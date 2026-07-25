@@ -48,6 +48,13 @@ class FirestoreService<T> {
     return docRef.id;
   }
 
+  /// Bikin dokumen dengan ID yang SUDAH ditentukan (bukan auto-ID).
+  /// Dipakai buat tb_pengguna, di mana ID dokumennya HARUS sama dengan
+  /// UID Firebase Auth supaya bisa dicari saat login.
+  Future<void> createWithId(String id, T item) async {
+    await _collection.doc(id).set(toJson(item));
+  }
+
   Future<void> update(String id, T item) async {
     await _collection.doc(id).update(toJson(item));
   }

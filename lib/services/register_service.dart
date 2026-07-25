@@ -49,7 +49,7 @@ class RegisterService {
 
     try {
       final pengguna = Pengguna(id: uid, nama: namaAnak, noHp: noHp, role: 'user');
-      await _penggunaService.create(pengguna);
+      await _penggunaService.createWithId(uid, pengguna);
 
       // Tanggal lahir & jenis kelamin memakai nilai sementara karena
       // desain register tidak menyediakan kolom untuk itu — admin

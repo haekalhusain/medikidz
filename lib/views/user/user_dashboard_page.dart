@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'jadwal/jadwal_list_page.dart';
+import '../widgets/logout_button.dart';
 
 class UserDashboardPage extends StatelessWidget {
   const UserDashboardPage({super.key});
@@ -15,7 +16,10 @@ class UserDashboardPage extends StatelessWidget {
     ];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Dashboard Pengguna')),
+      appBar: AppBar(
+        title: const Text('Dashboard Pengguna'),
+        actions: const [LogoutButton()],
+      ),
       body: GridView.builder(
         padding: const EdgeInsets.all(16),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

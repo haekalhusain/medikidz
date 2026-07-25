@@ -9,6 +9,7 @@ import '../../controllers/jadwal_master_controller.dart';
 import '../../controllers/jadwal_controller.dart';
 import '../../controllers/vaksin_controller.dart';
 import '../../services/jadwal_schedule_service.dart';
+import '../widgets/logout_button.dart';
 
 class AdminDashboardPage extends StatelessWidget {
   const AdminDashboardPage({super.key});
@@ -43,7 +44,10 @@ class AdminDashboardPage extends StatelessWidget {
     final scheduleService = JadwalScheduleService();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Dashboard Admin')),
+      appBar: AppBar(
+        title: const Text('Dashboard Admin'),
+        actions: const [LogoutButton()],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
