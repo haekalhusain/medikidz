@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1076259151720",
+    "project_id": "project-medikidz",
+    "storage_bucket": "project-medikidz.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1076259151720:android:108f7c161a2e16207340dd",
+        "android_client_info": {
+          "package_name": "com.example.medikidz"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAuI9xX0xj4tiLgQCe3R8AbD3XW_fFjDOM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
