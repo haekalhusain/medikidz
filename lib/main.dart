@@ -1,17 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:get/get.dart'; // <--- TAMBAHKAN BARIS INI
-
-// import 'views/auth_gate.dart';
-
-// KATANYA ‼
-// import 'views/auth_gate.dart'; memang sudah seharusnya di-comment (atau dihapus saja) dari main.dart
-// Karena halaman pertama yang dimuat saat aplikasi dibuka sekarang adalah OnboardingScreen(), bukan AuthGate() lagi.
-
+import 'package:get/get.dart'; 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'views/auth_gate.dart'; 
 import 'firebase_options.dart';
 import 'onboarding_screen.dart'; 
-
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,10 +23,9 @@ class MedikidzApp extends StatelessWidget {
       title: 'Medikidz',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.teal, useMaterial3: true),
-      // Ubah halaman pertama menjadi Onboarding
-      home: const OnboardingScreen(), 
+      home: FirebaseAuth.instance.currentUser != null 
+          ? const AuthGate() // Jika sudah login, langsung ke AuthGate (akan diarahkan ke Home/Admin otomatis)
+          : const OnboardingScreen(), // Jika belum login, tampilkan Onboarding
     );
   }
 }
-
-
