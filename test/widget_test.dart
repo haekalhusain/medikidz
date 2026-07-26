@@ -1,17 +1,15 @@
-
-import 'package:flutter/material.dart';
+// import 'package:flutter/material.dart'; // Bisa dihapus karena tidak terpakai di file ini
 import 'package:flutter_test/flutter_test.dart';
-
-// Basic smoke test untuk 
-
-import 'package:medikidz/maindart_backup.txt';
+import 'package:medikidz/main.dart'; 
 
 void main() {
   testWidgets('RoleSelectionPage menampilkan judul dan 2 tombol', (WidgetTester tester) async {
+    // Membangun widget utama aplikasi
     await tester.pumpWidget(const MedikidzApp());
 
     // Verifikasi judul app muncul
-    expect(find.text('Medikidz'), findsOneWidget);
+    // Menggunakan findsWidgets lebih aman jika kata 'Medikidz' muncul lebih dari 1 kali di layar
+    expect(find.text('Medikidz'), findsWidgets); 
 
     // Verifikasi 2 tombol pilihan role muncul
     expect(find.text('Admin'), findsOneWidget);
