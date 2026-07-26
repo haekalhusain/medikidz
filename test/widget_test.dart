@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 // Basic smoke test untuk 
 
-import 'package:medikidz/main.dart';
+import 'package:medikidz/maindart_backup.txt';
 
 void main() {
   testWidgets('RoleSelectionPage menampilkan judul dan 2 tombol', (WidgetTester tester) async {
