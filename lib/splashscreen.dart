@@ -11,21 +11,13 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen>
-    with SingleTickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-
-  // Animasi Opacity Logo Ikon (logo.png)
-  late Animation<double> _logoOpacityAnimation;
-
-  // Animasi Scale / Ukuran Logo Ikon (logo.png)
+  late Animation<double> _holeScaleAnimation;
+  late Animation<Offset> _logoSlideAnimation;
   late Animation<double> _logoScaleAnimation;
-
-  // Animasi Opacity Teks (logo2.png)
+  late Animation<double> _logoOpacityAnimation;
   late Animation<double> _textOpacityAnimation;
-
-  // Animasi transisi warna background
-  late Animation<double> _bgTransitionAnimation;
 
   @override
   void initState() {
@@ -33,46 +25,61 @@ class _SplashScreenState extends State<SplashScreen>
 
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 3500),
+      duration: const Duration(milliseconds: 3200),
     );
 
-    // 1. Durasi 0.0 - 0.2: Layar Putih Polos
+    // 1. Animasi Lubang Elips (Membesar lalu Mengecil/Hilang)
+    _holeScaleAnimation = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 0.0, end: 1.0).chain(CurveTween(curve: Curves.easeOut)),
+        weight: 35,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.0, end: 0.0).chain(CurveTween(curve: Curves.easeIn)),
+        weight: 35,
+      ),
+    ]).animate(_controller);
 
-    // 2. Durasi 0.2 - 0.5: Logo ikon muncul (Fade in)
+    // 2. Animasi Logo Slide Up (Dinaikkan dari posisi lubang di bawah ke posisi tengah)
+    _logoSlideAnimation = Tween<Offset>(
+      begin: const Offset(0.0, 1.8), // Posisi awal jauh di bawah (pas di area lubang)
+      end: Offset.zero,             // Berhenti tepat di tengah layar
+    ).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.25, 0.75, curve: Curves.easeOutCubic),
+      ),
+    );
+
+    // 3. Logo Membesar dari Kecil ke Ukuran Normal
+    _logoScaleAnimation = Tween<double>(begin: 0.3, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.25, 0.75, curve: Curves.easeOutBack),
+      ),
+    );
+
+    // 4. Logo Fade In
     _logoOpacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.2, 0.5, curve: Curves.easeIn),
+        curve: const Interval(0.2, 0.4, curve: Curves.easeIn),
       ),
     );
 
-    // 3. Durasi 0.5 - 1.0: Logo membesar, background gradasi aktif, & logo2.png (teks) fade in
-    _logoScaleAnimation = Tween<double>(begin: 0.85, end: 1.15).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.5, 1.0, curve: Curves.easeInOutCubic),
-      ),
-    );
-
+    // 5. Teks Logo (logo2.png) Fade In di Akhir
     _textOpacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.55, 1.0, curve: Curves.easeIn),
+        curve: const Interval(0.75, 1.0, curve: Curves.easeIn),
       ),
     );
 
-    _bgTransitionAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.5, 1.0, curve: Curves.easeInOut),
-      ),
-    );
-
-    // Navigasi setelah animasi selesai (ditambahkan pengecekan mounted)
+    // Navigasi ke Halaman Berikutnya
     _controller.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         if (!mounted) return;
-        
+
         final user = FirebaseAuth.instance.currentUser;
         if (user != null) {
           Get.off(() => const AuthGate());
@@ -82,7 +89,6 @@ class _SplashScreenState extends State<SplashScreen>
       }
     });
 
-    // Jalankan animasi
     _controller.forward();
   }
 
@@ -95,73 +101,91 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, child) {
-          return Stack(
-            children: [
-              // ----------------------------------------------------
-              // Layer 1: Background Putih Polos
-              // ----------------------------------------------------
-              Container(color: Colors.white),
-
-              // ----------------------------------------------------
-              // Layer 2: Background Gradasi Hijau
-              // ----------------------------------------------------
-              Opacity(
-                opacity: _bgTransitionAnimation.value,
-                child: Container(
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        Color(0xFF81C784),
-                        Color(0xFFE8F5E9),
-                        Color(0xFFA5D6A7),
-                        Color(0xFF4DB6AC),
-                      ],
-                      stops: [0.0, 0.35, 0.7, 1.0],
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFFB3E5FC),
+              Color(0xFFE8F5E9),
+              Color(0xFF81C784),
+            ],
+            stops: [0.0, 0.5, 1.0],
+          ),
+        ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // --- LUBANG ELIPS GEPENG (Di Posisi Agak Bawah) ---
+            Positioned(
+              bottom: MediaQuery.of(context).size.height * 0.32, // Mengunci posisi agak ke bawah
+              child: AnimatedBuilder(
+                animation: _holeScaleAnimation,
+                builder: (context, child) {
+                  return Transform.scale(
+                    scale: _holeScaleAnimation.value,
+                    child: Container(
+                      width: 150,
+                      height: 18, // Rasio tinggi-lebar yang membuat elips sangat gepeng
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2E7D32).withValues(alpha: 0.55),
+                        borderRadius: const BorderRadius.all(Radius.elliptical(150, 18)),
+                      ),
                     ),
-                  ),
-                ),
+                  );
+                },
               ),
+            ),
 
-              // ----------------------------------------------------
-              // Layer 3: Logo (logo.png) & Teks (logo2.png)
-              // ----------------------------------------------------
-              Center(
-                child: Opacity(
-                  opacity: _logoOpacityAnimation.value,
-                  child: Transform.scale(
-                    scale: _logoScaleAnimation.value,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Logo Ikon
-                        Image.asset(
-                          'assets/logo.png',
-                          width: 140,
-                          fit: BoxFit.contain,
-                        ),
-                        const SizedBox(height: 16),
-                        // Logo Teks (logo2.png)
-                        Opacity(
-                          opacity: _textOpacityAnimation.value,
-                          child: Image.asset(
-                            'assets/logo2.png',
-                            width: 180,
-                            fit: BoxFit.contain,
+            // --- LOGO & TEKS (Posisi Tepat di Tengah Layar) ---
+            Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Logo Animasi
+                  AnimatedBuilder(
+                    animation: _controller,
+                    builder: (context, child) {
+                      return SlideTransition(
+                        position: _logoSlideAnimation,
+                        child: ScaleTransition(
+                          scale: _logoScaleAnimation,
+                          child: Opacity(
+                            opacity: _logoOpacityAnimation.value,
+                            child: Image.asset(
+                              'assets/logo.png',
+                              width: 130,
+                              fit: BoxFit.contain,
+                            ),
                           ),
                         ),
-                      ],
-                    ),
+                      );
+                    },
                   ),
-                ),
+                  const SizedBox(height: 16),
+                  // Teks Logo
+                  AnimatedBuilder(
+                    animation: _textOpacityAnimation,
+                    builder: (context, child) {
+                      return Opacity(
+                        opacity: _textOpacityAnimation.value,
+                        child: Image.asset(
+                          'assets/logo2.png',
+                          width: 180,
+                          fit: BoxFit.contain,
+                        ),
+                      );
+                    },
+                  ),
+                ],
               ),
-            ],
-          );
-        },
+            ),
+          ],
+        ),
       ),
     );
   }
