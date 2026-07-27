@@ -60,6 +60,30 @@ class AuthService {
 
   Future<void> logout() => _auth.signOut();
 
+  /// Ubah password. Firebase Auth mewajibkan re-autentikasi dulu pakai
+  /// password LAMA sebelum boleh set password baru — ini alasan kenapa
+  /// form Ubah Password butuh field "Password Lama", bukan cuma password baru.
+  Future<void> changePassword({
+    required String passwordLama,
+    required String passwordBaru,
+  }) async {
+    final user = _auth.currentUser;
+    if (user == null || user.email == null) {
+      throw AuthException('Sesi login tidak ditemukan. Silakan masuk ulang.');
+    }
+
+    try {
+      final credential = EmailAuthProvider.credential(
+        email: user.email!,
+        password: passwordLama,
+      );
+      await user.reauthenticateWithCredential(credential);
+      await user.updatePassword(passwordBaru);
+    } on FirebaseAuthException catch (e) {
+      throw AuthException(_mapError(e));
+    }
+  }
+
   String _mapError(FirebaseAuthException e) {
     switch (e.code) {
       case 'email-already-in-use':
@@ -74,6 +98,8 @@ class AuthService {
         return 'Nomor HP tidak valid.';
       case 'too-many-requests':
         return 'Terlalu banyak percobaan. Coba lagi nanti.';
+      case 'requires-recent-login':
+        return 'Sesi login sudah lama, silakan masuk ulang lalu coba lagi.';
       default:
         return e.message ?? 'Terjadi kesalahan. Silakan coba lagi.';
     }

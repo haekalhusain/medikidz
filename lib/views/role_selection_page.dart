@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'admin/admin_dashboard_page.dart';
+import 'admin/admin_shell_page.dart';
 import 'user/user_dashboard_page.dart';
 import 'register/register_page.dart';
+
 
 class RoleSelectionPage extends StatelessWidget {
   const RoleSelectionPage({super.key});
@@ -29,7 +30,7 @@ class RoleSelectionPage extends StatelessWidget {
                     icon: const Icon(Icons.admin_panel_settings),
                     label: const Text('Admin', style: TextStyle(fontSize: 16)),
                     onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const AdminDashboardPage()),
+                      MaterialPageRoute(builder: (_) => const AdminShellPage()),
                     ),
                   ),
                 ),
