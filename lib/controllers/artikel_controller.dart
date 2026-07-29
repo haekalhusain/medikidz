@@ -20,6 +20,15 @@ class ArtikelController extends GetxController {
     });
   }
 
+  Future<void> fetchArtikel() async {
+    try {
+      isLoading.value = true;
+      await Future.delayed(const Duration(milliseconds: 500));
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   Future<bool> create(Artikel artikel) async {
     try {
       isLoading.value = true;
