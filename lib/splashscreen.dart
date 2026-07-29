@@ -25,7 +25,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 3200),
+      duration: const Duration(seconds: 3), // Diubah menjadi 3 detik pas
     );
 
     // 1. Animasi Lubang Elips (Membesar lalu Mengecil/Hilang)

@@ -1,6 +1,7 @@
+import 'dart:async'; // <--- IMPORT TIMER DI SINI
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart'; 
-import 'views/auth_gate.dart'; // <--- IMPORT AUTH GATE DI SINI
+import 'views/auth_gate.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -12,6 +13,7 @@ class OnboardingScreen extends StatefulWidget {
 class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _controller = PageController();
   int _currentIndex = 0;
+  Timer? _timer; // <--- DEKLARASI VARIABLE TIMER
 
   final List<Map<String, String>> _onboardingData = [
     {
@@ -32,16 +34,38 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _startAutoSlide(); // <--- JALANKAN TIMER SAAT INTI STATE
+  }
+
+  // FUNGSI UNTUK AUTO SLIDE SETIAP 3 DETIK
+  void _startAutoSlide() {
+    _timer = Timer.periodic(const Duration(seconds: 3), (timer) {
+      if (_currentIndex < _onboardingData.length - 1) {
+        _controller.nextPage(
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeInOut,
+        );
+      } else {
+        _timer?.cancel(); // Hentikan timer jika sudah di halaman/slide terakhir
+      }
+    });
+  }
+
+  @override
   void dispose() {
+    _timer?.cancel(); // <--- MEMATIKAN TIMER AGAR TIDAK MEMORY LEAK
     _controller.dispose();
     super.dispose();
   }
 
   // FUNGSI UNTUK PINDAH KE AUTH GATE
   void _goToAuth() {
+    _timer?.cancel(); // Batalkan timer jika user menekan lewati / selesai secara manual
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (context) => const AuthGate(), // <--- ARAHKAN KE AUTH GATE
+        builder: (context) => const AuthGate(),
       ),
     );
   }
@@ -66,7 +90,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       height: 380,
                       child: PageView.builder(
                         controller: _controller,
-                        onPageChanged: (index) => setState(() => _currentIndex = index),
+                        onPageChanged: (index) {
+                          setState(() => _currentIndex = index);
+                          // Jika pengguna menggeser manual hingga slide terakhir, matikan timer
+                          if (index == _onboardingData.length - 1) {
+                            _timer?.cancel();
+                          }
+                        },
                         itemCount: _onboardingData.length,
                         itemBuilder: (context, index) {
                           return Column(
@@ -159,7 +189,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   // TOMBOL LEWATI
                   _currentIndex != _onboardingData.length - 1
                       ? TextButton(
-                          onPressed: _goToAuth, // Panggil fungsi pindah ke Auth
+                          onPressed: _goToAuth,
                           child: const Text(
                             "Lewati",
                             style: TextStyle(
@@ -180,7 +210,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           curve: Curves.easeIn,
                         );
                       } else {
-                        _goToAuth(); // Panggil fungsi pindah ke Auth jika di slide terakhir
+                        _goToAuth();
                       }
                     },
                     child: Container(
