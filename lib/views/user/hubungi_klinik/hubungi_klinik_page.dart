@@ -116,6 +116,7 @@ class HubungiKlinikPage extends StatelessWidget {
                                   Text(
                                     'Ada kendala? Langsung chat aja!',
                                     style: TextStyle(
+                                      // ignore: deprecated_member_use
                                       color: Colors.white.withOpacity(0.9),
                                       fontSize: 13,
                                     ),
@@ -132,6 +133,7 @@ class HubungiKlinikPage extends StatelessWidget {
                           width: double.infinity,
                           padding: const EdgeInsets.symmetric(vertical: 10),
                           decoration: BoxDecoration(
+                            // ignore: deprecated_member_use
                             color: Colors.white.withOpacity(0.2), // Transparan putih
                             borderRadius: BorderRadius.circular(8),
                           ),

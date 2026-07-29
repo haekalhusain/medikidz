@@ -201,6 +201,7 @@ class _ArtikelUserCard extends StatelessWidget {
                 height: 160,
                 width: double.infinity,
                 fit: BoxFit.cover,
+                // ignore: unnecessary_underscores
                 errorBuilder: (_, __, ___) => Container(
                   height: 160,
                   color: Colors.teal.shade50,

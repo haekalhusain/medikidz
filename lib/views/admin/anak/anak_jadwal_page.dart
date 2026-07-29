@@ -4,7 +4,7 @@ import '../../../controllers/jadwal_master_controller.dart';
 import '../../../controllers/jadwal_controller.dart';
 import '../../../controllers/vaksin_controller.dart';
 import '../../../models/anak_model.dart';
-import '../../../models/jadwal_model.dart';
+// import '../../../models/jadwal_model.dart';
 import '../../../services/jadwal_schedule_service.dart';
 import '../../../services/jadwal_status_updater.dart';
 import 'jadwal_matrix_widget.dart';
@@ -14,9 +14,9 @@ class AnakJadwalPage extends StatelessWidget {
   final Anak anak;
   AnakJadwalPage({super.key, required this.anak});
 
-  final JadwalMasterController _masterController = Get.put(JadwalMasterController());
-  final JadwalController _jadwalController = Get.put(JadwalController());
-  final VaksinController _vaksinController = Get.put(VaksinController());
+  final JadwalMasterController _masterController = Get.find<JadwalMasterController>();
+  final JadwalController _jadwalController = Get.find<JadwalController>();
+  final VaksinController _vaksinController = Get.find<VaksinController>();
   final JadwalScheduleService _scheduleService = JadwalScheduleService();
 
   @override
@@ -113,7 +113,7 @@ class AnakJadwalPage extends StatelessWidget {
         child: ExpansionTile(
           leading: CircleAvatar(
             radius: 18,
-            backgroundColor: color.withOpacity(0.12),
+            backgroundColor: color.withValues(alpha: 0.12),
             child: Icon(j.sudah ? Icons.check : Icons.schedule, color: color, size: 18),
           ),
           title: Text('${j.master.namaVaksin} - Dosis ${j.master.urutanDosis}'),
@@ -121,7 +121,7 @@ class AnakJadwalPage extends StatelessWidget {
           trailing: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.12),
+              color: color.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
