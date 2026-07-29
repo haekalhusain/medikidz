@@ -294,6 +294,7 @@ class _RequiredLabel extends StatelessWidget {
   final String text;
   final double fontSize;
   final bool bold;
+  // ignore: unused_element_parameter
   const _RequiredLabel(this.text, {this.fontSize = 13, this.bold = false});
 
   @override
