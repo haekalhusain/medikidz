@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../../controllers/vaksin_controller.dart';
 import '../../../models/vaksin_model.dart';
 import '../../../models/konten_section_model.dart';
+import 'package:flutter/services.dart';
 
 const _kategoriOptions = [
   'Program Pemerintahan (Imunisasi Rutin Wajib)',
@@ -106,11 +107,16 @@ class _VaksinFormPageState extends State<VaksinFormPage> {
                         TextFormField(
                           controller: _stokController,
                           keyboardType: TextInputType.number,
+                          inputFormatters: [
+                             FilteringTextInputFormatter.digitsOnly, 
+                          ],
                           decoration: const InputDecoration(border: OutlineInputBorder(), hintText: 'Contoh: 16'),
                           validator: (v) {
                             if (v == null || v.isEmpty) return 'Wajib diisi';
-                            if (int.tryParse(v) == null) return 'Harus angka';
-                            return null;
+                            final parsedValue = int.tryParse(v);
+                            if (parsedValue == null) return 'Harus angka';
+                            if (parsedValue < 0) return 'Stok tidak boleh minus'; // Peringatan jika < 0
+                           return null;
                           },
                         ),
                       ],
