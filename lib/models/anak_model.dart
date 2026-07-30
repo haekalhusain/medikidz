@@ -4,6 +4,7 @@ class Anak {
   final String namaAnak;
   final DateTime tanggalLahir;
   final String jenisKelamin;
+  final String? nik;
   final bool isDeleted;
 
   Anak({
@@ -12,6 +13,7 @@ class Anak {
     required this.namaAnak,
     required this.tanggalLahir,
     required this.jenisKelamin,
+    this.nik,
     this.isDeleted = false,
   });
 
@@ -24,6 +26,7 @@ class Anak {
           ? DateTime.parse(json['tanggal_lahir'])
           : DateTime.now(),
       jenisKelamin: json['jenis_kelamin'] ?? 'laki-laki',
+      nik: json['nik'],
       isDeleted: json['deleted_at'] != null,
     );
   }
@@ -33,6 +36,7 @@ class Anak {
         'nama_anak': namaAnak,
         'tanggal_lahir': tanggalLahir.toIso8601String(),
         'jenis_kelamin': jenisKelamin,
+        'nik': nik,
         'deleted_at': null,
       };
 }

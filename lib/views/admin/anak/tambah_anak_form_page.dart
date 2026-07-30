@@ -1,12 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:get/get.dart';
+import '../../../controllers/anak_controller.dart';
+import '../../../controllers/pengguna_controller.dart';
 import '../../../models/anak_model.dart';
+import '../../../models/pengguna_model.dart';
 
+/// Halaman Tambah Anak Baru. Admin WAJIB mengaitkan anak ke akun
+/// orang tua (user) yang sudah registrasi, lewat dropdown "Pilih Akun
+/// Orang Tua (User)" -- bukan input idUser manual.
 class TambahAnakFormPage extends StatefulWidget {
-  final String idUser;
-  final String namaOrangTua;
+  final String? idUser;
+  final String? namaOrangTua;
 
-  const TambahAnakFormPage({super.key, required this.idUser, required this.namaOrangTua});
+  const TambahAnakFormPage({
+    super.key,
+    this.idUser,
+    this.namaOrangTua,
+  });
 
   @override
   State<TambahAnakFormPage> createState() => _TambahAnakFormPageState();
@@ -15,12 +25,34 @@ class TambahAnakFormPage extends StatefulWidget {
 class _TambahAnakFormPageState extends State<TambahAnakFormPage> {
   final _formKey = GlobalKey<FormState>();
   final _namaAnakController = TextEditingController();
+  final _searchController = TextEditingController();
+
   DateTime? _tanggalLahir;
   String _jenisKelamin = 'laki-laki';
-  bool _isLoading = false;
+  Pengguna? _orangTuaTerpilih;
+  String _searchQuery = '';
+
+  @override
+  void dispose() {
+    _namaAnakController.dispose();
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final penggunaController = Get.put(PenggunaController());
+    final anakController = Get.put(AnakController());
+
+    if (widget.idUser != null && widget.namaOrangTua != null) {
+      _orangTuaTerpilih = Pengguna(
+        id: widget.idUser,
+        nama: widget.namaOrangTua!,
+        noHp: '',
+        role: 'user',
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(title: const Text('Tambah Anak Baru')),
       body: Padding(
@@ -29,14 +61,61 @@ class _TambahAnakFormPageState extends State<TambahAnakFormPage> {
           key: _formKey,
           child: ListView(
             children: [
-              Card(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Text('Orang tua: ${widget.namaOrangTua}', style: const TextStyle(fontSize: 13)),
+              const Text('Pilih Akun Orang Tua (User)', style: TextStyle(fontWeight: FontWeight.w600)),
+              const SizedBox(height: 4),
+              const Text(
+                'Anak baru akan terkait langsung dengan akun user/pasien yang dipilih.',
+                style: TextStyle(fontSize: 12, color: Colors.black54),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _searchController,
+                onChanged: (v) => setState(() => _searchQuery = v.trim().toLowerCase()),
+                decoration: const InputDecoration(
+                  hintText: 'Cari nama / no. HP orang tua..',
+                  prefixIcon: Icon(Icons.search),
+                  border: OutlineInputBorder(),
+                  isDense: true,
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
+              Obx(() {
+                if (penggunaController.penggunaList.isEmpty) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8),
+                    child: Text('Belum ada akun user yang registrasi.', style: TextStyle(color: Colors.black54)),
+                  );
+                }
+
+                final hasil = _searchQuery.isEmpty
+                    ? penggunaController.penggunaList
+                    : penggunaController.penggunaList
+                        .where((p) =>
+                            p.nama.toLowerCase().contains(_searchQuery) || p.noHp.contains(_searchQuery))
+                        .toList();
+
+                return DropdownButtonFormField<Pengguna>(
+                  value: hasil.contains(_orangTuaTerpilih) ? _orangTuaTerpilih : null,
+                  isExpanded: true,
+                  decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true),
+                  hint: const Text('-- Pilih Akun Orang Tua --'),
+                  items: hasil
+                      .map((p) => DropdownMenuItem(
+                            value: p,
+                            child: Text('${p.nama} (${p.noHp})', overflow: TextOverflow.ellipsis),
+                          ))
+                      .toList(),
+                  onChanged: (value) => setState(() => _orangTuaTerpilih = value),
+                  validator: (value) => value == null ? 'Pilih akun orang tua terlebih dahulu' : null,
+                );
+              }),
+
+              const SizedBox(height: 24),
+              const Divider(),
+              const SizedBox(height: 12),
+
+              const Text('Data Anak', style: TextStyle(fontWeight: FontWeight.w600)),
+              const SizedBox(height: 8),
               TextFormField(
                 controller: _namaAnakController,
                 decoration: const InputDecoration(labelText: 'Nama Anak', border: OutlineInputBorder()),
@@ -65,15 +144,15 @@ class _TambahAnakFormPageState extends State<TambahAnakFormPage> {
                 onChanged: (value) => setState(() => _jenisKelamin = value!),
               ),
               const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _submit,
-                  child: _isLoading
-                      ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                      : const Text('Simpan'),
-                ),
-              ),
+              Obx(() => SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: anakController.isLoading.value ? null : () => _submit(anakController),
+                      child: anakController.isLoading.value
+                          ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                          : const Text('Simpan'),
+                    ),
+                  )),
             ],
           ),
         ),
@@ -91,32 +170,24 @@ class _TambahAnakFormPageState extends State<TambahAnakFormPage> {
     if (picked != null) setState(() => _tanggalLahir = picked);
   }
 
-  Future<void> _submit() async {
+  Future<void> _submit(AnakController anakController) async {
     if (!_formKey.currentState!.validate()) return;
     if (_tanggalLahir == null) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Tanggal lahir wajib diisi')));
       return;
     }
 
-    setState(() => _isLoading = true);
-    try {
-      final anak = Anak(
-        idUser: widget.idUser,
-        namaAnak: _namaAnakController.text.trim(),
-        tanggalLahir: _tanggalLahir!,
-        jenisKelamin: _jenisKelamin,
-      );
+    final anak = Anak(
+      idUser: _orangTuaTerpilih!.id!,
+      namaAnak: _namaAnakController.text.trim(),
+      tanggalLahir: _tanggalLahir!,
+      jenisKelamin: _jenisKelamin,
+    );
 
-      await FirebaseFirestore.instance.collection('tb_anak').add(anak.toJson());
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Anak baru berhasil ditambahkan.')));
-        Navigator.pop(context);
-      }
-    } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Gagal: $e')));
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
+    final success = await anakController.create(anak);
+    if (success && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Anak baru berhasil ditambahkan.')));
+      Navigator.pop(context);
     }
   }
 }

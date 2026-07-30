@@ -19,9 +19,20 @@ class KelolaJadwalListPage extends StatefulWidget {
   State<KelolaJadwalListPage> createState() => _KelolaJadwalListPageState();
 }
 
+enum _FilterStatus { semua, terlambat, akanDatang }
+
 class _KelolaJadwalListPageState extends State<KelolaJadwalListPage> {
   bool _hanyaHariIni = true;
+  _FilterStatus _filterStatus = _FilterStatus.semua;
+  final _searchController = TextEditingController();
+  String _query = '';
   final JadwalScheduleService _scheduleService = JadwalScheduleService();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,21 +46,65 @@ class _KelolaJadwalListPageState extends State<KelolaJadwalListPage> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(12),
-            child: Row(
-              children: [
-                ChoiceChip(
-                  label: const Text('Jatuh Tempo Hari Ini'),
-                  selected: _hanyaHariIni,
-                  onSelected: (_) => setState(() => _hanyaHariIni = true),
-                ),
-                const SizedBox(width: 8),
-                ChoiceChip(
-                  label: const Text('Semua Jadwal'),
-                  selected: !_hanyaHariIni,
-                  onSelected: (_) => setState(() => _hanyaHariIni = false),
-                ),
-              ],
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 4),
+            child: TextField(
+              controller: _searchController,
+              onChanged: (value) => setState(() => _query = value.trim().toLowerCase()),
+              decoration: InputDecoration(
+                hintText: 'Cari nama anak atau nama vaksin..',
+                prefixIcon: const Icon(Icons.search),
+                isDense: true,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                suffixIcon: _query.isEmpty
+                    ? null
+                    : IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          _searchController.clear();
+                          setState(() => _query = '');
+                        },
+                      ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  ChoiceChip(
+                    label: const Text('Jatuh Tempo Hari Ini'),
+                    selected: _hanyaHariIni,
+                    onSelected: (_) => setState(() => _hanyaHariIni = true),
+                  ),
+                  const SizedBox(width: 8),
+                  ChoiceChip(
+                    label: const Text('Semua Jadwal'),
+                    selected: !_hanyaHariIni,
+                    onSelected: (_) => setState(() => _hanyaHariIni = false),
+                  ),
+                  const SizedBox(width: 16),
+                  const VerticalDivider(width: 1),
+                  const SizedBox(width: 8),
+                  ChoiceChip(
+                    label: const Text('Terlambat'),
+                    selectedColor: Colors.red.withValues(alpha: 0.15),
+                    selected: _filterStatus == _FilterStatus.terlambat,
+                    onSelected: (_) => setState(() => _filterStatus =
+                        _filterStatus == _FilterStatus.terlambat ? _FilterStatus.semua : _FilterStatus.terlambat),
+                  ),
+                  const SizedBox(width: 8),
+                  ChoiceChip(
+                    label: const Text('Akan Datang'),
+                    selectedColor: Colors.orange.withValues(alpha: 0.15),
+                    selected: _filterStatus == _FilterStatus.akanDatang,
+                    onSelected: (_) => setState(() => _filterStatus = _filterStatus == _FilterStatus.akanDatang
+                        ? _FilterStatus.semua
+                        : _FilterStatus.akanDatang),
+                  ),
+                ],
+              ),
             ),
           ),
           Expanded(
@@ -84,19 +139,29 @@ class _KelolaJadwalListPageState extends State<KelolaJadwalListPage> {
 
               semuaBaris.sort((a, b) => a.item.tanggalJadwal.compareTo(b.item.tanggalJadwal));
 
-              final tampil = _hanyaHariIni
+              var tampil = _hanyaHariIni
                   ? semuaBaris.where((b) {
                       final t = b.item.tanggalJadwal;
                       return t.year == now.year && t.month == now.month && t.day == now.day;
                     }).toList()
                   : semuaBaris;
 
+              if (_filterStatus == _FilterStatus.terlambat) {
+                tampil = tampil.where((b) => b.item.statusLabel == 'Terlambat').toList();
+              } else if (_filterStatus == _FilterStatus.akanDatang) {
+                tampil = tampil.where((b) => b.item.statusLabel == 'Akan Datang').toList();
+              }
+
+              if (_query.isNotEmpty) {
+                tampil = tampil
+                    .where((b) =>
+                        b.anak.namaAnak.toLowerCase().contains(_query) ||
+                        b.item.master.namaVaksin.toLowerCase().contains(_query))
+                    .toList();
+              }
+
               if (tampil.isEmpty) {
-                return Center(
-                  child: Text(_hanyaHariIni
-                      ? 'Tidak ada jadwal yang jatuh tempo hari ini.'
-                      : 'Belum ada anak terdaftar / semua jadwal sudah selesai.'),
-                );
+                return const Center(child: Text('Tidak ada jadwal yang cocok dengan filter/pencarian.'));
               }
 
               return ListView.builder(
@@ -133,35 +198,37 @@ class _KelolaJadwalListPageState extends State<KelolaJadwalListPage> {
     );
   }
 
-  void _konfirmasi(
+  Future<void> _konfirmasi(
     BuildContext context,
     JadwalController jadwalController,
     VaksinController vaksinController,
     _BarisJadwal baris,
-  ) {
-    showDialog(
+  ) async {
+    final vaksinDariKlinik = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
         title: const Text('Konfirmasi Imunisasi'),
         content: Text(
-            'Tandai "${baris.item.master.namaVaksin}" untuk ${baris.anak.namaAnak} sebagai SUDAH diimunisasi?'),
+          'Tandai "${baris.item.master.namaVaksin}" untuk ${baris.anak.namaAnak} sebagai SUDAH diimunisasi?\n\n'
+          'Apakah vaksinnya dari stok klinik ini? Kalau "Ya", stok otomatis dikurangi 1.',
+        ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: const Text('Batal')),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              await JadwalStatusUpdater.ubahStatus(
-                jadwalController: jadwalController,
-                vaksinController: vaksinController,
-                anak: baris.anak,
-                item: baris.item,
-                status: 'sudah imunisasi',
-              );
-            },
-            child: const Text('Konfirmasi'),
-          ),
+          OutlinedButton(onPressed: () => Navigator.pop(context, false), child: const Text('Ya, Tapi Bukan dari Klinik')),
+          ElevatedButton(onPressed: () => Navigator.pop(context, true), child: const Text('Ya, dari Klinik')),
         ],
       ),
+    );
+
+    if (vaksinDariKlinik == null || !context.mounted) return;
+
+    await JadwalStatusUpdater.ubahStatus(
+      jadwalController: jadwalController,
+      vaksinController: vaksinController,
+      anak: baris.anak,
+      item: baris.item,
+      status: 'sudah imunisasi',
+      vaksinDariKlinik: vaksinDariKlinik,
     );
   }
 

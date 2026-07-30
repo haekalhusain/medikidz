@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import '../models/vaksin_model.dart';
 import '../services/firestore_service.dart';
+import '../services/activity_log_service.dart';
 
 class VaksinController extends GetxController {
   final _service = FirestoreService<Vaksin>(
@@ -24,6 +25,10 @@ class VaksinController extends GetxController {
     try {
       isLoading.value = true;
       await _service.create(vaksin);
+      await ActivityLogService.log(
+        'Menambahkan vaksin baru: ${vaksin.namaVaksin} (stok: ${vaksin.jumlahStok})',
+        kategori: 'vaksin',
+      );
       return true;
     } catch (e) {
       Get.snackbar('Gagal', e.toString());

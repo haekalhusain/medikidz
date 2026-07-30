@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'jadwal/jadwal_list_page.dart';
+import 'anak/anak_saya_list_page.dart';
 import 'artikel/user_artikel_list_page.dart';
 import 'hubungi_klinik/hubungi_klinik_page.dart'; // Impor Halaman Baru
-import '../widgets/logout_button.dart';
+import 'profile/profil_anda_page.dart';
 
 class UserDashboardPage extends StatelessWidget {
   const UserDashboardPage({super.key});
@@ -10,6 +11,9 @@ class UserDashboardPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final menus = [
+      _MenuItem('Anak Saya', Icons.child_care, () {
+        Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AnakSayaListPage()));
+      }),
       _MenuItem('Jadwal Imunisasi', Icons.calendar_month, () {
         Navigator.of(context).push(MaterialPageRoute(builder: (_) => const JadwalListPage()));
       }),
@@ -26,7 +30,15 @@ class UserDashboardPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Dashboard Pengguna'),
-        actions: const [LogoutButton()],
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.person_outline),
+            tooltip: 'Profil Anda',
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const ProfilAndaPage()),
+            ),
+          ),
+        ],
       ),
       body: GridView.builder(
         padding: const EdgeInsets.all(16),

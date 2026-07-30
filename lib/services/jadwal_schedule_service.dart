@@ -1,6 +1,7 @@
 import '../models/anak_model.dart';
 import '../models/jadwal_master_model.dart';
 import '../models/jadwal_model.dart';
+import '../models/vaksin_model.dart';
 
 /// Satu baris rencana imunisasi untuk seorang anak: gabungan antara
 /// template (JadwalMaster) dengan realisasi aktualnya (JadwalImunisasi),
@@ -19,6 +20,27 @@ class JadwalTerjadwal {
     if (tanggalJadwal.isBefore(DateTime.now())) return 'Terlambat';
     return 'Akan Datang';
   }
+}
+
+/// Ringkasan kebutuhan SATU jenis vaksin untuk periode tertentu (biasanya
+/// 1 bulan), dibandingkan dengan stok yang tersedia di tb_vaksin.
+class KebutuhanVaksin {
+  final String namaVaksin;
+  final int dibutuhkan;
+  final int stokTersedia;
+  final bool terdaftarDiStok;
+
+  KebutuhanVaksin({
+    required this.namaVaksin,
+    required this.dibutuhkan,
+    required this.stokTersedia,
+    required this.terdaftarDiStok,
+  });
+
+  /// Berapa dosis yang masih kurang. 0 kalau stok cukup/berlebih.
+  int get kekurangan => (dibutuhkan - stokTersedia) > 0 ? dibutuhkan - stokTersedia : 0;
+
+  bool get cukup => kekurangan == 0;
 }
 
 /// Menghitung rencana imunisasi 0-24 bulan seorang anak berdasarkan
@@ -75,5 +97,66 @@ class JadwalScheduleService {
           .length;
     }
     return count;
+  }
+
+  /// Hitung kebutuhan vaksin PER JENIS untuk bulan & tahun tertentu, lintas
+  /// SEMUA anak, lalu bandingkan dengan stok yang ada di tb_vaksin.
+  ///
+  /// Yang dihitung hanya jadwal yang jatuh di bulan tsb dan BELUM
+  /// direalisasikan ('sudah imunisasi') -- sama seperti countJadwalBulanIni,
+  /// hanya saja di sini dipecah per nama vaksin.
+  List<KebutuhanVaksin> hitungKebutuhanVaksin({
+    required List<Anak> anakList,
+    required List<JadwalMaster> masterList,
+    required List<JadwalImunisasi> semuaJadwalImunisasi,
+    required List<Vaksin> vaksinList,
+    required DateTime bulan,
+  }) {
+    // Langkah 1: kumpulkan semua baris jadwal (lintas anak) yang jatuh
+    // di bulan target dan belum diimunisasi.
+    final kebutuhanPerNama = <String, int>{};
+    for (final anak in anakList) {
+      final jadwal = computeJadwalForAnak(
+        anak: anak,
+        masterList: masterList,
+        semuaJadwalImunisasi: semuaJadwalImunisasi,
+      );
+
+      for (final j in jadwal) {
+        final cocokBulan =
+            j.tanggalJadwal.year == bulan.year && j.tanggalJadwal.month == bulan.month;
+        if (j.sudah || !cocokBulan) continue;
+
+        kebutuhanPerNama.update(
+          j.master.namaVaksin,
+          (jumlah) => jumlah + 1,
+          ifAbsent: () => 1,
+        );
+      }
+    }
+
+    // Langkah 2: cocokkan tiap nama vaksin dengan data stok (case-insensitive,
+    // karena penulisan nama vaksin di jadwal master & tb_vaksin bisa beda kapital).
+    final hasil = kebutuhanPerNama.entries.map((entry) {
+      Vaksin? vaksinCocok;
+      for (final v in vaksinList) {
+        if (v.namaVaksin.toLowerCase() == entry.key.toLowerCase()) {
+          vaksinCocok = v;
+          break;
+        }
+      }
+
+      return KebutuhanVaksin(
+        namaVaksin: entry.key,
+        dibutuhkan: entry.value,
+        stokTersedia: vaksinCocok?.jumlahStok ?? 0,
+        terdaftarDiStok: vaksinCocok != null,
+      );
+    }).toList();
+
+    // Urutkan: yang paling kurang stoknya muncul paling atas, biar admin
+    // langsung lihat prioritas restock.
+    hasil.sort((a, b) => b.kekurangan.compareTo(a.kekurangan));
+    return hasil;
   }
 }
