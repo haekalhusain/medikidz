@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'vaksin/vaksin_list_page.dart';
+import 'vaksin/vaksin_kebutuhan_page.dart';
 import 'artikel/artikel_list_page.dart';
 import 'anak/anak_list_page.dart';
 import 'jadwal/kelola_jadwal_list_page.dart';
-import 'riwayat/riwayat_list_page.dart';
 import '../../controllers/artikel_controller.dart';
 import '../../controllers/anak_controller.dart';
 import '../../controllers/jadwal_controller.dart';
 import '../../controllers/jadwal_master_controller.dart';
 import '../../controllers/vaksin_controller.dart';
-import '../../controllers/riwayat_controller.dart';
 import '../../services/jadwal_schedule_service.dart';
+import '../../services/activity_log_service.dart';
 import '../widgets/logout_button.dart';
 
 /// Konten tab "Home". Dipakai di dalam AdminShellPage (bersama bottom nav).
@@ -25,7 +25,6 @@ class AdminDashboardHome extends StatelessWidget {
     final jadwalController = Get.put(JadwalController());
     final masterController = Get.put(JadwalMasterController());
     final vaksinController = Get.put(VaksinController());
-    final riwayatController = Get.put(RiwayatController());
     final scheduleService = JadwalScheduleService();
 
     return Scaffold(
@@ -61,7 +60,7 @@ class AdminDashboardHome extends StatelessWidget {
                     sublabel: 'Estimasi dosis bulan ini',
                     value: '$vaksinBulanIni',
                     onTap: () => Navigator.of(context)
-                        .push(MaterialPageRoute(builder: (_) => const KelolaJadwalListPage())),
+                        .push(MaterialPageRoute(builder: (_) => const VaksinKebutuhanPage())),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -84,7 +83,7 @@ class AdminDashboardHome extends StatelessWidget {
 
           Obx(() {
             final jumlahArtikel = artikelController.artikelList.length;
-            final jumlahRiwayat = riwayatController.riwayatList.length;
+            final jumlahAnak = anakController.anakList.length;
 
             return Row(
               children: [
@@ -102,13 +101,13 @@ class AdminDashboardHome extends StatelessWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: _RingkasanCard(
-                    icon: Icons.menu_book_outlined,
+                    icon: Icons.child_care,
                     iconColor: Colors.teal,
                     label: 'Riwayat Imunisasi',
-                    sublabel: 'Riwayat luar faskes',
-                    value: '$jumlahRiwayat',
+                    sublabel: 'Total anak terdaftar',
+                    value: '$jumlahAnak',
                     onTap: () => Navigator.of(context)
-                        .push(MaterialPageRoute(builder: (_) => const RiwayatListPage())),
+                        .push(MaterialPageRoute(builder: (_) => const AnakListPage())),
                   ),
                 ),
               ],
@@ -142,7 +141,7 @@ class AdminDashboardHome extends StatelessWidget {
             children: [
               _MenuCepatItem(
                 icon: Icons.child_care,
-                label: 'Data\nAnak',
+                label: 'Riwayat\nImunisasi',
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const AnakListPage()),
                 ),
@@ -168,32 +167,84 @@ class AdminDashboardHome extends StatelessWidget {
                   MaterialPageRoute(builder: (_) => const KelolaJadwalListPage()),
                 ),
               ),
-              _MenuCepatItem(
-                icon: Icons.add_box_outlined,
-                label: 'Riwayat\nImunisasi',
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const RiwayatListPage()),
-                ),
-              ),
             ],
           ),
 
           const SizedBox(height: 24),
           const Text('Aktivitas Terbaru', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
-          const Card(
-            child: Padding(
-              padding: EdgeInsets.all(16),
-              child: Text(
-                'Belum ada aktivitas tercatat. Log aktivitas otomatis akan muncul di sini '
-                'setelah fitur pencatatan aktivitas (audit trail) dibangun.',
-                style: TextStyle(fontSize: 12, color: Colors.black54),
-              ),
-            ),
+          StreamBuilder<List<ActivityLogEntry>>(
+            stream: ActivityLogService.streamTerbaru(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return const Card(
+                  child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Text(
+                      'Belum ada aktivitas tercatat. Aktivitas seperti tambah vaksin, tambah artikel, '
+                      'dan pencatatan imunisasi akan muncul di sini.',
+                      style: TextStyle(fontSize: 12, color: Colors.black54),
+                    ),
+                  ),
+                );
+              }
+
+              final data = snapshot.data!;
+              return Card(
+                child: Column(
+                  children: [
+                    for (int i = 0; i < data.length; i++) ...[
+                      ListTile(
+                        dense: true,
+                        leading: Icon(_ikonKategori(data[i].kategori), color: _warnaKategori(data[i].kategori)),
+                        title: Text(data[i].pesan, style: const TextStyle(fontSize: 13)),
+                        subtitle: Text(_formatWaktu(data[i].waktu), style: const TextStyle(fontSize: 11)),
+                      ),
+                      if (i != data.length - 1) const Divider(height: 1),
+                    ],
+                  ],
+                ),
+              );
+            },
           ),
         ],
       ),
     );
+  }
+
+  IconData _ikonKategori(String kategori) {
+    switch (kategori) {
+      case 'vaksin':
+        return Icons.vaccines;
+      case 'artikel':
+        return Icons.description_outlined;
+      case 'imunisasi':
+        return Icons.check_circle_outline;
+      default:
+        return Icons.info_outline;
+    }
+  }
+
+  Color _warnaKategori(String kategori) {
+    switch (kategori) {
+      case 'vaksin':
+        return Colors.blue;
+      case 'artikel':
+        return Colors.teal;
+      case 'imunisasi':
+        return Colors.green;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  String _formatWaktu(DateTime waktu) {
+    final now = DateTime.now();
+    final selisih = now.difference(waktu);
+    if (selisih.inMinutes < 1) return 'Baru saja';
+    if (selisih.inMinutes < 60) return '${selisih.inMinutes} menit lalu';
+    if (selisih.inHours < 24) return '${selisih.inHours} jam lalu';
+    return '${waktu.day}/${waktu.month}/${waktu.year}';
   }
 }
 
@@ -221,11 +272,11 @@ class _RingkasanCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: highlight ? Colors.red.withOpacity(0.05) : null,
+      color: highlight ? Colors.red.withValues(alpha: 0.05) : null,
       shape: highlight
           ? RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
-              side: BorderSide(color: Colors.red.withOpacity(0.4)),
+              side: BorderSide(color: Colors.red.withValues(alpha: 0.4)),
             )
           : null,
       child: InkWell(
@@ -240,7 +291,7 @@ class _RingkasanCard extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     radius: 16,
-                    backgroundColor: iconColor.withOpacity(0.1),
+                    backgroundColor: iconColor.withValues(alpha: 0.1),
                     child: Icon(icon, size: 18, color: iconColor),
                   ),
                   const SizedBox(width: 8),
@@ -296,7 +347,7 @@ class _MenuCepatItem extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 24,
-                backgroundColor: Colors.teal.withOpacity(0.1),
+                backgroundColor: Colors.teal.withValues(alpha: 0.1),
                 child: Icon(icon, color: Colors.teal),
               ),
               const SizedBox(height: 6),

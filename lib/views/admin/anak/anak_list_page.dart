@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import '../../../controllers/anak_controller.dart';
 import 'anak_form_page.dart';
 import 'anak_jadwal_page.dart';
-import 'cari_akun_page.dart';
+import 'tambah_anak_form_page.dart';
 
 class AnakListPage extends StatefulWidget {
   const AnakListPage({super.key});
@@ -27,10 +27,10 @@ class _AnakListPageState extends State<AnakListPage> {
     final controller = Get.put(AnakController());
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Data Anak')),
+      appBar: AppBar(title: const Text('Riwayat Imunisasi')),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const CariAkunPage()),
+          MaterialPageRoute(builder: (_) => const TambahAnakFormPage()),
         ),
         icon: const Icon(Icons.add),
         label: const Text('Tambah Anak'),

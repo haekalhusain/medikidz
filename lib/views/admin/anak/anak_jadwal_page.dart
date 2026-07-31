@@ -4,7 +4,6 @@ import '../../../controllers/jadwal_master_controller.dart';
 import '../../../controllers/jadwal_controller.dart';
 import '../../../controllers/vaksin_controller.dart';
 import '../../../models/anak_model.dart';
-// import '../../../models/jadwal_model.dart';
 import '../../../services/jadwal_schedule_service.dart';
 import '../../../services/jadwal_status_updater.dart';
 import 'jadwal_matrix_widget.dart';
@@ -58,10 +57,10 @@ class AnakJadwalPage extends StatelessWidget {
         return ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            Text('Rencana Imunisasi 0-24 Bulan', style: Theme.of(context).textTheme.titleMedium),
+            Text('Rencana Imunisasi 2 Tahun ke Depan', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 4),
             const Text(
-              'Ditampilkan sebagai matriks seperti standar tabel imunisasi. '
+              'Ditampilkan sebagai matriks seperti standar tabel imunisasi (0-24 bulan). '
               'Kotak dengan tanda centang berarti sudah diimunisasi.',
               style: TextStyle(color: Colors.black54, fontSize: 12),
             ),
@@ -149,7 +148,7 @@ class AnakJadwalPage extends StatelessWidget {
                         ],
                         onChanged: (value) {
                           if (value == null || value == statusValue) return;
-                          _ubahStatus(context, j, value);
+                          _handlePilihStatus(context, j, value);
                         },
                       ),
                     ],
@@ -163,13 +162,47 @@ class AnakJadwalPage extends StatelessWidget {
     }).toList();
   }
 
-  Future<void> _ubahStatus(BuildContext context, JadwalTerjadwal item, String status) async {
+  Future<void> _handlePilihStatus(BuildContext context, JadwalTerjadwal item, String status) async {
+    if (status != 'sudah imunisasi') {
+      await _ubahStatus(context, item, status, vaksinDariKlinik: false);
+      return;
+    }
+
+    final vaksinDariKlinik = await _tanyaVaksinKlinik(context);
+    if (vaksinDariKlinik == null) return; // dibatalkan
+    await _ubahStatus(context, item, status, vaksinDariKlinik: vaksinDariKlinik);
+  }
+
+  Future<bool?> _tanyaVaksinKlinik(BuildContext context) {
+    return showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Vaksin Klinik?'),
+        content: const Text(
+          'Apakah vaksin yang dipakai berasal dari stok klinik ini? '
+          'Kalau "Ya", stok vaksin akan otomatis dikurangi 1.',
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Tidak')),
+          ElevatedButton(onPressed: () => Navigator.pop(context, true), child: const Text('Ya')),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _ubahStatus(
+    BuildContext context,
+    JadwalTerjadwal item,
+    String status, {
+    required bool vaksinDariKlinik,
+  }) async {
     final success = await JadwalStatusUpdater.ubahStatus(
       jadwalController: _jadwalController,
       vaksinController: _vaksinController,
       anak: anak,
       item: item,
       status: status,
+      vaksinDariKlinik: vaksinDariKlinik,
     );
 
     if (success && context.mounted) {
