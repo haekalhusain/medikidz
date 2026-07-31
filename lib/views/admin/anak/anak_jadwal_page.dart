@@ -2,21 +2,34 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../controllers/jadwal_master_controller.dart';
 import '../../../controllers/jadwal_controller.dart';
+import '../../../controllers/vaksin_controller.dart';
 import '../../../models/anak_model.dart';
+// import '../../../models/jadwal_model.dart';
 import '../../../services/jadwal_schedule_service.dart';
+import '../../../services/jadwal_status_updater.dart';
+import 'jadwal_matrix_widget.dart';
+import '../jadwal/jadwal_form_page.dart';
 
 class AnakJadwalPage extends StatelessWidget {
   final Anak anak;
   AnakJadwalPage({super.key, required this.anak});
 
-  final JadwalMasterController _masterController = Get.put(JadwalMasterController());
-  final JadwalController _jadwalController = Get.put(JadwalController());
+  final JadwalMasterController _masterController = Get.find<JadwalMasterController>();
+  final JadwalController _jadwalController = Get.find<JadwalController>();
+  final VaksinController _vaksinController = Get.find<VaksinController>();
   final JadwalScheduleService _scheduleService = JadwalScheduleService();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Jadwal - ${anak.namaAnak}')),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => JadwalFormPage(anakTerpilih: anak)),
+        ),
+        icon: const Icon(Icons.add),
+        label: const Text('Tambah Jadwal'),
+      ),
       body: Obx(() {
         final masterList = _masterController.jadwalMasterList;
         final jadwalList = _jadwalController.jadwalList;
@@ -45,16 +58,28 @@ class AnakJadwalPage extends StatelessWidget {
         return ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            Text('Rencana Imunisasi (0-24 bulan)', style: Theme.of(context).textTheme.titleMedium),
+            Text('Rencana Imunisasi 0-24 Bulan', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 4),
-            Text(
-              'Dihitung otomatis dari tanggal lahir anak.',
+            const Text(
+              'Ditampilkan sebagai matriks seperti standar tabel imunisasi. '
+              'Kotak dengan tanda centang berarti sudah diimunisasi.',
               style: TextStyle(color: Colors.black54, fontSize: 12),
             ),
             const SizedBox(height: 12),
-            _buildTable(jadwal),
+            JadwalMatrixWidget(jadwal: jadwal),
+
             const SizedBox(height: 28),
-            Text('Riwayat Imunisasi', style: Theme.of(context).textTheme.titleMedium),
+            Text('Rincian Lengkap (Termasuk >24 Bulan)', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 4),
+            const Text(
+              'Ketuk salah satu baris untuk lihat jadwal seharusnya & ubah status imunisasi.',
+              style: TextStyle(color: Colors.black54, fontSize: 12),
+            ),
+            const SizedBox(height: 8),
+            ..._buildRincianList(context, jadwal),
+
+            const SizedBox(height: 28),
+            Text('Riwayat Imunisasi (dari Jadwal)', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
             if (riwayat.isEmpty)
               const Padding(
@@ -76,32 +101,82 @@ class AnakJadwalPage extends StatelessWidget {
     );
   }
 
-  Widget _buildTable(List<JadwalTerjadwal> jadwal) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: DataTable(
-        headingRowColor: WidgetStateProperty.all(Colors.teal.withOpacity(0.1)),
-        columns: const [
-          DataColumn(label: Text('Jenis Imunisasi')),
-          DataColumn(label: Text('Dosis')),
-          DataColumn(label: Text('Usia')),
-          DataColumn(label: Text('Tanggal Jadwal')),
-          DataColumn(label: Text('Status')),
-        ],
-        rows: jadwal.map((j) {
-          final color = j.sudah
-              ? Colors.green
-              : (j.statusLabel == 'Terlambat' ? Colors.red : Colors.orange);
-          return DataRow(cells: [
-            DataCell(Text(j.master.namaVaksin)),
-            DataCell(Text('${j.master.urutanDosis}')),
-            DataCell(Text(j.master.usiaLabel)),
-            DataCell(Text(_formatDate(j.tanggalJadwal))),
-            DataCell(Text(j.statusLabel, style: TextStyle(color: color, fontWeight: FontWeight.bold))),
-          ]);
-        }).toList(),
-      ),
+  List<Widget> _buildRincianList(BuildContext context, List<JadwalTerjadwal> jadwal) {
+    return jadwal.map((j) {
+      final color = j.sudah
+          ? Colors.green
+          : (j.statusLabel == 'Terlambat' ? Colors.red : Colors.orange);
+      final statusValue = j.sudah ? 'sudah imunisasi' : 'belum imunisasi';
+
+      return Card(
+        margin: const EdgeInsets.only(bottom: 8),
+        child: ExpansionTile(
+          leading: CircleAvatar(
+            radius: 18,
+            backgroundColor: color.withValues(alpha: 0.12),
+            child: Icon(j.sudah ? Icons.check : Icons.schedule, color: color, size: 18),
+          ),
+          title: Text('${j.master.namaVaksin} - Dosis ${j.master.urutanDosis}'),
+          subtitle: Text('Usia: ${j.master.usiaLabel}'),
+          trailing: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              j.statusLabel,
+              style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 11),
+            ),
+          ),
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Jadwal Seharusnya: ${_formatDate(j.tanggalJadwal)}'),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      const Text('Status Imunisasi:'),
+                      const SizedBox(width: 12),
+                      DropdownButton<String>(
+                        value: statusValue,
+                        items: const [
+                          DropdownMenuItem(value: 'belum imunisasi', child: Text('Belum Imunisasi')),
+                          DropdownMenuItem(value: 'sudah imunisasi', child: Text('Sudah Imunisasi')),
+                        ],
+                        onChanged: (value) {
+                          if (value == null || value == statusValue) return;
+                          _ubahStatus(context, j, value);
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }).toList();
+  }
+
+  Future<void> _ubahStatus(BuildContext context, JadwalTerjadwal item, String status) async {
+    final success = await JadwalStatusUpdater.ubahStatus(
+      jadwalController: _jadwalController,
+      vaksinController: _vaksinController,
+      anak: anak,
+      item: item,
+      status: status,
     );
+
+    if (success && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Status ${item.master.namaVaksin} diubah jadi "$status".')),
+      );
+    }
   }
 
   String _formatDate(DateTime date) => '${date.day}/${date.month}/${date.year}';

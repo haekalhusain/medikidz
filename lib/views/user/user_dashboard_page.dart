@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'jadwal/jadwal_list_page.dart';
+import 'artikel/user_artikel_list_page.dart';
+import 'hubungi_klinik/hubungi_klinik_page.dart'; // Impor Halaman Baru
 import '../widgets/logout_button.dart';
 
 class UserDashboardPage extends StatelessWidget {
@@ -11,7 +13,13 @@ class UserDashboardPage extends StatelessWidget {
       _MenuItem('Jadwal Imunisasi', Icons.calendar_month, () {
         Navigator.of(context).push(MaterialPageRoute(builder: (_) => const JadwalListPage()));
       }),
-      _MenuItem('Artikel Edukasi', Icons.article, () => _comingSoon(context, 'Artikel Edukasi')),
+      _MenuItem('Artikel Edukasi', Icons.article, () {
+        Navigator.of(context).push(MaterialPageRoute(builder: (_) => const UserArtikelListPage()));
+      }),
+      _MenuItem('Hubungi Klinik', Icons.support_agent, () {
+        // Navigasi ke Halaman Hubungi Klinik
+        Navigator.of(context).push(MaterialPageRoute(builder: (_) => const HubungiKlinikPage()));
+      }),
       _MenuItem('Artikel Favorit', Icons.favorite, () => _comingSoon(context, 'Artikel Favorit')),
     ];
 

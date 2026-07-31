@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:get/get.dart'; 
-import 'package:firebase_auth/firebase_auth.dart';
-import 'views/auth_gate.dart'; 
 import 'firebase_options.dart';
-import 'onboarding_screen.dart'; 
+import 'splashscreen.dart'; // Impor file splashscreen Anda
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,9 +21,8 @@ class MedikidzApp extends StatelessWidget {
       title: 'Medikidz',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.teal, useMaterial3: true),
-      home: FirebaseAuth.instance.currentUser != null 
-          ? const AuthGate() // Jika sudah login, langsung ke AuthGate (akan diarahkan ke Home/Admin otomatis)
-          : const OnboardingScreen(), // Jika belum login, tampilkan Onboarding
+      // Set home ke SplashScreen, karena logika pengecekan user sudah diatur di dalam SplashScreen
+      home: const SplashScreen(), 
     );
   }
 }

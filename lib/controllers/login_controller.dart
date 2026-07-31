@@ -2,7 +2,7 @@ import 'package:get/get.dart';
 import '../services/auth_service.dart';
 import '../services/firestore_service.dart';
 import '../models/pengguna_model.dart';
-import '../views/admin/admin_dashboard_page.dart';
+import '../views/admin/admin_shell_page.dart';
 import '../views/user/user_dashboard_page.dart';
 
 class LoginController extends GetxController {
@@ -31,7 +31,7 @@ class LoginController extends GetxController {
       }
 
       if (pengguna.role == 'admin') {
-        Get.offAll(() => const AdminDashboardPage());
+        Get.offAll(() => const AdminShellPage());
       } else {
         Get.offAll(() => const UserDashboardPage());
       }
