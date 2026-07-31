@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:medikidz/views/user/profile/profil_anda_page.dart';
 import '../../../models/artikel_model.dart';
+// Import file profil anda (sesuaikan path foldernya jika perlu)
+
 
 class UserArtikelDetailPage extends StatelessWidget {
   final Artikel artikel;
@@ -16,106 +20,218 @@ class UserArtikelDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const primaryTeal = Color(0xFF52C49C);
+    const lightTealBg = Color(0xFFE8F7F2);
+
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          // Hero Image Bar
-          SliverAppBar(
-            expandedHeight: 220,
-            pinned: true,
-            flexibleSpace: FlexibleSpaceBar(
-              background: artikel.gambarUrl != null && artikel.gambarUrl!.isNotEmpty
-                  ? Image.network(
-                      artikel.gambarUrl!,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(
-                        color: Colors.teal.shade100,
-                        child: const Icon(Icons.broken_image, size: 50, color: Colors.teal),
-                      ),
-                    )
-                  : Container(
-                      color: Colors.teal.shade100,
-                      child: const Icon(Icons.article, size: 60, color: Colors.teal),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leadingWidth: 70,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 16),
+          child: Center(
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                shape: BoxShape.circle,
+              ),
+              child: IconButton(
+                icon: const Icon(
+                  Icons.arrow_back,
+                  color: Colors.black,
+                  size: 20,
+                ),
+                onPressed: () => Get.back(),
+              ),
+            ),
+          ),
+        ),
+        actions: [
+          // Icon Notifikasi dengan Badge
+          Center(
+            child: Container(
+              margin: const EdgeInsets.only(right: 10),
+              decoration: const BoxDecoration(
+                color: lightTealBg,
+                shape: BoxShape.circle,
+              ),
+              child: Stack(
+                children: [
+                  IconButton(
+                    icon: const Icon(
+                      Icons.notifications_none_rounded,
+                      color: primaryTeal,
+                      size: 22,
                     ),
+                    onPressed: () {},
+                  ),
+                  Positioned(
+                    right: 8,
+                    top: 8,
+                    child: Container(
+                      padding: const EdgeInsets.all(3),
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 14,
+                        minHeight: 14,
+                      ),
+                      child: const Text(
+                        '3',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 8,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
 
-          // Article Body Content
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
+          // Icon Profile (Direct ke ProfilAndaPage)
+          Center(
+            child: Container(
+              margin: const EdgeInsets.only(right: 16),
+              decoration: const BoxDecoration(
+                color: lightTealBg,
+                shape: BoxShape.circle,
+              ),
+              child: IconButton(
+                icon: const Icon(
+                  Icons.person,
+                  color: primaryTeal,
+                  size: 24,
+                ),
+                onPressed: () {
+                  Get.to(() => const ProfilAndaPage());
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 1. Gambar Banner Artikel
+            Container(
+              width: double.infinity,
+              height: 220,
+              color: lightTealBg,
+              child: artikel.gambarUrl != null && artikel.gambarUrl!.isNotEmpty
+                  ? Image.network(
+                      artikel.gambarUrl!,
+                      width: double.infinity,
+                      height: 220,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => const Center(
+                        child: Icon(Icons.broken_image, size: 50, color: primaryTeal),
+                      ),
+                    )
+                  : const Center(
+                      child: Icon(Icons.article, size: 60, color: primaryTeal),
+                    ),
+            ),
+
+            // 2. Header Artikel (Badge Kategori, Judul, Tanggal)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Meta Info (Category & Date)
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.teal,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          artikel.kategori,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                  // Badge Kategori (Chip Style)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: lightTealBg,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: primaryTeal.withOpacity(0.5)),
+                    ),
+                    child: Text(
+                      artikel.kategori,
+                      style: const TextStyle(
+                        color: primaryTeal,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
                       ),
-                      const SizedBox(width: 12),
-                      Icon(Icons.calendar_today_outlined, size: 14, color: Colors.grey.shade600),
-                      const SizedBox(width: 4),
-                      Text(
-                        _formatTanggal(artikel.tanggalUpload),
-                        style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-                      ),
-                    ],
+                    ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
 
-                  // Title
+                  // Judul Artikel
                   Text(
                     artikel.judul,
                     style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      height: 1.3,
-                      color: Colors.black87,
+                      color: Colors.black,
+                      height: 1.2,
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 8),
 
-                  // Summary Box
-                  Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: Colors.teal.shade50,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border(
-                        left: BorderSide(color: Colors.teal.shade600, width: 4),
-                      ),
-                    ),
-                    child: Text(
-                      artikel.ringkasan,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontStyle: FontStyle.italic,
-                        color: Colors.teal.shade900,
-                        height: 1.4,
-                      ),
+                  // Tanggal Upload
+                  Text(
+                    _formatTanggal(artikel.tanggalUpload),
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey.shade600,
                     ),
                   ),
-                  const SizedBox(height: 24),
-                  const Divider(),
-                  const SizedBox(height: 16),
+                ],
+              ),
+            ),
 
-                  // Content Dynamic Sections
-                  if (artikel.konten.isEmpty)
-                    const Text('Belum ada isi detail untuk artikel ini.')
-                  else
+            // Garis Divider Pemisah
+            Divider(height: 1, thickness: 1, color: Colors.grey.shade300),
+
+            // 3. Ringkasan (KOTAK/SUMMARY BOX SEPERTI SEMULA) & Detail Konten
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Kotak Ringkasan (Style Awal)
+                  if (artikel.ringkasan.isNotEmpty) ...[
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: lightTealBg,
+                        borderRadius: BorderRadius.circular(10),
+                        border: const Border(
+                          left: BorderSide(color: primaryTeal, width: 4),
+                        ),
+                      ),
+                      child: Text(
+                        artikel.ringkasan,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontStyle: FontStyle.italic,
+                          color: Colors.black87,
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+
+                  // Konten Dinamis (Subjudul & Isi)
+                  if (artikel.konten.isEmpty) ...[
+                    if (artikel.ringkasan.isEmpty)
+                      const Text(
+                        'Belum ada isi detail untuk artikel ini.',
+                        style: TextStyle(color: Colors.black54),
+                      ),
+                  ] else ...[
                     ...artikel.konten.map((section) {
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 20),
@@ -128,7 +244,7 @@ class UserArtikelDetailPage extends StatelessWidget {
                                 style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.teal,
+                                  color: Colors.black,
                                 ),
                               ),
                               const SizedBox(height: 8),
@@ -145,11 +261,12 @@ class UserArtikelDetailPage extends StatelessWidget {
                         ),
                       );
                     }),
+                  ],
                 ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
