@@ -32,7 +32,7 @@ class _AdminShellPageState extends State<AdminShellPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBody: true, // Memastikan latar belakang body berada di bawah navbar jika transparan
+      extendBody: false, // FAB tiap halaman (mis. "Tambah Artikel") sempat ketutupan navbar kalau true
       body: IndexedStack(
         index: _currentIndex,
         children: _pages,

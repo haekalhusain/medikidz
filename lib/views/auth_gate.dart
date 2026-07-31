@@ -5,7 +5,7 @@ import '../services/firestore_service.dart';
 import '../models/pengguna_model.dart';
 import 'login/login_page.dart';
 import 'admin/admin_shell_page.dart';
-import 'user/user_dashboard_page.dart';
+import 'user/user_shell_page.dart';
 
 /// Menentukan halaman pertama yang tampil berdasarkan sesi Firebase Auth
 /// yang sedang aktif. Kalau belum login -> LoginPage. Kalau sudah login,
@@ -46,7 +46,7 @@ class AuthGate extends StatelessWidget {
 
             return pengguna.role == 'admin'
                 ? const AdminShellPage()
-                : const UserDashboardPage();
+                : const UserShellPage();
           },
         );
       },

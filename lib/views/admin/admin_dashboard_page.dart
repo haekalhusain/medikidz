@@ -311,13 +311,6 @@ class AdminDashboardHome extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _MenuCepatItem(
-                  icon: Icons.person_outline,
-                  label: 'Kelola Akun',
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const AnakListPage()),
-                  ),
-                ),
-                _MenuCepatItem(
                   icon: Icons.vaccines_outlined,
                   label: 'Vaksin',
                   onTap: () => Navigator.of(context).push(

@@ -35,6 +35,7 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
                 decoration: InputDecoration(
                   labelText: 'Password Lama',
                   border: const OutlineInputBorder(),
+                  focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.teal, width: 2)),
                   suffixIcon: IconButton(
                     icon: Icon(_obscureLama ? Icons.visibility_off : Icons.visibility),
                     onPressed: () => setState(() => _obscureLama = !_obscureLama),
@@ -49,6 +50,7 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
                 decoration: InputDecoration(
                   labelText: 'Password Baru',
                   border: const OutlineInputBorder(),
+                  focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.teal, width: 2)),
                   suffixIcon: IconButton(
                     icon: Icon(_obscureBaru ? Icons.visibility_off : Icons.visibility),
                     onPressed: () => setState(() => _obscureBaru = !_obscureBaru),
@@ -67,6 +69,7 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
                 decoration: InputDecoration(
                   labelText: 'Konfirmasi Password Baru',
                   border: const OutlineInputBorder(),
+                  focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.teal, width: 2)),
                   suffixIcon: IconButton(
                     icon: Icon(_obscureKonfirmasi ? Icons.visibility_off : Icons.visibility),
                     onPressed: () => setState(() => _obscureKonfirmasi = !_obscureKonfirmasi),
@@ -77,11 +80,17 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
               const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
+                height: 50,
                 child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.teal,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                  ),
                   onPressed: _isLoading ? null : _submit,
                   child: _isLoading
-                      ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                      : const Text('Simpan'),
+                      ? const SizedBox(
+                          height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                      : const Text('Simpan', style: TextStyle(color: Colors.white, fontSize: 16)),
                 ),
               ),
             ],
