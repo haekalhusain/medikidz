@@ -4,6 +4,7 @@ import '../../../controllers/vaksin_controller.dart';
 import '../../../models/vaksin_model.dart';
 import '../../../models/konten_section_model.dart';
 import 'package:flutter/services.dart';
+import '../profile/profile_page.dart';
 
 const _kategoriOptions = [
   'Program Pemerintahan (Imunisasi Rutin Wajib)',
@@ -31,6 +32,10 @@ class _VaksinFormPageState extends State<VaksinFormPage> {
 
   bool get _isEdit => widget.vaksin != null;
 
+  // Color Palette
+  static const primaryTeal = Color(0xFF52C49C);
+  static const lightTealBg = Color(0xFFE8F7F2);
+
   @override
   void initState() {
     super.initState();
@@ -39,7 +44,9 @@ class _VaksinFormPageState extends State<VaksinFormPage> {
       _namaController.text = v.namaVaksin;
       _stokController.text = v.jumlahStok.toString();
       _statusStok = v.statusStok;
-      _kategoriVaksin = _kategoriOptions.contains(v.kategoriVaksin) ? v.kategoriVaksin : _kategoriOptions.first;
+      _kategoriVaksin = _kategoriOptions.contains(v.kategoriVaksin)
+          ? v.kategoriVaksin
+          : _kategoriOptions.first;
 
       if (v.informasi.isEmpty) {
         _kontenControllers.add(_KontenControllerPair());
@@ -57,6 +64,8 @@ class _VaksinFormPageState extends State<VaksinFormPage> {
 
   @override
   void dispose() {
+    _namaController.dispose();
+    _stokController.dispose();
     for (final k in _kontenControllers) {
       k.subjudul.dispose();
       k.isi.dispose();
@@ -69,33 +78,177 @@ class _VaksinFormPageState extends State<VaksinFormPage> {
     final controller = Get.find<VaksinController>();
 
     return Scaffold(
-      appBar: AppBar(title: Text(_isEdit ? 'Edit Vaksin' : 'Tambah Vaksin')),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        titleSpacing: 16,
+        title: Row(
+          children: [
+            // Gabungan Logo Gambar (logo.png) dan Logo Teks (logo2.png)
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Image.asset(
+                  'assets/logo.png',
+                  height: 32,
+                  fit: BoxFit.contain,
+                ),
+                const SizedBox(height: 2),
+                Image.asset(
+                  'assets/logo2.png',
+                  height: 14,
+                  fit: BoxFit.contain,
+                ),
+              ],
+            ),
+          ],
+        ),
+        actions: [
+          // Icon Notifikasi dengan badge
+          Center(
+            child: Container(
+              margin: const EdgeInsets.only(right: 8),
+              decoration: const BoxDecoration(
+                color: lightTealBg,
+                shape: BoxShape.circle,
+              ),
+              child: Stack(
+                children: [
+                  IconButton(
+                    icon: const Icon(
+                      Icons.notifications_none_rounded,
+                      color: primaryTeal,
+                      size: 22,
+                    ),
+                    onPressed: () {},
+                  ),
+                  Positioned(
+                    right: 8,
+                    top: 8,
+                    child: Container(
+                      padding: const EdgeInsets.all(3),
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 14,
+                        minHeight: 14,
+                      ),
+                      child: const Text(
+                        '1',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 8,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // Icon Profile (Berpindah ke ProfilePage)
+          Center(
+            child: Container(
+              margin: const EdgeInsets.only(right: 16),
+              decoration: const BoxDecoration(
+                color: lightTealBg,
+                shape: BoxShape.circle,
+              ),
+              child: IconButton(
+                icon: const Icon(
+                  Icons.person,
+                  color: primaryTeal,
+                  size: 22,
+                ),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const ProfilePage(),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
       body: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         child: Form(
           key: _formKey,
           child: ListView(
             children: [
-              _RequiredLabel('Nama Vaksin'),
+              // Header Tombol Kembali & Judul Form
+              Row(
+                children: [
+                  InkWell(
+                    onTap: () => Navigator.pop(context),
+                    borderRadius: BorderRadius.circular(10),
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF2F4F7),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(
+                        Icons.arrow_back,
+                        color: Colors.black87,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    _isEdit ? 'Edit Vaksin' : 'Tambah Vaksin',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              // Input Nama Vaksin
+              const _RequiredLabel('Nama Vaksin'),
+              const SizedBox(height: 4),
               TextFormField(
                 controller: _namaController,
-                decoration: const InputDecoration(border: OutlineInputBorder(), hintText: 'Contoh: Vaksin BCG'),
+                decoration: _inputDecoration(hintText: 'Contoh: Vaksin BCG'),
                 validator: (v) => (v == null || v.isEmpty) ? 'Wajib diisi' : null,
               ),
               const SizedBox(height: 16),
 
-              _RequiredLabel('Kategori Vaksin'),
+              // Input Kategori Vaksin
+              const _RequiredLabel('Kategori Vaksin'),
+              const SizedBox(height: 4),
               DropdownButtonFormField<String>(
                 value: _kategoriVaksin,
                 isExpanded: true,
-                decoration: const InputDecoration(border: OutlineInputBorder()),
+                decoration: _inputDecoration(),
                 items: _kategoriOptions
-                    .map((k) => DropdownMenuItem(value: k, child: Text(k, overflow: TextOverflow.ellipsis)))
+                    .map((k) => DropdownMenuItem(
+                          value: k,
+                          child: Text(
+                            k,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                        ))
                     .toList(),
                 onChanged: (value) => setState(() => _kategoriVaksin = value!),
               ),
               const SizedBox(height: 16),
 
+              // Row Stok & Status
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -103,20 +256,21 @@ class _VaksinFormPageState extends State<VaksinFormPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _RequiredLabel('Stok'),
+                        const _RequiredLabel('Stok'),
+                        const SizedBox(height: 4),
                         TextFormField(
                           controller: _stokController,
                           keyboardType: TextInputType.number,
                           inputFormatters: [
-                             FilteringTextInputFormatter.digitsOnly, 
+                            FilteringTextInputFormatter.digitsOnly,
                           ],
-                          decoration: const InputDecoration(border: OutlineInputBorder(), hintText: 'Contoh: 16'),
+                          decoration: _inputDecoration(hintText: 'Contoh: 16'),
                           validator: (v) {
                             if (v == null || v.isEmpty) return 'Wajib diisi';
                             final parsedValue = int.tryParse(v);
                             if (parsedValue == null) return 'Harus angka';
-                            if (parsedValue < 0) return 'Stok tidak boleh minus'; // Peringatan jika < 0
-                           return null;
+                            if (parsedValue < 0) return 'Stok tidak boleh minus';
+                            return null;
                           },
                         ),
                       ],
@@ -127,30 +281,41 @@ class _VaksinFormPageState extends State<VaksinFormPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _RequiredLabel('Status'),
+                        const _RequiredLabel('Status'),
+                        const SizedBox(height: 4),
                         DropdownButtonFormField<String>(
                           value: _statusStok,
-                          decoration: const InputDecoration(border: OutlineInputBorder()),
+                          decoration: _inputDecoration(),
                           items: const [
-                            DropdownMenuItem(value: 'tersedia', child: Text('Tersedia')),
-                            DropdownMenuItem(value: 'menipis', child: Text('Stok Menipis')),
-                            DropdownMenuItem(value: 'kosong', child: Text('Kosong')),
+                            DropdownMenuItem(
+                                value: 'tersedia',
+                                child: Text('Tersedia', style: TextStyle(fontSize: 14))),
+                            DropdownMenuItem(
+                                value: 'menipis',
+                                child: Text('Stok Menipis', style: TextStyle(fontSize: 14))),
+                            DropdownMenuItem(
+                                value: 'kosong',
+                                child: Text('Kosong', style: TextStyle(fontSize: 14))),
                           ],
-                          onChanged: (value) => setState(() => _statusStok = value!),
+                          onChanged: (value) =>
+                              setState(() => _statusStok = value!),
                         ),
                       ],
                     ),
                   ),
                 ],
               ),
+              const SizedBox(height: 16),
 
-              const SizedBox(height: 20),
-              _OptionalLabel('Informasi (opsional)', fontSize: 15, bold: true),
+              // Informasi Label
+              const _RequiredLabel('Informasi'),
               const SizedBox(height: 8),
+
+              // Container Abu-abu untuk Blok Informasi
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF0F0F0),
+                  color: const Color(0xFFEEEEEE),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Column(
@@ -159,37 +324,104 @@ class _VaksinFormPageState extends State<VaksinFormPage> {
                       _KontenBlock(
                         index: i,
                         pair: _kontenControllers[i],
-                        onRemove: _kontenControllers.length > 1 ? () => _removeKonten(i) : null,
+                        onRemove: _kontenControllers.length > 1
+                            ? () => _removeKonten(i)
+                            : null,
                       ),
-                      if (i != _kontenControllers.length - 1) const SizedBox(height: 16),
+                      if (i != _kontenControllers.length - 1)
+                        const SizedBox(height: 16),
                     ],
                   ],
                 ),
               ),
               const SizedBox(height: 12),
+
+              // Tombol Tambah Konten Artikel
               Align(
                 alignment: Alignment.centerRight,
                 child: OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: primaryTeal,
+                    side: const BorderSide(color: primaryTeal),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 8),
+                  ),
                   onPressed: _addKonten,
-                  icon: const Icon(Icons.add),
-                  label: const Text('Tambah Konten Artikel'),
+                  icon: const Icon(Icons.add, size: 18),
+                  label: const Text(
+                    'Tambah Konten Artikel',
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
+              const SizedBox(height: 28),
 
-              const SizedBox(height: 24),
+              // Tombol Simpan
               Obx(() => SizedBox(
                     width: double.infinity,
                     height: 48,
                     child: ElevatedButton(
-                      onPressed: controller.isLoading.value ? null : _submit,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryTeal,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                      ),
+                      onPressed:
+                          controller.isLoading.value ? null : _submit,
                       child: controller.isLoading.value
-                          ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                          : const Text('Simpan'),
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Text(
+                              'Simpan',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
                     ),
                   )),
+              const SizedBox(height: 24),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration({String? hintText}) {
+    return InputDecoration(
+      hintText: hintText,
+      hintStyle: const TextStyle(fontSize: 13, color: Colors.grey),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      fillColor: Colors.white,
+      filled: true,
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: const BorderSide(color: primaryTeal),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: const BorderSide(color: Colors.red),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: const BorderSide(color: Colors.red),
       ),
     );
   }
@@ -216,7 +448,8 @@ class _VaksinFormPageState extends State<VaksinFormPage> {
       jumlahStok: int.parse(_stokController.text),
       statusStok: _statusStok,
       informasi: _kontenControllers
-          .map((k) => KontenSection(subjudul: k.subjudul.text.trim(), isi: k.isi.text.trim()))
+          .map((k) => KontenSection(
+              subjudul: k.subjudul.text.trim(), isi: k.isi.text.trim()))
           .where((k) => k.subjudul.isNotEmpty || k.isi.isNotEmpty)
           .toList(),
     );
@@ -238,7 +471,11 @@ class _KontenBlock extends StatelessWidget {
   final _KontenControllerPair pair;
   final VoidCallback? onRemove;
 
-  const _KontenBlock({required this.index, required this.pair, this.onRemove});
+  const _KontenBlock({
+    required this.index,
+    required this.pair,
+    this.onRemove,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -248,50 +485,57 @@ class _KontenBlock extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: _OptionalLabel('Subjudul ${index + 1}'),
+              child: _RequiredLabel('Subjudul ${index + 1}'),
             ),
             if (onRemove != null)
               IconButton(
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
                 icon: const Icon(Icons.close, size: 18, color: Colors.red),
                 onPressed: onRemove,
                 tooltip: 'Hapus blok ini',
               ),
           ],
         ),
+        const SizedBox(height: 4),
         TextFormField(
           controller: pair.subjudul,
-          decoration: const InputDecoration(border: OutlineInputBorder(), filled: true, fillColor: Colors.white),
+          decoration: InputDecoration(
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            filled: true,
+            fillColor: Colors.white,
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: Color(0xFF52C49C)),
+            ),
+          ),
         ),
-        const SizedBox(height: 8),
-        _OptionalLabel('Isi Artikel ${index + 1}'),
+        const SizedBox(height: 12),
+        _RequiredLabel('Isi Artikel ${index + 1}'),
+        const SizedBox(height: 4),
         TextFormField(
           controller: pair.isi,
           maxLines: 3,
-          decoration: const InputDecoration(border: OutlineInputBorder(), filled: true, fillColor: Colors.white),
+          decoration: InputDecoration(
+            contentPadding: const EdgeInsets.all(12),
+            filled: true,
+            fillColor: Colors.white,
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: Color(0xFF52C49C)),
+            ),
+          ),
         ),
       ],
-    );
-  }
-}
-
-class _OptionalLabel extends StatelessWidget {
-  final String text;
-  final double fontSize;
-  final bool bold;
-  const _OptionalLabel(this.text, {this.fontSize = 13, this.bold = false});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: Colors.black87,
-          fontSize: fontSize,
-          fontWeight: bold ? FontWeight.bold : FontWeight.w500,
-        ),
-      ),
     );
   }
 }
@@ -300,13 +544,13 @@ class _RequiredLabel extends StatelessWidget {
   final String text;
   final double fontSize;
   final bool bold;
-  // ignore: unused_element_parameter
+
   const _RequiredLabel(this.text, {this.fontSize = 13, this.bold = false});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
+      padding: const EdgeInsets.only(bottom: 2),
       child: RichText(
         text: TextSpan(
           style: TextStyle(
@@ -316,7 +560,10 @@ class _RequiredLabel extends StatelessWidget {
           ),
           children: [
             TextSpan(text: text),
-            const TextSpan(text: ' *', style: TextStyle(color: Colors.red)),
+            const TextSpan(
+              text: '*',
+              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+            ),
           ],
         ),
       ),
