@@ -3,15 +3,23 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../controllers/artikel_controller.dart';
+import '../../../controllers/pengguna_controller.dart';
 import '../../../models/artikel_model.dart';
 import '../../../models/konten_section_model.dart';
 import '../../../services/image_upload_service.dart';
 
+// Disesuaikan dengan kategori pada desain (Panduan, Fakta Medis, Tips Medis).
+// Kalau butuh kategori lain, tinggal tambahkan ke list ini.
 const _kategoriOptions = [
-  'Info Vaksin',
-  'Tips Kesehatan',
-  'Nutrisi Anak',
-  'Tumbuh Kembang',
+  'Panduan',
+  'Fakta Medis',
+  'Tips Medis',
+];
+
+const _statusOptions = [
+  ('draft', 'Draft'),
+  ('dipublikasi', 'Dipublikasi'),
+  ('arsip', 'Arsip'),
 ];
 
 class ArtikelFormPage extends StatefulWidget {
@@ -28,8 +36,9 @@ class _ArtikelFormPageState extends State<ArtikelFormPage> {
   final _ringkasanController = TextEditingController();
 
   String? _kategori;
-  XFile? _gambarBaru; // gambar yang baru dipilih, belum diupload
-  String? _gambarUrlLama; // gambar existing kalau mode edit
+  String _status = 'draft';
+  XFile? _gambarBaru;
+  String? _gambarUrlLama;
   bool _isUploadingGambar = false;
 
   final List<_KontenControllerPair> _kontenControllers = [];
@@ -44,6 +53,7 @@ class _ArtikelFormPageState extends State<ArtikelFormPage> {
       _judulController.text = a.judul;
       _ringkasanController.text = a.ringkasan;
       _kategori = _kategoriOptions.contains(a.kategori) ? a.kategori : null;
+      _status = a.status;
       _gambarUrlLama = a.gambarUrl;
 
       if (a.konten.isEmpty) {
@@ -118,6 +128,16 @@ class _ArtikelFormPageState extends State<ArtikelFormPage> {
                 items: _kategoriOptions.map((k) => DropdownMenuItem(value: k, child: Text(k))).toList(),
                 onChanged: (value) => setState(() => _kategori = value),
                 validator: (v) => (v == null) ? 'Wajib dipilih' : null,
+              ),
+              const SizedBox(height: 12),
+              _RequiredLabel('Status'),
+              DropdownButtonFormField<String>(
+                value: _status,
+                decoration: const InputDecoration(border: OutlineInputBorder()),
+                items: _statusOptions
+                    .map((s) => DropdownMenuItem(value: s.$1, child: Text(s.$2)))
+                    .toList(),
+                onChanged: (value) => setState(() => _status = value!),
               ),
               const SizedBox(height: 12),
               _RequiredLabel('Ringkasan Singkat'),
@@ -253,6 +273,15 @@ class _ArtikelFormPageState extends State<ArtikelFormPage> {
     final controller = Get.find<ArtikelController>();
     final gambarUrl = await _uploadGambarJikaAda();
 
+    // Penulis diambil otomatis dari akun admin yang sedang login,
+    // BUKAN field yang diisi manual — supaya tidak bisa dipalsukan.
+    // Saat edit, penulis asli dipertahankan (bukan diganti nama editor).
+    String penulis = _isEdit ? widget.artikel!.penulis : '-';
+    if (!_isEdit) {
+      final pengguna = await PenggunaController().getCurrentPengguna();
+      penulis = pengguna?.nama ?? '-';
+    }
+
     final artikel = Artikel(
       judul: _judulController.text.trim(),
       kategori: _kategori!,
@@ -263,6 +292,8 @@ class _ArtikelFormPageState extends State<ArtikelFormPage> {
           .where((k) => k.subjudul.isNotEmpty || k.isi.isNotEmpty)
           .toList(),
       tanggalUpload: _isEdit ? widget.artikel!.tanggalUpload : DateTime.now(),
+      status: _status,
+      penulis: penulis,
     );
 
     final success = _isEdit
