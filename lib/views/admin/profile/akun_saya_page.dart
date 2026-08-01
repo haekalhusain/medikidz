@@ -1,15 +1,16 @@
-import 'package:flutter/material.dart';
-import '../../../models/pengguna_model.dart';
-import '../../../services/auth_service.dart';
-import '../../../services/firestore_service.dart';
-import 'ubah_password_page.dart';
-
 /// Halaman Akun Saya khusus admin. Beda dengan versi user, admin cuma
 /// punya Data Personal (nama) -- nggak ada tab Data Anak.
 ///
 /// Password TIDAK ditampilkan literal (Firebase Auth memang tidak bisa
 /// membaca kembali password yang tersimpan). Field password di sini cuma
 /// jalan pintas visual ke halaman "Ubah Kata Sandi" yang sudah ada.
+import 'package:flutter/material.dart';
+import '../../../models/pengguna_model.dart';
+import '../../../services/auth_service.dart';
+import '../../../services/firestore_service.dart';
+import 'ubah_password_page.dart';
+
+/// Halaman Akun Saya khusus admin.
 class AkunSayaPage extends StatefulWidget {
   const AkunSayaPage({super.key});
 
@@ -67,11 +68,21 @@ class _AkunSayaPageState extends State<AkunSayaPage> {
     try {
       await _penggunaService.update(_uid!, updated);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Data personal disimpan.')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Data personal berhasil disimpan.'),
+            backgroundColor: Color(0xFF2D9580),
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Gagal menyimpan: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Gagal menyimpan: $e'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -81,81 +92,192 @@ class _AkunSayaPageState extends State<AkunSayaPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        leading: const BackButton(),
-        title: const Text('Akun Saya'),
+        backgroundColor: Colors.white,
         elevation: 0,
+        scrolledUnderElevation: 0,
+        leadingWidth: 70,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 16, top: 8, bottom: 8),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(20),
+            onTap: () => Navigator.of(context).pop(),
+            child: Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.grey.shade100,
+                border: Border.all(color: Colors.grey.shade300, width: 0.8),
+              ),
+              child: const Icon(
+                Icons.arrow_back_rounded,
+                color: Colors.black87,
+                size: 20,
+              ),
+            ),
+          ),
+        ),
+        title: const Text(
+          'Akun Saya',
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: CircularProgressIndicator(color: Color(0xFF2D9580)),
+            )
           : Column(
               children: [
+                // --- SUB HEADER "Data personal" ---
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  color: Colors.teal,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF359D89), // Deep Mint Teal
+                  ),
                   child: const Text(
                     'Data personal',
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.2,
+                    ),
                   ),
                 ),
+
+                // --- FORM BODY ---
                 Expanded(
                   child: ListView(
-                    padding: const EdgeInsets.all(20),
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
                     children: [
-                      const Text('Nama', style: TextStyle(fontWeight: FontWeight.w600)),
-                      const SizedBox(height: 6),
+                      // Field Label: Nama
+                      const Text(
+                        'Nama',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
                       TextField(
                         controller: _namaController,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          color: Colors.black87,
+                          fontWeight: FontWeight.w500,
+                        ),
                         decoration: InputDecoration(
                           filled: true,
-                          fillColor: Colors.grey.shade100,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(24),
-                            borderSide: BorderSide.none,
+                          fillColor: const Color(0xFFFAFAFA),
+                          hintText: 'Masukkan nama',
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 16,
                           ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(28),
+                            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(28),
+                            borderSide: const BorderSide(color: Color(0xFF359D89), width: 1.5),
+                          ),
                         ),
                       ),
+
                       const SizedBox(height: 20),
-                      const Text('Password', style: TextStyle(fontWeight: FontWeight.w600)),
-                      const SizedBox(height: 6),
-                      InkWell(
-                        borderRadius: BorderRadius.circular(24),
-                        onTap: () => Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const UbahPasswordPage()),
+
+                      // Field Label: Password
+                      const Text(
+                        'Password',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
                         ),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade100,
-                            borderRadius: BorderRadius.circular(24),
+                      ),
+                      const SizedBox(height: 8),
+                      Material(
+                        color: const Color(0xFFFAFAFA),
+                        borderRadius: BorderRadius.circular(28),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(28),
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => const UbahPasswordPage(),
+                            ),
                           ),
-                          child: Row(
-                            children: [
-                              const Expanded(child: Text('••••••••')),
-                              Icon(Icons.edit_outlined, size: 18, color: Colors.teal.shade700),
-                            ],
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 16,
+                            ),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(28),
+                              border: Border.all(color: const Color(0xFFE2E8F0)),
+                            ),
+                            child: Row(
+                              children: [
+                                const Expanded(
+                                  child: Text(
+                                    '••••••••',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.black87,
+                                      letterSpacing: 3,
+                                    ),
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.edit_outlined,
+                                  size: 18,
+                                  color: Colors.teal.shade700,
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 28),
+
+                      const SizedBox(height: 36),
+
+                      // --- TOMBOL SELESAI ---
                       SizedBox(
                         width: double.infinity,
-                        height: 50,
+                        height: 52,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.teal,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                            backgroundColor: const Color(0xFF359D89),
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(28),
+                            ),
                           ),
                           onPressed: _isSaving ? null : _submit,
                           child: _isSaving
                               ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                              : const Text('Selesai', style: TextStyle(color: Colors.white, fontSize: 16)),
+                                  height: 22,
+                                  width: 22,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.5,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Text(
+                                  'Selesai',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                         ),
                       ),
                     ],
