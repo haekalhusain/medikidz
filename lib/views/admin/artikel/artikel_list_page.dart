@@ -6,7 +6,9 @@ import 'artikel_form_page.dart';
 import '../profile/profile_page.dart';
 
 class ArtikelListPage extends StatefulWidget {
-  const ArtikelListPage({super.key});
+  final ValueChanged<int>? onNavigateToTab;
+
+  const ArtikelListPage({super.key, this.onNavigateToTab});
 
   @override
   State<ArtikelListPage> createState() => _ArtikelListPageState();
@@ -207,7 +209,13 @@ class _ArtikelListPageState extends State<ArtikelListPage> {
     return Row(
       children: [
         InkWell(
-          onTap: () => Navigator.pop(context),
+          onTap: () {
+            if (widget.onNavigateToTab != null) {
+              widget.onNavigateToTab!(0);
+            } else {
+              Navigator.maybePop(context);
+            }
+          },
           borderRadius: BorderRadius.circular(10),
           child: Container(
             padding: const EdgeInsets.all(8),

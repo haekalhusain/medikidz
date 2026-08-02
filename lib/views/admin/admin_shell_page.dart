@@ -21,7 +21,7 @@ class _AdminShellPageState extends State<AdminShellPage> {
     _pages = [
       AdminDashboardHome(onNavigateToTab: _navigateToTab),
       const VaksinListPage(),
-      const ArtikelListPage(),
+      ArtikelListPage(onNavigateToTab: _navigateToTab),
       const ProfilePage(),
     ];
   }
