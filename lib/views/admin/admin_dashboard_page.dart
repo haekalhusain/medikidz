@@ -16,7 +16,9 @@ import '../widgets/logout_button.dart';
 
 /// Konten tab "Home". Dipakai di dalam AdminShellPage (bersama bottom nav).
 class AdminDashboardHome extends StatelessWidget {
-  const AdminDashboardHome({super.key});
+  final ValueChanged<int>? onNavigateToTab;
+
+  const AdminDashboardHome({super.key, this.onNavigateToTab});
 
   @override
   Widget build(BuildContext context) {
@@ -271,11 +273,17 @@ class AdminDashboardHome extends StatelessWidget {
                             : lightTealBg,
                         buttonTextColor:
                             stokMenipis > 0 ? Colors.red : primaryTeal,
-                        onTap: () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => const VaksinListPage(),
-                          ),
-                        ),
+                        onTap: () {
+                          if (onNavigateToTab != null) {
+                            onNavigateToTab!(1);
+                            return;
+                          }
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => const VaksinListPage(),
+                            ),
+                          );
+                        },
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -313,18 +321,30 @@ class AdminDashboardHome extends StatelessWidget {
                 _MenuCepatItem(
                   icon: Icons.vaccines_outlined,
                   label: 'Vaksin',
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const VaksinListPage()),
-                  ),
+                  onTap: () {
+                    if (onNavigateToTab != null) {
+                      onNavigateToTab!(1);
+                      return;
+                    }
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const VaksinListPage()),
+                    );
+                  },
                 ),
                 _MenuCepatItem(
                   icon: Icons.description_outlined,
                   label: 'Artikel',
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => const ArtikelListPage(),
-                    ),
-                  ),
+                  onTap: () {
+                    if (onNavigateToTab != null) {
+                      onNavigateToTab!(2);
+                      return;
+                    }
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const ArtikelListPage(),
+                      ),
+                    );
+                  },
                 ),
                 _MenuCepatItem(
                   icon: Icons.calendar_today_outlined,

@@ -13,13 +13,24 @@ class AdminShellPage extends StatefulWidget {
 
 class _AdminShellPageState extends State<AdminShellPage> {
   int _currentIndex = 0;
+  late final List<Widget> _pages;
 
-  final _pages = const [
-    AdminDashboardHome(),
-    VaksinListPage(),
-    ArtikelListPage(),
-    ProfilePage(),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _pages = [
+      AdminDashboardHome(onNavigateToTab: _navigateToTab),
+      const VaksinListPage(),
+      const ArtikelListPage(),
+      const ProfilePage(),
+    ];
+  }
+
+  void _navigateToTab(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+  }
 
   // Data Item Navbar
   final List<_NavItemData> _navItems = const [
