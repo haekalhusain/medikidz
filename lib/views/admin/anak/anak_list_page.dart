@@ -175,6 +175,7 @@ class _AnakListPageState extends State<AnakListPage> {
                 }
 
                 return ListView.builder(
+                  physics: const BouncingScrollPhysics(),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 8,
@@ -187,160 +188,179 @@ class _AnakListPageState extends State<AnakListPage> {
                       margin: const EdgeInsets.only(bottom: 14),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(22),
                         border: Border.all(
                           color: const Color(0xFFE2E8F0),
                           width: 1,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.02),
-                            blurRadius: 8,
-                            offset: const Offset(0, 3),
+                            color: Colors.black.withOpacity(0.04),
+                            blurRadius: 12,
+                            offset: const Offset(0, 6),
                           ),
                         ],
                       ),
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(20),
-                        onTap: () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => AnakJadwalPage(anak: anak),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(22),
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => AnakJadwalPage(anak: anak),
+                            ),
                           ),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // AVATAR PROFIL ANAK
-                              Container(
-                                width: 56,
-                                height: 56,
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFFE2E8F0),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  anak.jenisKelamin == 'laki-laki'
-                                      ? Icons.boy_rounded
-                                      : Icons.girl_rounded,
-                                  size: 38,
-                                  color: const Color(0xFF94A3B8),
-                                ),
-                              ),
-                              const SizedBox(width: 14),
-
-                              // DETAIL DATA ANAK
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      anak.namaAnak,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black87,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    const SizedBox(height: 6),
-
-                                    // Tanggal Lahir
-                                    Row(
-                                      children: [
-                                        const Icon(
-                                          Icons.cake_outlined,
-                                          size: 15,
-                                          color: Color(0xFF359D89),
-                                        ),
-                                        const SizedBox(width: 6),
-                                        Text(
-                                          'Lahir: ${_formatDate(anak.tanggalLahir)}',
-                                          style: const TextStyle(
-                                            fontSize: 13,
-                                            color: Color(0xFF64748B),
-                                          ),
-                                        ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  width: 58,
+                                  height: 58,
+                                  decoration: BoxDecoration(
+                                    gradient: const LinearGradient(
+                                      colors: [
+                                        Color(0xFF359D89),
+                                        Color(0xFF4FC3A1),
                                       ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
                                     ),
-                                    const SizedBox(height: 4),
-
-                                    // Jenis Kelamin
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          anak.jenisKelamin == 'laki-laki'
-                                              ? Icons.male_rounded
-                                              : Icons.female_rounded,
-                                          size: 15,
-                                          color: const Color(0xFF359D89),
-                                        ),
-                                        const SizedBox(width: 6),
-                                        Text(
-                                          anak.jenisKelamin == 'laki-laki'
-                                              ? 'Laki-laki'
-                                              : 'Perempuan',
-                                          style: const TextStyle(
-                                            fontSize: 13,
-                                            color: Color(0xFF64748B),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    anak.jenisKelamin == 'laki-laki'
+                                        ? Icons.boy_rounded
+                                        : Icons.girl_rounded,
+                                    size: 32,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              anak.namaAnak,
+                                              style: const TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.black87,
+                                              ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
                                           ),
-                                        ),
-                                      ],
-                                    ),
-
-                                    const SizedBox(height: 10),
-
-                                    // TOMBOL AKSI (EDIT & DELETE) DI POJOK KANAN BAWAH CARD
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        InkWell(
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                          onTap: () => Navigator.of(context).push(
-                                            MaterialPageRoute(
-                                              builder: (_) => AnakFormPage(
-                                                anak: anak,
+                                          const SizedBox(width: 8),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 4,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFFE8F7F2),
+                                              borderRadius: BorderRadius.circular(999),
+                                            ),
+                                            child: const Text(
+                                              'Lihat detail',
+                                              style: TextStyle(
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.w600,
+                                                color: Color(0xFF359D89),
                                               ),
                                             ),
                                           ),
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(6),
-                                            child: Icon(
-                                              Icons.edit_outlined,
-                                              size: 20,
-                                              color: Colors.grey.shade700,
+                                        ],
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.cake_outlined,
+                                            size: 15,
+                                            color: Color(0xFF359D89),
+                                          ),
+                                          const SizedBox(width: 6),
+                                          Expanded(
+                                            child: Text(
+                                              'Lahir: ${_formatDate(anak.tanggalLahir)}',
+                                              style: const TextStyle(
+                                                fontSize: 13,
+                                                color: Color(0xFF64748B),
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
                                             ),
                                           ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        InkWell(
-                                          borderRadius: BorderRadius.circular(
-                                            8,
+                                        ],
+                                      ),
+                                      const SizedBox(height: 5),
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            anak.jenisKelamin == 'laki-laki'
+                                                ? Icons.male_rounded
+                                                : Icons.female_rounded,
+                                            size: 15,
+                                            color: const Color(0xFF359D89),
                                           ),
-                                          onTap: () => _confirmDelete(
-                                            context,
-                                            controller,
-                                            anak.id!,
-                                          ),
-                                          child: const Padding(
-                                            padding: EdgeInsets.all(6),
-                                            child: Icon(
-                                              Icons.delete_outline_rounded,
-                                              size: 20,
-                                              color: Colors.redAccent,
+                                          const SizedBox(width: 6),
+                                          Text(
+                                            anak.jenisKelamin == 'laki-laki'
+                                                ? 'Laki-laki'
+                                                : 'Perempuan',
+                                            style: const TextStyle(
+                                              fontSize: 13,
+                                              color: Color(0xFF64748B),
                                             ),
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                                        ],
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              'Ketuk kartu untuk melihat riwayat dan jadwal imunisasi',
+                                              style: TextStyle(
+                                                fontSize: 11,
+                                                color: Colors.grey.shade600,
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          _buildActionButton(
+                                            icon: Icons.edit_outlined,
+                                            color: const Color(0xFF64748B),
+                                            onTap: () => Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                builder: (_) => AnakFormPage(
+                                                  anak: anak,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          _buildActionButton(
+                                            icon: Icons.delete_outline_rounded,
+                                            color: Colors.redAccent,
+                                            onTap: () => _confirmDelete(
+                                              context,
+                                              controller,
+                                              anak.id!,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -351,6 +371,26 @@ class _AnakListPageState extends State<AnakListPage> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildActionButton({
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10),
+      child: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.12),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(icon, size: 18, color: color),
       ),
     );
   }

@@ -21,13 +21,20 @@ class AnakJadwalPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Jadwal - ${anak.namaAnak}')),
+      backgroundColor: const Color(0xFFF8FAFC),
+      appBar: AppBar(
+        title: Text('Jadwal - ${anak.namaAnak}'),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
+        elevation: 0,
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => Navigator.of(context).push(
           MaterialPageRoute(builder: (_) => JadwalFormPage(anakTerpilih: anak)),
         ),
         icon: const Icon(Icons.add),
         label: const Text('Tambah Jadwal'),
+        backgroundColor: const Color(0xFF359D89),
       ),
       body: Obx(() {
         final masterList = _masterController.jadwalMasterList;
@@ -55,8 +62,39 @@ class AnakJadwalPage extends StatelessWidget {
           ..sort((a, b) => b.realisasi!.tanggalImunisasi.compareTo(a.realisasi!.tanggalImunisasi));
 
         return ListView(
+          physics: const BouncingScrollPhysics(),
           padding: const EdgeInsets.all(16),
           children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: const Color(0xFFE2E8F0)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.03),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Ringkasan imunisasi anak',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Pantau jadwal, riwayat, dan status imunisasi secara lebih rapi dan mudah dibaca.',
+                    style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
             Text('Rencana Imunisasi 2 Tahun ke Depan', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 4),
             const Text(
