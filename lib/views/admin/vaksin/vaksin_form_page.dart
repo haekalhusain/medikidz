@@ -4,7 +4,7 @@ import '../../../controllers/vaksin_controller.dart';
 import '../../../models/vaksin_model.dart';
 import '../../../models/konten_section_model.dart';
 import 'package:flutter/services.dart';
-import '../profile/profile_page.dart';
+import '../widgets/admin_header.dart';
 
 const _kategoriOptions = [
   'Program Pemerintahan (Imunisasi Rutin Wajib)',
@@ -79,106 +79,7 @@ class _VaksinFormPageState extends State<VaksinFormPage> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        automaticallyImplyLeading: false,
-        titleSpacing: 16,
-        title: Row(
-          children: [
-            // Gabungan Logo Gambar (logo.png) dan Logo Teks (logo2.png)
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Image.asset(
-                  'assets/logo.png',
-                  height: 32,
-                  fit: BoxFit.contain,
-                ),
-                const SizedBox(height: 2),
-                Image.asset(
-                  'assets/logo2.png',
-                  height: 14,
-                  fit: BoxFit.contain,
-                ),
-              ],
-            ),
-          ],
-        ),
-        actions: [
-          // Icon Notifikasi dengan badge
-          Center(
-            child: Container(
-              margin: const EdgeInsets.only(right: 8),
-              decoration: const BoxDecoration(
-                color: lightTealBg,
-                shape: BoxShape.circle,
-              ),
-              child: Stack(
-                children: [
-                  IconButton(
-                    icon: const Icon(
-                      Icons.notifications_none_rounded,
-                      color: primaryTeal,
-                      size: 22,
-                    ),
-                    onPressed: () {},
-                  ),
-                  Positioned(
-                    right: 8,
-                    top: 8,
-                    child: Container(
-                      padding: const EdgeInsets.all(3),
-                      decoration: const BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
-                      ),
-                      constraints: const BoxConstraints(
-                        minWidth: 14,
-                        minHeight: 14,
-                      ),
-                      child: const Text(
-                        '1',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 8,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          // Icon Profile (Berpindah ke ProfilePage)
-          Center(
-            child: Container(
-              margin: const EdgeInsets.only(right: 16),
-              decoration: const BoxDecoration(
-                color: lightTealBg,
-                shape: BoxShape.circle,
-              ),
-              child: IconButton(
-                icon: const Icon(
-                  Icons.person,
-                  color: primaryTeal,
-                  size: 22,
-                ),
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => const ProfilePage(),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-        ],
-      ),
+      appBar: buildAdminTopBar(context),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         child: Form(

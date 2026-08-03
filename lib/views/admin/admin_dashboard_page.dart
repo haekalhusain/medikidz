@@ -12,7 +12,7 @@ import '../../controllers/jadwal_master_controller.dart';
 import '../../controllers/vaksin_controller.dart';
 import '../../services/jadwal_schedule_service.dart';
 import '../../services/activity_log_service.dart';
-import '../widgets/logout_button.dart';
+import 'widgets/admin_header.dart';
 
 /// Konten tab "Home". Dipakai di dalam AdminShellPage (bersama bottom nav).
 class AdminDashboardHome extends StatelessWidget {
@@ -36,102 +36,7 @@ class AdminDashboardHome extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF7FAFC),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        toolbarHeight: 70,
-        title: Padding(
-          padding: const EdgeInsets.only(top: 8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Image.asset(
-                'assets/logo.png',
-                height: 32,
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) =>
-                    Icon(Icons.child_care, color: primaryTeal, size: 30),
-              ),
-              const SizedBox(height: 2),
-              Image.asset(
-                'assets/logo2.png',
-                height: 12,
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) => const Text(
-                  'KLINIK & APOTEK MediKidz',
-                  style: TextStyle(
-                    fontSize: 8,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black54,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          // Tombol Notifikasi (Desain Bulat dengan Badge Merah seperti di gambar)
-          Center(
-            child: Container(
-              margin: const EdgeInsets.only(right: 8),
-              decoration: const BoxDecoration(
-                color: Color(0xFFE6FFFA),
-                shape: BoxShape.circle,
-              ),
-              child: Stack(
-                children: [
-                  IconButton(
-                    icon: Icon(
-                      Icons.notifications_none_rounded,
-                      color: primaryTeal,
-                      size: 22,
-                    ),
-                    onPressed: () {
-                      // Belum ada fungsi
-                    },
-                  ),
-                  Positioned(
-                    right: 8,
-                    top: 8,
-                    child: Container(
-                      padding: const EdgeInsets.all(3),
-                      decoration: const BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
-                      ),
-                      constraints: const BoxConstraints(
-                        minWidth: 14,
-                        minHeight: 14,
-                      ),
-                      child: const Text(
-                        '1',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 8,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          // Tombol Logout bawaan
-          Center(
-            child: Container(
-              margin: const EdgeInsets.only(right: 16),
-              decoration: const BoxDecoration(
-                color: Color(0xFFE6FFFA),
-                shape: BoxShape.circle,
-              ),
-              child: const LogoutButton(),
-            ),
-          ),
-        ],
-      ),
+      appBar: buildAdminTopBar(context),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

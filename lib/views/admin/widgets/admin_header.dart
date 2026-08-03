@@ -1,77 +1,141 @@
 import 'package:flutter/material.dart';
-import '../../widgets/logout_button.dart';
+import '../profile/profile_page.dart';
 
-/// Header identik dengan yang dipakai di AdminDashboardHome (logo klinik,
-/// tombol notifikasi, tombol profil). Ditarik jadi widget terpisah supaya
-/// tampilannya konsisten di semua tab (Home, Vaksin, Artikel, Profile)
-/// tanpa copy-paste kode AppBar berulang kali.
-PreferredSizeWidget buildMedikidzHeaderAppBar() {
-  const primaryTeal = Color(0xFF38B2AC);
+/// Header admin yang konsisten untuk halaman-halaman admin.
+/// Menyertakan logo, tombol notifikasi, tombol profil, dan garis pemisah.
+PreferredSizeWidget buildAdminTopBar(BuildContext context, {bool showDivider = true}) {
+  const primaryTeal = Color(0xFF00A884);
+  const lightTealBg = Color(0xFFE8F7F2);
 
-  return AppBar(
-    backgroundColor: Colors.white,
-    elevation: 0,
-    toolbarHeight: 70,
-    title: Padding(
-      padding: const EdgeInsets.only(top: 8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Image.asset(
-            'assets/logo.png',
-            height: 32,
-            fit: BoxFit.contain,
-            errorBuilder: (context, error, stackTrace) =>
-                const Icon(Icons.child_care, color: primaryTeal, size: 30),
-          ),
-          const SizedBox(height: 2),
-          Image.asset(
-            'assets/logo2.png',
-            height: 12,
-            fit: BoxFit.contain,
-            errorBuilder: (context, error, stackTrace) => const Text(
-              'KLINIK & APOTEK MediKidz',
-              style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: Colors.black54),
-            ),
-          ),
-        ],
-      ),
-    ),
-    actions: [
-      Center(
-        child: Container(
-          margin: const EdgeInsets.only(right: 8),
-          decoration: const BoxDecoration(color: Color(0xFFE6FFFA), shape: BoxShape.circle),
-          child: Stack(
+  return PreferredSize(
+    preferredSize: Size.fromHeight(showDivider ? 84 : 67),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          automaticallyImplyLeading: false,
+          toolbarHeight: 67,
+          titleSpacing: 16,
+          title: Row(
             children: [
-              const IconButton(
-                icon: Icon(Icons.notifications_none_rounded, color: primaryTeal, size: 22),
-                onPressed: null,
-              ),
-              Positioned(
-                right: 8,
-                top: 8,
-                child: Container(
-                  padding: const EdgeInsets.all(3),
-                  decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
-                  constraints: const BoxConstraints(minWidth: 14, minHeight: 14),
-                  child: const Text('1',
-                      style: TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center),
-                ),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    'assets/logo.png',
+                    height: 30,
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, __, ___) => const Icon(
+                      Icons.local_hospital,
+                      color: primaryTeal,
+                      size: 28,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Image.asset(
+                    'assets/logo2.png',
+                    height: 12,
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, __, ___) => const Text(
+                      'MediKidz',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: primaryTeal,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
+          actions: [
+            Center(
+              child: Container(
+                margin: const EdgeInsets.only(right: 8),
+                decoration: const BoxDecoration(
+                  color: lightTealBg,
+                  shape: BoxShape.circle,
+                ),
+                child: Stack(
+                  children: [
+                    IconButton(
+                      icon: const Icon(
+                        Icons.notifications_none_rounded,
+                        color: primaryTeal,
+                        size: 22,
+                      ),
+                      onPressed: () {},
+                    ),
+                    Positioned(
+                      right: 8,
+                      top: 8,
+                      child: Container(
+                        padding: const EdgeInsets.all(3),
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 14,
+                          minHeight: 14,
+                        ),
+                        child: const Text(
+                          '1',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 8,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Center(
+              child: Container(
+                margin: const EdgeInsets.only(right: 16),
+                decoration: const BoxDecoration(
+                  color: lightTealBg,
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
+                  icon: const Icon(
+                    Icons.person,
+                    color: primaryTeal,
+                    size: 22,
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const ProfilePage()),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
         ),
-      ),
-      Center(
-        child: Container(
-          margin: const EdgeInsets.only(right: 16),
-          decoration: const BoxDecoration(color: Color(0xFFE6FFFA), shape: BoxShape.circle),
-          child: const LogoutButton(),
-        ),
-      ),
-    ],
+        if (showDivider)
+          Container(
+            height: 2.0,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: [
+                  Color(0xFFA3D9CD),
+                  Color(0xFFC5BC9B),
+                ],
+              ),
+            ),
+          ),
+      ],
+    ),
   );
 }

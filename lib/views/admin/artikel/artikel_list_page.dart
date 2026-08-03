@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import '../../../controllers/artikel_controller.dart';
 import '../../../models/artikel_model.dart';
 import 'artikel_form_page.dart';
-import '../profile/profile_page.dart';
+import '../widgets/admin_header.dart';
 
 class ArtikelListPage extends StatefulWidget {
   final ValueChanged<int>? onNavigateToTab;
@@ -36,118 +36,7 @@ class _ArtikelListPageState extends State<ArtikelListPage> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        automaticallyImplyLeading: false,
-        titleSpacing: 16,
-        title: Row(
-          children: [
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Image.asset(
-                  'assets/logo.png',
-                  height: 30,
-                  fit: BoxFit.contain,
-                  errorBuilder: (_, __, ___) => const Icon(
-                    Icons.local_hospital,
-                    color: primaryTeal,
-                    size: 28,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Image.asset(
-                  'assets/logo2.png',
-                  height: 12,
-                  fit: BoxFit.contain,
-                  errorBuilder: (_, __, ___) => const Text(
-                    'MediKidz',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      color: primaryTeal,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        actions: [
-          // Icon Notifikasi
-          Center(
-            child: Container(
-              margin: const EdgeInsets.only(right: 8),
-              decoration: const BoxDecoration(
-                color: lightTealBg,
-                shape: BoxShape.circle,
-              ),
-              child: Stack(
-                children: [
-                  IconButton(
-                    icon: const Icon(
-                      Icons.notifications_none_rounded,
-                      color: primaryTeal,
-                      size: 22,
-                    ),
-                    onPressed: () {},
-                  ),
-                  Positioned(
-                    right: 8,
-                    top: 8,
-                    child: Container(
-                      padding: const EdgeInsets.all(3),
-                      decoration: const BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
-                      ),
-                      constraints: const BoxConstraints(
-                        minWidth: 14,
-                        minHeight: 14,
-                      ),
-                      child: const Text(
-                        '1',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 8,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          // Icon Profile
-          Center(
-            child: Container(
-              margin: const EdgeInsets.only(right: 16),
-              decoration: const BoxDecoration(
-                color: lightTealBg,
-                shape: BoxShape.circle,
-              ),
-              child: IconButton(
-                icon: const Icon(
-                  Icons.person,
-                  color: primaryTeal,
-                  size: 22,
-                ),
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => const ProfilePage(),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-        ],
-      ),
+      appBar: buildAdminTopBar(context),
       body: Obx(() {
         final semuaArtikel = controller.artikelList;
 

@@ -11,7 +11,7 @@ import '../../../controllers/vaksin_controller.dart';
 import '../../../models/anak_model.dart';
 import '../../../services/jadwal_schedule_service.dart';
 import '../../../services/jadwal_status_updater.dart';
-import '../profile/profile_page.dart';
+import '../widgets/admin_header.dart';
 
 class KelolaJadwalListPage extends StatefulWidget {
   const KelolaJadwalListPage({super.key});
@@ -44,88 +44,10 @@ class _KelolaJadwalListPageState extends State<KelolaJadwalListPage> {
 
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: buildAdminTopBar(context),
       body: SafeArea(
         child: Column(
           children: [
-            // --- HEADER ATAS (LOGO & PROFIL) ---
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Logo dari Asset
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Image.asset(
-                        'assets/logo.png',
-                        height: 32,
-                        errorBuilder: (_, __, ___) => const Icon(Icons.medical_services, color: Color(0xFF359D89), size: 30),
-                      ),
-                      const SizedBox(height: 2),
-                      Image.asset(
-                        'assets/logo2.png',
-                        height: 14,
-                        errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-                      ),
-                    ],
-                  ),
-                  // Tombol Notifikasi & Profil
-                  Row(
-                    children: [
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFE6F4F1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            const Icon(Icons.notifications_none_rounded, color: Color(0xFF359D89), size: 22),
-                            Positioned(
-                              top: 8,
-                              right: 10,
-                              child: Container(
-                                padding: const EdgeInsets.all(2),
-                                decoration: const BoxDecoration(
-                                  color: Colors.redAccent,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Text(
-                                  '1',
-                                  style: TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      GestureDetector(
-                        onTap: () {
-                          Get.to(() => const ProfilePage());
-                        },
-                        child: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFE6F4F1),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(Icons.person_rounded, color: Color(0xFF359D89), size: 24),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            const Divider(height: 1, thickness: 1, color: Color(0xFFE2E8F0)),
-
             // --- TITLE & ACTION BACK ---
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
