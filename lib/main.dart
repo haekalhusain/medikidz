@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:get/get.dart'; 
+import 'package:get/get.dart';
 import 'firebase_options.dart';
+import 'services/fcm_service.dart';
 import 'splashscreen.dart'; // Impor file splashscreen Anda
 
 void main() async {
@@ -9,6 +10,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  await FcmService().init();
   runApp(const MedikidzApp());
 }
 

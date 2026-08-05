@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import '../services/auth_service.dart';
 import '../services/firestore_service.dart';
+import '../services/fcm_service.dart';
 import '../models/pengguna_model.dart';
 import '../views/admin/admin_shell_page.dart';
 import '../views/user/user_shell_page.dart';
@@ -29,6 +30,8 @@ class LoginController extends GetxController {
         errorMessage.value = 'Data akun tidak ditemukan. Hubungi admin.';
         return;
       }
+
+      await FcmService().saveTokenForCurrentUser();
 
       if (pengguna.role == 'admin') {
         Get.offAll(() => const AdminShellPage());

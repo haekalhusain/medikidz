@@ -23,13 +23,27 @@ class FirestoreService<T> {
         snapshot.docs.map((doc) => fromJson(doc.data(), doc.id)).toList());
   }
 
+  Stream<List<T>> streamWhere(
+    String field,
+    dynamic isEqualTo, {
+    String? orderBy,
+    bool descending = false,
+  }) {
+    Query<Map<String, dynamic>> query = _collection.where(field, isEqualTo: isEqualTo);
+    if (orderBy != null) {
+      query = query.orderBy(orderBy, descending: descending);
+    }
+    return query.snapshots().map((snapshot) =>
+        snapshot.docs.map((doc) => fromJson(doc.data(), doc.id)).toList());
+  }
+
   Future<List<T>> getAll({String? orderBy, bool descending = false}) async {
     Query<Map<String, dynamic>> query = _collection;
     if (orderBy != null) {
       query = query.orderBy(orderBy, descending: descending);
     }
     final snapshot = await query.get();
-    return snapshot.docs.map((doc) => fromJson(doc.data(), doc.id)).toList();
+    return snapshot.docs.map((doc) => fromJson(doc.data()!, doc.id)).toList();
   }
 
   Future<T?> getById(String id) async {
@@ -40,7 +54,11 @@ class FirestoreService<T> {
 
   Future<List<T>> getWhere(String field, dynamic isEqualTo) async {
     final snapshot = await _collection.where(field, isEqualTo: isEqualTo).get();
-    return snapshot.docs.map((doc) => fromJson(doc.data(), doc.id)).toList();
+    return snapshot.docs.map((doc) => fromJson(doc.data()!, doc.id)).toList();
+  }
+
+  Future<void> updateFields(String id, Map<String, dynamic> data) async {
+    await _collection.doc(id).update(data);
   }
 
   Future<String> create(T item) async {

@@ -18,6 +18,7 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
   bool _obscureBaru = true;
   bool _obscureKonfirmasi = true;
   bool _isLoading = false;
+  String _errorMessage = '';
 
   @override
   void dispose() {
@@ -27,10 +28,38 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
     super.dispose();
   }
 
+  bool get _hasMinLength => _passwordBaruController.text.length >= 6;
+  bool get _hasNumber => RegExp(r'[0-9]').hasMatch(_passwordBaruController.text);
+  bool get _hasLetter => RegExp(r'[A-Za-z]').hasMatch(_passwordBaruController.text);
+
+  Widget _buildRule(String label, bool passed) {
+    return Row(
+      children: [
+        Icon(
+          passed ? Icons.check_circle : Icons.radio_button_unchecked,
+          size: 16,
+          color: passed ? const Color(0xFF2D9580) : Colors.grey.shade400,
+        ),
+        const SizedBox(width: 8),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            color: passed ? Colors.black87 : Colors.grey.shade600,
+          ),
+        ),
+      ],
+    );
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+      _errorMessage = '';
+    });
+
     try {
       await AuthService().changePassword(
         passwordLama: _passwordLamaController.text,
@@ -47,12 +76,7 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: Colors.redAccent,
-          ),
-        );
+        setState(() => _errorMessage = e.toString());
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -201,12 +225,21 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
                     onPressed: () => setState(() => _obscureBaru = !_obscureBaru),
                   ),
                 ),
+                onChanged: (_) => setState(() {}),
                 validator: (v) {
                   if (v == null || v.isEmpty) return 'Wajib diisi';
-                  if (v.length < 6) return 'Minimal 6 karakter';
+                  if (!_hasMinLength) return 'Minimal 6 karakter';
+                  if (!_hasNumber) return 'Password harus mengandung angka';
+                  if (!_hasLetter) return 'Pastikan password mengandung huruf';
                   return null;
                 },
               ),
+              const SizedBox(height: 12),
+              _buildRule('Password harus mengandung angka', _hasNumber),
+              const SizedBox(height: 8),
+              _buildRule('Minimal 6 karakter', _hasMinLength),
+              const SizedBox(height: 8),
+              _buildRule('Pastikan password mengandung huruf', _hasLetter),
 
               const SizedBox(height: 20),
 
@@ -257,10 +290,23 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
                     onPressed: () => setState(() => _obscureKonfirmasi = !_obscureKonfirmasi),
                   ),
                 ),
-                validator: (v) => (v != _passwordBaruController.text) ? 'Password tidak sama' : null,
+                validator: (v) {
+                  if (v == null || v.isEmpty) return 'Wajib diisi';
+                  if (v != _passwordBaruController.text) return 'Password tidak sama';
+                  return null;
+                },
               ),
 
               const SizedBox(height: 36),
+
+              if (_errorMessage.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: Text(
+                    _errorMessage,
+                    style: const TextStyle(color: Colors.redAccent, fontSize: 13),
+                  ),
+                ),
 
               // --- TOMBOL SIMPAN ---
               SizedBox(
@@ -286,7 +332,7 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
                           ),
                         )
                       : const Text(
-                          'Simpan',
+                          'Ganti Sandi',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,

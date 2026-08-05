@@ -15,6 +15,8 @@ class _JadwalMasterFormPageState extends State<JadwalMasterFormPage> {
   late String _kategoriJendela;
   late TextEditingController _toleransiController;
   late TextEditingController _catatanController;
+  late TextEditingController _intervalPengejaranController;
+  late TextEditingController _usiaMaksimalController;
 
   @override
   void initState() {
@@ -22,6 +24,18 @@ class _JadwalMasterFormPageState extends State<JadwalMasterFormPage> {
     _kategoriJendela = widget.item.kategoriJendelaPengejaran;
     _toleransiController = TextEditingController(text: widget.item.toleransiKeterlambatanHari?.toString() ?? '');
     _catatanController = TextEditingController(text: widget.item.catatanMedis ?? '');
+    _intervalPengejaranController =
+        TextEditingController(text: widget.item.intervalMinimumPengejaranHari?.toString() ?? '');
+    _usiaMaksimalController = TextEditingController(text: widget.item.usiaMaksimalHari?.toString() ?? '');
+  }
+
+  @override
+  void dispose() {
+    _toleransiController.dispose();
+    _catatanController.dispose();
+    _intervalPengejaranController.dispose();
+    _usiaMaksimalController.dispose();
+    super.dispose();
   }
 
   @override
@@ -94,6 +108,36 @@ class _JadwalMasterFormPageState extends State<JadwalMasterFormPage> {
                 alignLabelWithHint: true,
               ),
             ),
+            const SizedBox(height: 28),
+            const Divider(),
+            const SizedBox(height: 12),
+            const Text('Pengaturan Pengejaran Dosis (Catch-up)',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+            const Text(
+              'Dipakai saat anak ketinggalan dosis ini dan perlu dikejar. '
+              'Diisi bebas oleh dokter/staff sesuai kebijakan klinik, bisa diubah kapan saja.',
+              style: TextStyle(fontSize: 12, color: Colors.black54),
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _intervalPengejaranController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Interval Minimum ke Dosis Ini (hari)',
+                border: OutlineInputBorder(),
+                helperText: 'Jarak minimum dari dosis sebelumnya, kalau dosis ini bagian dari pengejaran',
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _usiaMaksimalController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Usia Maksimal Pemberian (hari)',
+                border: OutlineInputBorder(),
+                helperText: 'Kosongkan kalau vaksin ini tidak punya batas usia maksimal',
+              ),
+            ),
             const SizedBox(height: 24),
             Obx(() => SizedBox(
                   width: double.infinity,
@@ -125,6 +169,9 @@ class _JadwalMasterFormPageState extends State<JadwalMasterFormPage> {
       toleransiKeterlambatanHari: _toleransiController.text.isEmpty ? null : int.tryParse(_toleransiController.text),
       catatanMedis: _catatanController.text.trim(),
       sumberReferensi: item.sumberReferensi,
+      intervalMinimumPengejaranHari:
+          _intervalPengejaranController.text.isEmpty ? null : int.tryParse(_intervalPengejaranController.text),
+      usiaMaksimalHari: _usiaMaksimalController.text.isEmpty ? null : int.tryParse(_usiaMaksimalController.text),
     );
 
     final success = await controller.updateData(item.id!, updated);

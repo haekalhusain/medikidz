@@ -5,6 +5,7 @@ class Pengguna {
   final String role;
   final String? email;
   final String? alamat;
+  final String? fcmToken;
 
   Pengguna({
     this.id,
@@ -13,6 +14,7 @@ class Pengguna {
     required this.role,
     this.email,
     this.alamat,
+    this.fcmToken,
   });
 
   factory Pengguna.fromJson(Map<String, dynamic> json, String id) {
@@ -23,6 +25,7 @@ class Pengguna {
       role: json['role'] ?? 'user',
       email: json['email'],
       alamat: json['alamat'],
+      fcmToken: json['fcm_token'],
     );
   }
 
@@ -32,5 +35,6 @@ class Pengguna {
         'role': role,
         'email': email,
         'alamat': alamat,
+        'fcm_token': fcmToken,
       };
 }

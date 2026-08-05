@@ -4,8 +4,10 @@ import '../../../controllers/jadwal_master_controller.dart';
 import '../../../controllers/jadwal_controller.dart';
 import '../../../controllers/vaksin_controller.dart';
 import '../../../models/anak_model.dart';
+import '../../../models/jadwal_master_model.dart';
 import '../../../services/jadwal_schedule_service.dart';
 import '../../../services/jadwal_status_updater.dart';
+import '../../../utils/date_formatter.dart';
 import 'jadwal_matrix_widget.dart';
 import '../jadwal/jadwal_form_page.dart';
 
@@ -113,7 +115,7 @@ class AnakJadwalPage extends StatelessWidget {
               style: TextStyle(color: Colors.black54, fontSize: 12),
             ),
             const SizedBox(height: 8),
-            ..._buildRincianList(context, jadwal),
+            ..._buildRincianList(context, jadwal, masterList),
 
             const SizedBox(height: 28),
             Text('Riwayat Imunisasi (dari Jadwal)', style: Theme.of(context).textTheme.titleMedium),
@@ -138,12 +140,16 @@ class AnakJadwalPage extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildRincianList(BuildContext context, List<JadwalTerjadwal> jadwal) {
+  List<Widget> _buildRincianList(BuildContext context, List<JadwalTerjadwal> jadwal, List<JadwalMaster> masterList) {
     return jadwal.map((j) {
       final color = j.sudah
           ? Colors.green
-          : (j.statusLabel == 'Terlambat' ? Colors.red : Colors.orange);
-      final statusValue = j.sudah ? 'sudah imunisasi' : 'belum imunisasi';
+          : j.dilewati
+              ? Colors.blueGrey
+              : j.tidakBisaDikejar
+                  ? Colors.grey
+                  : (j.statusLabel == 'Terlambat' ? Colors.red : Colors.orange);
+      final statusValue = _currentStatusValue(j);
 
       return Card(
         margin: const EdgeInsets.only(bottom: 8),
@@ -154,7 +160,7 @@ class AnakJadwalPage extends StatelessWidget {
             child: Icon(j.sudah ? Icons.check : Icons.schedule, color: color, size: 18),
           ),
           title: Text('${j.master.namaVaksin} - Dosis ${j.master.urutanDosis}'),
-          subtitle: Text('Usia: ${j.master.usiaLabel}'),
+          subtitle: Text('Usia: ${j.master.usiaLabel}${j.sudahDijadwalUlang ? ' • dijadwal ulang' : ''}'),
           trailing: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
@@ -178,18 +184,29 @@ class AnakJadwalPage extends StatelessWidget {
                     children: [
                       const Text('Status Imunisasi:'),
                       const SizedBox(width: 12),
-                      DropdownButton<String>(
-                        value: statusValue,
-                        items: const [
-                          DropdownMenuItem(value: 'belum imunisasi', child: Text('Belum Imunisasi')),
-                          DropdownMenuItem(value: 'sudah imunisasi', child: Text('Sudah Imunisasi')),
-                        ],
-                        onChanged: (value) {
-                          if (value == null || value == statusValue) return;
-                          _handlePilihStatus(context, j, value);
-                        },
+                      Expanded(
+                        child: DropdownButton<String>(
+                          isExpanded: true,
+                          value: statusValue,
+                          items: const [
+                            DropdownMenuItem(value: 'belum imunisasi', child: Text('Belum Imunisasi')),
+                            DropdownMenuItem(value: 'sudah imunisasi', child: Text('Sudah Imunisasi')),
+                            DropdownMenuItem(value: 'dilewati', child: Text('Tidak Perlu Dikejar')),
+                            DropdownMenuItem(value: 'tidak bisa dikejar', child: Text('Tidak Bisa Dikejar')),
+                          ],
+                          onChanged: (value) {
+                            if (value == null || value == statusValue) return;
+                            _handlePilihStatus(context, j, value);
+                          },
+                        ),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 8),
+                  OutlinedButton.icon(
+                    onPressed: () => _editJadwalManual(context, j, masterList),
+                    icon: const Icon(Icons.edit_calendar_outlined, size: 18),
+                    label: const Text('Ubah Jadwal (Pengejaran)'),
                   ),
                 ],
               ),
@@ -198,6 +215,82 @@ class AnakJadwalPage extends StatelessWidget {
         ),
       );
     }).toList();
+  }
+
+  String _currentStatusValue(JadwalTerjadwal j) {
+    if (j.sudah) return 'sudah imunisasi';
+    if (j.dilewati) return 'dilewati';
+    if (j.tidakBisaDikejar) return 'tidak bisa dikejar';
+    return 'belum imunisasi';
+  }
+
+  Future<void> _editJadwalManual(BuildContext context, JadwalTerjadwal item, List<JadwalMaster> masterList) async {
+    final acuanSebelumnya = _scheduleService.tanggalAcuanDosisSebelumnya(
+      anak: anak,
+      masterList: masterList,
+      semuaJadwalImunisasi: _jadwalController.jadwalList,
+      masterSaatIni: item.master,
+    );
+
+    DateTime? batasMinimum;
+    if (acuanSebelumnya != null && item.master.intervalMinimumPengejaranHari != null) {
+      batasMinimum = acuanSebelumnya.add(Duration(days: item.master.intervalMinimumPengejaranHari!));
+    }
+
+    DateTime? batasMaksimal;
+    if (item.master.usiaMaksimalHari != null) {
+      batasMaksimal = anak.tanggalLahir.add(Duration(days: item.master.usiaMaksimalHari!));
+    }
+
+    final tanggalTerpilih = await showDatePicker(
+      context: context,
+      initialDate: item.tanggalJadwal.isBefore(DateTime.now()) ? DateTime.now() : item.tanggalJadwal,
+      firstDate: DateTime(2015),
+      lastDate: DateTime.now().add(const Duration(days: 365 * 3)),
+    );
+    if (tanggalTerpilih == null || !context.mounted) return;
+
+    final peringatan = <String>[];
+    if (batasMinimum != null && tanggalTerpilih.isBefore(batasMinimum)) {
+      peringatan.add(
+        'Tanggal ini kurang dari interval minimum pengejaran (${item.master.intervalMinimumPengejaranHari} hari '
+        'dari dosis sebelumnya, minimal ${_formatDate(batasMinimum)}).',
+      );
+    }
+    if (batasMaksimal != null && tanggalTerpilih.isAfter(batasMaksimal)) {
+      peringatan.add(
+        'Tanggal ini melewati batas usia maksimal pemberian vaksin ini (maksimal ${_formatDate(batasMaksimal)}).',
+      );
+    }
+
+    if (peringatan.isNotEmpty && context.mounted) {
+      final lanjut = await showDialog<bool>(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('⚠ Perlu Diperhatikan'),
+          content: Text(peringatan.join('\n\n')),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Batal')),
+            ElevatedButton(onPressed: () => Navigator.pop(context, true), child: const Text('Tetap Lanjutkan')),
+          ],
+        ),
+      );
+      if (lanjut != true) return;
+    }
+
+    if (!context.mounted) return;
+    final success = await JadwalStatusUpdater.jadwalUlangManual(
+      jadwalController: _jadwalController,
+      anak: anak,
+      item: item,
+      tanggalBaru: tanggalTerpilih,
+    );
+
+    if (success && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Jadwal ${item.master.namaVaksin} diubah ke ${_formatDate(tanggalTerpilih)}.')),
+      );
+    }
   }
 
   Future<void> _handlePilihStatus(BuildContext context, JadwalTerjadwal item, String status) async {
@@ -250,5 +343,5 @@ class AnakJadwalPage extends StatelessWidget {
     }
   }
 
-  String _formatDate(DateTime date) => '${date.day}/${date.month}/${date.year}';
+  String _formatDate(DateTime date) => formatTanggal(date);
 }

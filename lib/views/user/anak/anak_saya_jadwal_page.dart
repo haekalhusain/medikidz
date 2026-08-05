@@ -4,6 +4,7 @@ import '../../../controllers/jadwal_master_controller.dart';
 import '../../../controllers/jadwal_controller.dart';
 import '../../../models/anak_model.dart';
 import '../../../services/jadwal_schedule_service.dart';
+import '../../../utils/date_formatter.dart';
 import '../../admin/anak/jadwal_matrix_widget.dart';
 
 /// Versi READ-ONLY dari jadwal imunisasi anak (khusus orang tua/user).
@@ -87,5 +88,5 @@ class AnakSayaJadwalPage extends StatelessWidget {
     );
   }
 
-  String _formatDate(DateTime date) => '${date.day}/${date.month}/${date.year}';
+  String _formatDate(DateTime date) => formatTanggal(date);
 }

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../../controllers/anak_controller.dart';
 import '../../../models/anak_model.dart';
 import '../../../services/auth_service.dart';
+import '../../../utils/date_formatter.dart';
 
 /// Form tambah anak dari sisi user/orang tua sendiri. idUser otomatis
 /// dipakai dari akun yang sedang login -- tidak perlu pilih akun lagi
@@ -51,7 +52,7 @@ class _TambahAnakUserPageState extends State<TambahAnakUserPage> {
                   child: Text(
                     _tanggalLahir == null
                         ? 'Pilih tanggal'
-                        : '${_tanggalLahir!.day}/${_tanggalLahir!.month}/${_tanggalLahir!.year}',
+                        : formatTanggal(_tanggalLahir!),
                   ),
                 ),
               ),

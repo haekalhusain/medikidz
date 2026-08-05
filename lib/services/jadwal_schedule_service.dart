@@ -14,9 +14,17 @@ class JadwalTerjadwal {
   JadwalTerjadwal({required this.master, required this.tanggalJadwal, this.realisasi});
 
   bool get sudah => realisasi != null && realisasi!.status == 'sudah imunisasi';
+  bool get dilewati => realisasi != null && realisasi!.status == 'dilewati';
+  bool get tidakBisaDikejar => realisasi != null && realisasi!.status == 'tidak bisa dikejar';
+
+  /// True kalau jadwalnya dipindah manual sama dokter (kasus pengejaran),
+  /// bukan hasil hitungan usia otomatis.
+  bool get sudahDijadwalUlang => realisasi?.tanggalRencanaOverride != null;
 
   String get statusLabel {
     if (sudah) return 'Sudah';
+    if (dilewati) return 'Dilewati';
+    if (tidakBisaDikejar) return 'Tidak Bisa Dikejar';
     if (tanggalJadwal.isBefore(DateTime.now())) return 'Terlambat';
     return 'Akan Datang';
   }
@@ -60,7 +68,7 @@ class JadwalScheduleService {
     final sorted = [...masterList]..sort((a, b) => a.usiaHari.compareTo(b.usiaHari));
 
     return sorted.map((master) {
-      final tanggalJadwal = anak.tanggalLahir.add(Duration(days: master.usiaHari));
+      var tanggalJadwal = anak.tanggalLahir.add(Duration(days: master.usiaHari));
 
       JadwalImunisasi? realisasi;
       for (final r in realisasiAnak) {
@@ -72,8 +80,44 @@ class JadwalScheduleService {
         }
       }
 
+      // Kalau dokter udah jadwal ulang manual (kasus pengejaran), pakai itu
+      // sebagai "jadwal seharusnya" -- bukan hasil hitungan usia lagi.
+      if (realisasi?.tanggalRencanaOverride != null) {
+        tanggalJadwal = realisasi!.tanggalRencanaOverride!;
+      }
+
       return JadwalTerjadwal(master: master, tanggalJadwal: tanggalJadwal, realisasi: realisasi);
     }).toList();
+  }
+
+  /// Cari tanggal acuan dosis SEBELUMNYA (urutan_dosis - 1) untuk vaksin yang
+  /// sama, dipakai buat validasi interval minimum pengejaran. Prioritas:
+  /// tanggal beneran diimunisasi > tanggal rencana (override/hitungan usia).
+  /// Null kalau dosis sebelumnya belum ada / belum kejadi sama sekali.
+  DateTime? tanggalAcuanDosisSebelumnya({
+    required Anak anak,
+    required List<JadwalMaster> masterList,
+    required List<JadwalImunisasi> semuaJadwalImunisasi,
+    required JadwalMaster masterSaatIni,
+  }) {
+    if (masterSaatIni.urutanDosis <= 1) return null;
+
+    final jadwal = computeJadwalForAnak(anak: anak, masterList: masterList, semuaJadwalImunisasi: semuaJadwalImunisasi);
+
+    JadwalTerjadwal? sebelumnya;
+    for (final j in jadwal) {
+      if (j.master.namaVaksin == masterSaatIni.namaVaksin &&
+          j.master.urutanDosis == masterSaatIni.urutanDosis - 1) {
+        sebelumnya = j;
+        break;
+      }
+    }
+    if (sebelumnya == null) return null;
+
+    if (sebelumnya.realisasi != null && sebelumnya.realisasi!.status == 'sudah imunisasi') {
+      return sebelumnya.realisasi!.tanggalImunisasi;
+    }
+    return sebelumnya.tanggalJadwal;
   }
 
   /// Hitung berapa dosis (lintas SEMUA anak) yang jadwalnya jatuh di bulan

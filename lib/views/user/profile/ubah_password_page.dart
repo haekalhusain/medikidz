@@ -1,5 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import '../../../models/notifikasi_model.dart';
+import '../../../services/auth_service.dart';
+import '../../../services/notifikasi_service.dart';
 
 class UbahPasswordPage extends StatefulWidget {
   const UbahPasswordPage({super.key});
@@ -10,66 +12,45 @@ class UbahPasswordPage extends StatefulWidget {
 
 class _UbahPasswordPageState extends State<UbahPasswordPage> {
   final _formKey = GlobalKey<FormState>();
+  final _passwordLamaController = TextEditingController();
   final _passwordBaruController = TextEditingController();
   final _konfirmasiController = TextEditingController();
+
+  bool _obscureLama = true;
+  bool _obscureBaru = true;
+  bool _obscureKonfirmasi = true;
   bool _isLoading = false;
-  String _error = '';
+  String _errorMessage = '';
 
   @override
   void dispose() {
+    _passwordLamaController.dispose();
     _passwordBaruController.dispose();
     _konfirmasiController.dispose();
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Ubah Kata Sandi')),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              TextFormField(
-                controller: _passwordBaruController,
-                obscureText: true,
-                decoration: const InputDecoration(labelText: 'Kata Sandi Baru', border: OutlineInputBorder()),
-                validator: (v) => (v == null || v.length < 6) ? 'Minimal 6 karakter' : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _konfirmasiController,
-                obscureText: true,
-                decoration:
-                    const InputDecoration(labelText: 'Konfirmasi Kata Sandi Baru', border: OutlineInputBorder()),
-                validator: (v) {
-                  if (v == null || v.isEmpty) return 'Wajib diisi';
-                  if (v != _passwordBaruController.text) return 'Kata sandi tidak sama';
-                  return null;
-                },
-              ),
-              const SizedBox(height: 8),
-              if (_error.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Text(_error, style: const TextStyle(color: Colors.red)),
-                ),
-              const SizedBox(height: 8),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _submit,
-                  child: _isLoading
-                      ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                      : const Text('Simpan'),
-                ),
-              ),
-            ],
+  bool get _hasMinLength => _passwordBaruController.text.length >= 6;
+  bool get _hasNumber => RegExp(r'[0-9]').hasMatch(_passwordBaruController.text);
+  bool get _hasLetter => RegExp(r'[A-Za-z]').hasMatch(_passwordBaruController.text);
+
+  Widget _buildRule(String label, bool passed) {
+    return Row(
+      children: [
+        Icon(
+          passed ? Icons.check_circle : Icons.radio_button_unchecked,
+          size: 16,
+          color: passed ? const Color(0xFF2D9580) : Colors.grey.shade400,
+        ),
+        const SizedBox(width: 8),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            color: passed ? Colors.black87 : Colors.grey.shade600,
           ),
         ),
-      ),
+      ],
     );
   }
 
@@ -78,23 +59,269 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
 
     setState(() {
       _isLoading = true;
-      _error = '';
+      _errorMessage = '';
     });
 
     try {
-      await FirebaseAuth.instance.currentUser?.updatePassword(_passwordBaruController.text);
+      await AuthService().changePassword(
+        passwordLama: _passwordLamaController.text,
+        passwordBaru: _passwordBaruController.text,
+      );
+      final uid = AuthService().currentUser?.uid;
+      if (uid != null) {
+        await NotifikasiService().createForUser(
+          uid,
+          Notifikasi(
+            uid: uid,
+            judul: 'Pembaruan Data Akun',
+            pesan: 'Kata sandi berhasil diperbarui.',
+            kategori: 'akun',
+            waktu: DateTime.now(),
+          ),
+        );
+      }
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Kata sandi berhasil diubah.')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Password berhasil diubah.'),
+            backgroundColor: Color(0xFF2D9580),
+          ),
+        );
         Navigator.pop(context);
       }
-    } on FirebaseAuthException catch (e) {
-      setState(() {
-        _error = e.code == 'requires-recent-login'
-            ? 'Demi keamanan, silakan logout dan login ulang sebelum mengubah kata sandi.'
-            : (e.message ?? 'Gagal mengubah kata sandi.');
-      });
+    } catch (e) {
+      if (mounted) {
+        setState(() => _errorMessage = e.toString());
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        leadingWidth: 70,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 16, top: 8, bottom: 8),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(20),
+            onTap: () => Navigator.of(context).pop(),
+            child: Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.grey.shade100,
+                border: Border.all(color: Colors.grey.shade300, width: 0.8),
+              ),
+              child: const Icon(
+                Icons.arrow_back_rounded,
+                color: Colors.black87,
+                size: 20,
+              ),
+            ),
+          ),
+        ),
+        title: const Text(
+          'Ubah Kata Sandi',
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+              const Text(
+                'Password Lama',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: _passwordLamaController,
+                obscureText: _obscureLama,
+                style: const TextStyle(fontSize: 15, color: Colors.black87),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: const Color(0xFFFAFAFA),
+                  hintText: 'Masukkan Kata Sandi Lama',
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(28),
+                    borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(28),
+                    borderSide: const BorderSide(color: Color(0xFF359D89), width: 1.5),
+                  ),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscureLama ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                      color: Colors.grey.shade600,
+                      size: 20,
+                    ),
+                    onPressed: () => setState(() => _obscureLama = !_obscureLama),
+                  ),
+                ),
+                validator: (v) => (v == null || v.isEmpty) ? 'Wajib diisi' : null,
+              ),
+
+              const SizedBox(height: 20),
+
+              const Text(
+                'Password Baru',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: _passwordBaruController,
+                obscureText: _obscureBaru,
+                style: const TextStyle(fontSize: 15, color: Colors.black87),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: const Color(0xFFFAFAFA),
+                  hintText: 'Masukkan Password Baru',
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(28),
+                    borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(28),
+                    borderSide: const BorderSide(color: Color(0xFF359D89), width: 1.5),
+                  ),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscureBaru ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                      color: Colors.grey.shade600,
+                      size: 20,
+                    ),
+                    onPressed: () => setState(() => _obscureBaru = !_obscureBaru),
+                  ),
+                ),
+                onChanged: (_) => setState(() {}),
+                validator: (v) {
+                  if (v == null || v.isEmpty) return 'Wajib diisi';
+                  if (!_hasMinLength) return 'Minimal 6 karakter';
+                  if (!_hasNumber) return 'Password harus mengandung angka';
+                  if (!_hasLetter) return 'Pastikan password mengandung huruf';
+                  return null;
+                },
+              ),
+              const SizedBox(height: 12),
+              _buildRule('Password harus mengandung angka', _hasNumber),
+              const SizedBox(height: 8),
+              _buildRule('Minimal 6 karakter', _hasMinLength),
+              const SizedBox(height: 8),
+              _buildRule('Pastikan password mengandung huruf', _hasLetter),
+
+              const SizedBox(height: 20),
+
+              const Text(
+                'Konfirmasi Password Baru',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: _konfirmasiController,
+                obscureText: _obscureKonfirmasi,
+                style: const TextStyle(fontSize: 15, color: Colors.black87),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: const Color(0xFFFAFAFA),
+                  hintText: 'Konfirmasi Password Baru',
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(28),
+                    borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(28),
+                    borderSide: const BorderSide(color: Color(0xFF359D89), width: 1.5),
+                  ),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscureKonfirmasi ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                      color: Colors.grey.shade600,
+                      size: 20,
+                    ),
+                    onPressed: () => setState(() => _obscureKonfirmasi = !_obscureKonfirmasi),
+                  ),
+                ),
+                validator: (v) {
+                  if (v == null || v.isEmpty) return 'Wajib diisi';
+                  if (v != _passwordBaruController.text) return 'Password tidak sama';
+                  return null;
+                },
+              ),
+
+              const SizedBox(height: 36),
+
+              if (_errorMessage.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: Text(
+                    _errorMessage,
+                    style: const TextStyle(color: Colors.redAccent, fontSize: 13),
+                  ),
+                ),
+
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF359D89),
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(28),
+                    ),
+                  ),
+                  onPressed: _isLoading ? null : _submit,
+                  child: _isLoading
+                      ? const SizedBox(
+                          height: 22,
+                          width: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          'Ganti Sandi',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../controllers/anak_controller.dart';
+import '../../../utils/date_formatter.dart';
 import 'anak_form_page.dart';
 import 'anak_jadwal_page.dart';
 import 'tambah_anak_form_page.dart';
@@ -395,7 +396,7 @@ class _AnakListPageState extends State<AnakListPage> {
     );
   }
 
-  String _formatDate(DateTime date) => '${date.day}/${date.month}/${date.year}';
+  String _formatDate(DateTime date) => formatTanggal(date);
 
   void _confirmDelete(
     BuildContext context,

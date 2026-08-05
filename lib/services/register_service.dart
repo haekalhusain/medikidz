@@ -1,4 +1,5 @@
 import 'auth_service.dart';
+import 'fcm_service.dart';
 import 'otp_service.dart';
 import 'firestore_service.dart';
 import '../models/pengguna_model.dart';
@@ -50,6 +51,7 @@ class RegisterService {
     try {
       final pengguna = Pengguna(id: uid, nama: namaAnak, noHp: noHp, role: 'user');
       await _penggunaService.createWithId(uid, pengguna);
+      await FcmService().saveTokenForCurrentUser();
 
       // Tanggal lahir & jenis kelamin memakai nilai sementara karena
       // desain register tidak menyediakan kolom untuk itu — admin

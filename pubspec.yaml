@@ -11,14 +11,16 @@ dependencies:
   # State management (dipakai di semua Controller)
   get: ^4.6.6
   # Firebase
-  firebase_core: ^3.6.0
-  firebase_auth: ^5.3.1
-  cloud_firestore: ^5.4.4
+  firebase_core: ^4.13.0
+  firebase_auth: ^6.5.7
+  cloud_firestore: ^6.8.0
+  firebase_messaging: ^16.5.0
+  flutter_local_notifications: ^22.2.0
   # HTTP client (dipakai register_service.dart & otp_service.dart untuk panggil Cloud Functions)
   http: ^1.2.0
   flutter_svg: ^2.3.0
   image_picker: ^0.8.7+5
-  firebase_storage: ^12.3.2
+  firebase_storage: ^13.4.6
   imgbb: 0.0.1-beta
   flutter_image_compress: ^2.5.1
 

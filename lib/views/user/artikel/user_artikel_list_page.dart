@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../controllers/artikel_controller.dart';
 import '../../../models/artikel_model.dart';
+import '../../../utils/date_formatter.dart';
 import 'user_artikel_detail_page.dart';
 
 class UserArtikelListPage extends StatefulWidget {
@@ -32,6 +33,8 @@ class _UserArtikelListPageState extends State<UserArtikelListPage> {
 
   List<Artikel> _filterArtikel(List<Artikel> articles) {
     return articles.where((artikel) {
+      final statusTampil = artikel.status == 'dipublikasi';
+
       final matchesKategori = _selectedKategori == 'Semua' ||
           artikel.kategori.toLowerCase() == _selectedKategori.toLowerCase();
 
@@ -39,7 +42,7 @@ class _UserArtikelListPageState extends State<UserArtikelListPage> {
           artikel.judul.toLowerCase().contains(_searchQuery.toLowerCase()) ||
           artikel.ringkasan.toLowerCase().contains(_searchQuery.toLowerCase());
 
-      return matchesKategori && matchesQuery;
+      return statusTampil && matchesKategori && matchesQuery;
     }).toList();
   }
 
@@ -177,7 +180,7 @@ class _ArtikelUserCard extends StatelessWidget {
   const _ArtikelUserCard({required this.artikel});
 
   String _formatTanggal(DateTime dt) {
-    return '${dt.day}/${dt.month}/${dt.year}';
+    return formatTanggal(dt);
   }
 
   @override

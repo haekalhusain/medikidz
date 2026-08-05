@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../../controllers/riwayat_controller.dart';
 import '../../../controllers/anak_controller.dart';
 import '../../../models/riwayat_model.dart';
+import '../../../utils/date_formatter.dart';
 
 class RiwayatFormPage extends StatefulWidget {
   final RiwayatImunisasi? riwayat;
@@ -85,7 +86,7 @@ class _RiwayatFormPageState extends State<RiwayatFormPage> {
                     child: InputDecorator(
                       decoration: const InputDecoration(labelText: 'Tanggal Imunisasi', border: OutlineInputBorder()),
                       child: Text(
-                        _tanggal == null ? 'Pilih tanggal' : '${_tanggal!.day}/${_tanggal!.month}/${_tanggal!.year}',
+                        _tanggal == null ? 'Pilih tanggal' : formatTanggal(_tanggal!),
                       ),
                     ),
                   ),

@@ -11,6 +11,7 @@ import '../../../controllers/vaksin_controller.dart';
 import '../../../models/anak_model.dart';
 import '../../../services/jadwal_schedule_service.dart';
 import '../../../services/jadwal_status_updater.dart';
+import '../../../utils/date_formatter.dart';
 import '../widgets/admin_header.dart';
 
 class KelolaJadwalListPage extends StatefulWidget {
@@ -493,7 +494,7 @@ class _KelolaJadwalListPageState extends State<KelolaJadwalListPage> {
     );
   }
 
-  String _formatDate(DateTime date) => '${date.day}/${date.month}/${date.year}';
+  String _formatDate(DateTime date) => formatTanggal(date);
 }
 
 class _BarisJadwal {

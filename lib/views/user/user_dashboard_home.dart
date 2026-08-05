@@ -1,25 +1,65 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import '../../controllers/anak_controller.dart';
 import '../../controllers/jadwal_master_controller.dart';
 import '../../controllers/jadwal_controller.dart';
 import '../../controllers/vaksin_controller.dart';
 import '../../controllers/artikel_controller.dart';
+import '../../controllers/notifikasi_controller.dart';
 import '../../models/anak_model.dart';
 import '../../models/artikel_model.dart';
 import '../../services/auth_service.dart';
+import '../../services/fcm_service.dart';
 import '../../services/jadwal_schedule_service.dart';
+import '../../utils/date_formatter.dart';
 import 'anak/tambah_anak_user_page.dart';
 import 'anak/anak_saya_jadwal_page.dart';
 import 'anak/anak_saya_list_page.dart';
 import 'artikel/user_artikel_list_page.dart';
 import 'artikel/user_artikel_detail_page.dart';
 import 'hubungi_klinik/hubungi_klinik_page.dart';
+import '../notification/notifikasi_page.dart';
 import 'profile/profil_anda_page.dart';
 
-class UserDashboardHome extends StatelessWidget {
+class UserDashboardHome extends StatefulWidget {
   const UserDashboardHome({super.key});
+
+  @override
+  State<UserDashboardHome> createState() => _UserDashboardHomeState();
+}
+
+class _UserDashboardHomeState extends State<UserDashboardHome> {
+  NotificationSettings? _notificationSettings;
+  int _selectedAnakIndex = 0;
+  late final NotifikasiController _notifikasiController;
+
+  @override
+  void initState() {
+    super.initState();
+    _notifikasiController = Get.put(NotifikasiController());
+    _loadNotificationSettings();
+  }
+
+  Future<void> _loadNotificationSettings() async {
+    final settings = await FcmService().getNotificationSettings();
+    if (mounted) {
+      setState(() {
+        _notificationSettings = settings;
+      });
+    }
+  }
+
+  bool get _showPermissionBanner {
+    final status = _notificationSettings?.authorizationStatus;
+    return status != null && status != AuthorizationStatus.authorized;
+  }
+
+  Future<void> _requestNotificationPermission() async {
+    await FcmService().requestPermissionIfNeeded();
+    await _loadNotificationSettings();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,32 +75,35 @@ class UserDashboardHome extends StatelessWidget {
       body: SafeArea(
         child: Obx(() {
           final anakSaya = anakController.anakList.where((a) => a.idUser == uid).toList();
+          final selectedAnak = anakSaya.isNotEmpty
+              ? anakSaya[_selectedAnakIndex.clamp(0, anakSaya.length - 1)]
+              : null;
 
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
               _buildHeader(context),
               const SizedBox(height: 20),
+              if (_showPermissionBanner)
+                _buildNotificationPermissionBanner(context),
               const Text('Profil Anak', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 12),
 
               if (anakSaya.isEmpty)
                 _buildEmptyState(context)
-              else
-                ...List.generate(anakSaya.length, (i) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: _AnakBlock(
-                      index: i,
-                      anak: anakSaya[i],
-                      masterController: masterController,
-                      jadwalController: jadwalController,
-                      vaksinController: vaksinController,
-                    ),
-                  );
-                }),
-
-              if (anakSaya.isNotEmpty) ...[
+              else ...[
+                _buildAnakSelector(anakSaya),
+                const SizedBox(height: 16),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: _AnakBlock(
+                    index: _selectedAnakIndex,
+                    anak: selectedAnak!,
+                    masterController: masterController,
+                    jadwalController: jadwalController,
+                    vaksinController: vaksinController,
+                  ),
+                ),
                 SizedBox(
                   width: double.infinity,
                   height: 46,
@@ -90,7 +133,56 @@ class UserDashboardHome extends StatelessWidget {
     );
   }
 
+  Widget _buildNotificationPermissionBanner(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.orange.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Aktifkan notifikasi',
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Supaya pengingat imunisasi muncul di status bar, izinkan notifikasi sekarang.',
+            style: TextStyle(fontSize: 13),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.orange,
+                    side: BorderSide(color: Colors.orange.shade400),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                  ),
+                  onPressed: _requestNotificationPermission,
+                  child: const Text('Izinkan Notifikasi'),
+                ),
+              ),
+              const SizedBox(width: 8),
+              TextButton(
+                onPressed: () {},
+                child: const Text('Nanti'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildHeader(BuildContext context) {
+    final controller = _notifikasiController;
     return Row(
       children: [
         const Icon(Icons.favorite, color: Colors.teal, size: 28),
@@ -101,16 +193,40 @@ class UserDashboardHome extends StatelessWidget {
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.teal),
           ),
         ),
-        CircleAvatar(
-          radius: 20,
-          backgroundColor: Colors.teal.withValues(alpha: 0.1),
-          child: IconButton(
-            icon: const Icon(Icons.notifications_outlined, color: Colors.teal, size: 20),
-            onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Fitur notifikasi belum tersedia.')),
-            ),
-          ),
-        ),
+        Obx(() {
+          final unread = controller.unreadCount.value;
+          return Stack(
+            clipBehavior: Clip.none,
+            children: [
+              CircleAvatar(
+                radius: 20,
+                backgroundColor: Colors.teal.withValues(alpha: 0.1),
+                child: IconButton(
+                  icon: const Icon(Icons.notifications_outlined, color: Colors.teal, size: 20),
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const NotifikasiPage()),
+                  ),
+                ),
+              ),
+              if (unread > 0)
+                Positioned(
+                  right: -2,
+                  top: -2,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFE53E3E),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Text(
+                      unread > 99 ? '99+' : unread.toString(),
+                      style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+            ],
+          );
+        }),
         const SizedBox(width: 8),
         CircleAvatar(
           radius: 20,
@@ -161,6 +277,57 @@ class UserDashboardHome extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildAnakSelector(List<Anak> anakSaya) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            color: const Color(0xFF2F8D7E),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Text(
+            'Anak ${_selectedAnakIndex + 1}',
+            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Container(
+            height: 46,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: const Color(0xFF2F8D7E)),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<int>(
+                value: _selectedAnakIndex.clamp(0, anakSaya.length - 1),
+                items: anakSaya.asMap().entries.map((entry) {
+                  return DropdownMenuItem<int>(
+                    value: entry.key,
+                    child: Text(entry.value.namaAnak),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() {
+                      _selectedAnakIndex = value;
+                    });
+                  }
+                },
+                icon: const Icon(Icons.keyboard_arrow_down, color: Color(0xFF2F8D7E)),
+                style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.w600),
+                isExpanded: true,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -218,7 +385,10 @@ class UserDashboardHome extends StatelessWidget {
 
   Widget _buildArtikelSection(BuildContext context, ArtikelController artikelController) {
     return Obx(() {
-      final artikelList = artikelController.artikelList.take(5).toList();
+      final artikelList = artikelController.artikelList
+          .where((a) => a.status == 'dipublikasi')
+          .take(5)
+          .toList();
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -246,7 +416,7 @@ class UserDashboardHome extends StatelessWidget {
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemCount: artikelList.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 12),
+                separatorBuilder: (context, index) => const SizedBox(width: 12),
                 itemBuilder: (context, i) => _ArtikelCard(artikel: artikelList[i]),
               ),
             ),
@@ -358,45 +528,45 @@ class _AnakBlockState extends State<_AnakBlock> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(color: Colors.teal, borderRadius: BorderRadius.circular(16)),
-            child: Text('Anak ${widget.index + 1}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 12)),
-          ),
-          const SizedBox(height: 8),
-
           // Kartu info anak
           GestureDetector(
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => AnakSayaJadwalPage(anak: widget.anak)),
             ),
             child: Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(color: Colors.teal.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(14)),
+              width: double.infinity,
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(22),
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 14, offset: const Offset(0, 6))],
+              ),
               child: Row(
                 children: [
                   CircleAvatar(
-                    radius: 24,
-                    backgroundColor: Colors.white,
-                    child: Icon(widget.anak.jenisKelamin == 'laki-laki' ? Icons.boy : Icons.girl, color: Colors.teal),
+                    radius: 28,
+                    backgroundColor: Colors.teal.withOpacity(0.12),
+                    child: Icon(widget.anak.jenisKelamin == 'laki-laki' ? Icons.boy : Icons.girl, color: Colors.teal, size: 28),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Nama Anak: ${widget.anak.namaAnak}', style: const TextStyle(fontWeight: FontWeight.w600)),
-                        Text('Usia: ${_hitungUsia(widget.anak.tanggalLahir)}', style: const TextStyle(fontSize: 12)),
-                        Text('NIK: ${widget.anak.nik ?? '-'}', style: const TextStyle(fontSize: 12)),
+                        Text(widget.anak.namaAnak, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+                        const SizedBox(height: 4),
+                        Text('Usia: ${_hitungUsia(widget.anak.tanggalLahir)}', style: const TextStyle(fontSize: 13, color: Colors.black54)),
+                        const SizedBox(height: 2),
+                        Text('NIK: ${widget.anak.nik ?? '-'}', style: const TextStyle(fontSize: 13, color: Colors.black54)),
                       ],
                     ),
                   ),
-                  const Icon(Icons.chevron_right, color: Colors.black45),
+                  const Icon(Icons.chevron_right, color: Colors.black38),
                 ],
               ),
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 14),
 
           // Kartu Imunisasi Berikutnya
           if (berikutnya == null)
@@ -415,41 +585,50 @@ class _AnakBlockState extends State<_AnakBlock> {
           else ...[
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
-                gradient: LinearGradient(colors: [Colors.teal.shade400, Colors.teal.shade700]),
-                borderRadius: BorderRadius.circular(14),
+                gradient: LinearGradient(colors: [Colors.teal.shade500, Colors.teal.shade800]),
+                borderRadius: BorderRadius.circular(22),
+                boxShadow: [BoxShadow(color: Colors.teal.withOpacity(0.2), blurRadius: 18, offset: const Offset(0, 8))],
               ),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: const [
                       Icon(Icons.campaign_outlined, color: Colors.white),
                       SizedBox(width: 8),
-                      Text('Imunisasi Berikutnya', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      Text('Imunisasi Berikutnya', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
                     ],
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 16),
                   _baris('Vaksin', berikutnya.master.namaVaksin),
                   _baris('Perkiraan', _formatDate(berikutnya.tanggalJadwal)),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text('Status: ', style: TextStyle(color: Colors.white70)),
-                      Text(
-                        berikutnya.statusLabel == 'Terlambat' ? 'Terlambat' : 'Belum Dilakukan',
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-                      ),
-                      const SizedBox(width: 4),
-                      Icon(
-                        berikutnya.statusLabel == 'Terlambat' ? Icons.warning_amber_rounded : Icons.circle,
-                        size: berikutnya.statusLabel == 'Terlambat' ? 16 : 8,
-                        color: berikutnya.statusLabel == 'Terlambat' ? Colors.amber : Colors.redAccent,
-                      ),
-                    ],
-                  ),
                   _baris('Stok Vaksin', '${_cariStok(berikutnya.master.namaVaksin)}'),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 12),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.14),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Row(
+                      children: [
+                        Text(
+                          berikutnya.statusLabel == 'Terlambat' ? 'Status: Terlambat' : 'Status: Belum Dilakukan',
+                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                        ),
+                        const Spacer(),
+                        Icon(
+                          berikutnya.statusLabel == 'Terlambat' ? Icons.warning_amber_rounded : Icons.circle,
+                          size: berikutnya.statusLabel == 'Terlambat' ? 18 : 10,
+                          color: berikutnya.statusLabel == 'Terlambat' ? Colors.amber : Colors.white,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
                   _DeadlineCountdown(target: berikutnya.tanggalJadwal),
                 ],
               ),
@@ -531,12 +710,24 @@ class _AnakBlockState extends State<_AnakBlock> {
 
   Widget _baris(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 1),
-      child: Text('$label: $value', textAlign: TextAlign.center, style: const TextStyle(color: Colors.white)),
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: const TextStyle(color: Colors.white70, fontSize: 13)),
+          Flexible(
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  String _formatDate(DateTime date) => '${date.day}/${date.month}/${date.year}';
+  String _formatDate(DateTime date) => formatTanggal(date);
 }
 
 /// Hitung mundur waktu ke tanggal jadwal (D:HH:MM:SS). Kalau sudah lewat,

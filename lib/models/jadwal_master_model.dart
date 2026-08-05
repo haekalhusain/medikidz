@@ -9,6 +9,8 @@ class JadwalMaster {
   final int? toleransiKeterlambatanHari;
   final String? catatanMedis;
   final String? sumberReferensi;
+  final int? intervalMinimumPengejaranHari;
+  final int? usiaMaksimalHari;
 
   JadwalMaster({
     this.id,
@@ -21,6 +23,8 @@ class JadwalMaster {
     this.toleransiKeterlambatanHari,
     this.catatanMedis,
     this.sumberReferensi,
+    this.intervalMinimumPengejaranHari,
+    this.usiaMaksimalHari,
   });
 
   factory JadwalMaster.fromJson(Map<String, dynamic> json, String id) {
@@ -35,6 +39,8 @@ class JadwalMaster {
       toleransiKeterlambatanHari: json['toleransi_keterlambatan_hari'],
       catatanMedis: json['catatan_medis'],
       sumberReferensi: json['sumber_referensi'],
+      intervalMinimumPengejaranHari: json['interval_minimum_pengejaran_hari'],
+      usiaMaksimalHari: json['usia_maksimal_hari'],
     );
   }
 
@@ -48,5 +54,7 @@ class JadwalMaster {
         'toleransi_keterlambatan_hari': toleransiKeterlambatanHari,
         'catatan_medis': catatanMedis,
         'sumber_referensi': sumberReferensi,
+        'interval_minimum_pengejaran_hari': intervalMinimumPengejaranHari,
+        'usia_maksimal_hari': usiaMaksimalHari,
       };
 }

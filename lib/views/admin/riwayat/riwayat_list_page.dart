@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../controllers/riwayat_controller.dart';
+import '../../../utils/date_formatter.dart';
 import 'riwayat_form_page.dart';
 
 class RiwayatListPage extends StatelessWidget {
@@ -73,7 +74,7 @@ class RiwayatListPage extends StatelessWidget {
     );
   }
 
-  String _formatDate(DateTime date) => '${date.day}/${date.month}/${date.year}';
+  String _formatDate(DateTime date) => formatTanggal(date);
 
   void _confirmDelete(BuildContext context, RiwayatController controller, String id) {
     showDialog(

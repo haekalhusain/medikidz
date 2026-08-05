@@ -12,6 +12,7 @@ import '../../controllers/jadwal_master_controller.dart';
 import '../../controllers/vaksin_controller.dart';
 import '../../services/jadwal_schedule_service.dart';
 import '../../services/activity_log_service.dart';
+import '../../utils/date_formatter.dart';
 import 'widgets/admin_header.dart';
 
 /// Konten tab "Home". Dipakai di dalam AdminShellPage (bersama bottom nav).
@@ -407,7 +408,7 @@ class AdminDashboardHome extends StatelessWidget {
     if (selisih.inMinutes < 1) return 'Baru saja';
     if (selisih.inMinutes < 60) return '${selisih.inMinutes} menit lalu';
     if (selisih.inHours < 24) return '${selisih.inHours} jam lalu';
-    return '${waktu.day}/${waktu.month}/${waktu.year}';
+    return formatTanggal(waktu);
   }
 }
 

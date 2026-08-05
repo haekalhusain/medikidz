@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../notification/notifikasi_page.dart';
 import '../profile/profile_page.dart';
 
 /// Header admin yang konsisten untuk halaman-halaman admin.
@@ -28,7 +29,7 @@ PreferredSizeWidget buildAdminTopBar(BuildContext context, {bool showDivider = t
                     'assets/logo.png',
                     height: 30,
                     fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) => const Icon(
+                    errorBuilder: (context, error, stackTrace) => const Icon(
                       Icons.local_hospital,
                       color: primaryTeal,
                       size: 28,
@@ -39,7 +40,7 @@ PreferredSizeWidget buildAdminTopBar(BuildContext context, {bool showDivider = t
                     'assets/logo2.png',
                     height: 12,
                     fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) => const Text(
+                    errorBuilder: (context, error, stackTrace) => const Text(
                       'MediKidz',
                       style: TextStyle(
                         fontSize: 10,
@@ -68,7 +69,11 @@ PreferredSizeWidget buildAdminTopBar(BuildContext context, {bool showDivider = t
                         color: primaryTeal,
                         size: 22,
                       ),
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const NotifikasiPage(adminMode: true)),
+                        );
+                      },
                     ),
                     Positioned(
                       right: 8,

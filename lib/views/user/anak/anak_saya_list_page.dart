@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../controllers/anak_controller.dart';
 import '../../../services/auth_service.dart';
+import '../../../utils/date_formatter.dart';
 import 'anak_saya_jadwal_page.dart';
 import 'tambah_anak_user_page.dart';
 
@@ -69,5 +70,5 @@ class AnakSayaListPage extends StatelessWidget {
     );
   }
 
-  String _formatDate(DateTime date) => '${date.day}/${date.month}/${date.year}';
+  String _formatDate(DateTime date) => formatTanggal(date);
 }

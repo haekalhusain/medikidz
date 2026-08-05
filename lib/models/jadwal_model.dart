@@ -7,6 +7,7 @@ class JadwalImunisasi {
   final String? namaAnak;
   final String? namaVaksin;
   final int? urutanDosis;
+  final DateTime? tanggalRencanaOverride;
 
   JadwalImunisasi({
     this.id,
@@ -17,6 +18,7 @@ class JadwalImunisasi {
     this.namaAnak,
     this.namaVaksin,
     this.urutanDosis,
+    this.tanggalRencanaOverride,
   });
 
   factory JadwalImunisasi.fromJson(Map<String, dynamic> json, String id) {
@@ -31,6 +33,9 @@ class JadwalImunisasi {
       namaAnak: json['nama_anak'],
       namaVaksin: json['nama_vaksin'],
       urutanDosis: json['urutan_dosis'],
+      tanggalRencanaOverride: json['tanggal_rencana_override'] != null
+          ? DateTime.parse(json['tanggal_rencana_override'])
+          : null,
     );
   }
 
@@ -42,5 +47,6 @@ class JadwalImunisasi {
         'nama_anak': namaAnak,
         'nama_vaksin': namaVaksin,
         'urutan_dosis': urutanDosis,
+        'tanggal_rencana_override': tanggalRencanaOverride?.toIso8601String(),
       };
 }

@@ -4,6 +4,7 @@ import '../../../controllers/anak_controller.dart';
 import '../../../controllers/pengguna_controller.dart';
 import '../../../models/anak_model.dart';
 import '../../../models/pengguna_model.dart';
+import '../../../utils/date_formatter.dart';
 import '../widgets/admin_header.dart';
 
 /// Halaman Tambah Anak Baru. Admin WAJIB mengaitkan anak ke akun
@@ -350,7 +351,7 @@ class _TambahAnakFormPageState extends State<TambahAnakFormPage> {
                                         Text(
                                           _tanggalLahir == null
                                               ? 'Pilih tanggal lahir'
-                                              : '${_tanggalLahir!.day}/${_tanggalLahir!.month}/${_tanggalLahir!.year}',
+                                              : formatTanggal(_tanggalLahir!),
                                           style: TextStyle(
                                             fontSize: 13,
                                             fontWeight: _tanggalLahir == null ? FontWeight.normal : FontWeight.w600,

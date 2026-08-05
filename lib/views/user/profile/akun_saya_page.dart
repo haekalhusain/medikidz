@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../controllers/anak_controller.dart';
 import '../../../models/anak_model.dart';
+import '../../../models/notifikasi_model.dart';
 import '../../../models/pengguna_model.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/firestore_service.dart';
+import '../../../services/notifikasi_service.dart';
+import '../../../utils/date_formatter.dart';
 import '../anak/tambah_anak_user_page.dart';
 
 class AkunSayaPage extends StatefulWidget {
@@ -137,6 +140,16 @@ class _DataPersonalTabState extends State<_DataPersonalTab> {
 
     try {
       await _penggunaService.update(_uid!, updated);
+      await NotifikasiService().createForUser(
+        _uid!,
+        Notifikasi(
+          uid: _uid!,
+          judul: 'Pembaruan Data Akun',
+          pesan: 'Data personal kamu berhasil diperbarui.',
+          kategori: 'akun',
+          waktu: DateTime.now(),
+        ),
+      );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Data personal disimpan.')));
       }
@@ -341,7 +354,7 @@ class _DataAnakTabState extends State<_DataAnakTab> {
               child: Text(
                 _tanggalLahir == null
                     ? 'Pilih tanggal'
-                    : '${_tanggalLahir!.day}/${_tanggalLahir!.month}/${_tanggalLahir!.year}',
+                    : formatTanggal(_tanggalLahir!),
               ),
             ),
           ),

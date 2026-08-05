@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../controllers/anak_controller.dart';
 import '../../../models/anak_model.dart';
+import '../../../utils/date_formatter.dart';
 
 /// Khusus EDIT data anak yang sudah ada. Untuk tambah anak BARU,
 /// gunakan TambahAnakFormPage (ada dropdown pilih akun orang tua).
@@ -207,7 +208,7 @@ class _AnakFormPageState extends State<AnakFormPage> {
                   child: Text(
                     _tanggalLahir == null
                         ? 'Pilih tanggal'
-                        : '${_tanggalLahir!.day.toString().padLeft(2, '0')}/${_tanggalLahir!.month.toString().padLeft(2, '0')}/${_tanggalLahir!.year}',
+                        : formatTanggal(_tanggalLahir!),
                     style: TextStyle(
                       fontSize: 14,
                       color: _tanggalLahir == null

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../controllers/jadwal_controller.dart';
+import '../../../utils/date_formatter.dart';
 
 class JadwalListPage extends StatelessWidget {
   const JadwalListPage({super.key});
@@ -46,5 +47,5 @@ class JadwalListPage extends StatelessWidget {
     );
   }
 
-  String _formatDate(DateTime date) => '${date.day}/${date.month}/${date.year}';
+  String _formatDate(DateTime date) => formatTanggal(date);
 }

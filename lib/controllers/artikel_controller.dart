@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import '../models/artikel_model.dart';
 import '../services/firestore_service.dart';
 import '../services/activity_log_service.dart';
+import '../services/notifikasi_service.dart';
 
 class ArtikelController extends GetxController {
   final _service = FirestoreService<Artikel>(
@@ -38,6 +39,13 @@ class ArtikelController extends GetxController {
         'Menambahkan artikel baru: ${artikel.judul}',
         kategori: 'artikel',
       );
+      if (artikel.status == 'dipublikasi') {
+        await NotifikasiService().broadcastToUsers(
+          judul: 'Artikel baru tersedia',
+          pesan: 'Yuk lihat artikel baru tentang ${artikel.judul}.',
+          kategori: 'artikel',
+        );
+      }
       return true;
     } catch (e) {
       Get.snackbar('Gagal', e.toString());

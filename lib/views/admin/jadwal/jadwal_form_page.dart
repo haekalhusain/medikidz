@@ -5,6 +5,7 @@ import '../../../controllers/anak_controller.dart';
 import '../../../controllers/vaksin_controller.dart';
 import '../../../models/jadwal_model.dart';
 import '../../../models/anak_model.dart';
+import '../../../utils/date_formatter.dart';
 
 class JadwalFormPage extends StatefulWidget {
   final JadwalImunisasi? jadwal; // ada isi = mode edit
@@ -107,7 +108,7 @@ class _JadwalFormPageState extends State<JadwalFormPage> {
                     child: InputDecorator(
                       decoration: const InputDecoration(labelText: 'Tanggal Imunisasi', border: OutlineInputBorder()),
                       child: Text(
-                        _tanggal == null ? 'Pilih tanggal' : '${_tanggal!.day}/${_tanggal!.month}/${_tanggal!.year}',
+                        _tanggal == null ? 'Pilih tanggal' : formatTanggal(_tanggal!),
                       ),
                     ),
                   ),

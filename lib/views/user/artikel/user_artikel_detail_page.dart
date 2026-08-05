@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:medikidz/views/user/profile/profil_anda_page.dart';
 import '../../../models/artikel_model.dart';
+import '../../../utils/date_formatter.dart';
 // Import file profil anda (sesuaikan path foldernya jika perlu)
 
 
@@ -11,11 +12,7 @@ class UserArtikelDetailPage extends StatelessWidget {
   const UserArtikelDetailPage({super.key, required this.artikel});
 
   String _formatTanggal(DateTime dt) {
-    final monthNames = [
-      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-    ];
-    return '${dt.day} ${monthNames[dt.month - 1]} ${dt.year}';
+    return formatTanggal(dt);
   }
 
   @override
