@@ -7,6 +7,29 @@ const bcrypt = require("bcryptjs");
 admin.initializeApp();
 const db = admin.firestore();
 
+function parseDateField(value) {
+  if (!value) return null;
+  if (value instanceof admin.firestore.Timestamp) return value.toDate();
+  if (typeof value === 'string' || value instanceof String) return new Date(value.toString());
+  if (value instanceof Date) return value;
+  return null;
+}
+
+function toIsoDateString(date) {
+  return date.toISOString().split('T')[0];
+}
+
+function sameDate(a, b) {
+  return a.getUTCFullYear() === b.getUTCFullYear() &&
+    a.getUTCMonth() === b.getUTCMonth() &&
+    a.getUTCDate() === b.getUTCDate();
+}
+
+async function getAllDocuments(path) {
+  const snapshot = await db.collection(path).get();
+  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+}
+
 const SESSION_COLLECTION = "_registrasi_sessions";
 const OTP_EXPIRY_MINUTES = 5;
 const SESSION_EXPIRY_MINUTES = 15;
@@ -136,6 +159,96 @@ exports.verifyOtp = functions.https.onRequest(async (req, res) => {
 
   return res.status(201).json({ success: true, data: { id_user: penggunaRef.id, id_anak: anakRef.id } });
 });
+
+exports.scheduleJadwalH3Notifications = functions.pubsub
+  .schedule('0 7 * * *')
+  .timeZone('Asia/Makassar')
+  .onRun(async () => {
+    const now = new Date();
+    const targetDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+    targetDay.setUTCDate(targetDay.getUTCDate() + 3);
+    const targetDateString = toIsoDateString(targetDay);
+
+    const [anakList, masterList, jadwalList, existingNotifSnapshot] = await Promise.all([
+      getAllDocuments('tb_anak'),
+      getAllDocuments('tb_jadwalMaster'),
+      getAllDocuments('tb_jadwalImunisasi'),
+      db.collection('tb_notifikasi')
+        .where('kategori', '==', 'jadwal')
+        .where('jadwal_tanggal', '==', targetDateString)
+        .get(),
+    ]);
+
+    const existingKeys = new Set();
+    existingNotifSnapshot.docs.forEach((doc) => {
+      const data = doc.data();
+      const key = `${data.uid || ''}|${(data.jadwal_nama_vaksin || '').toString().toLowerCase()}|${data.jadwal_urutan_dosis || ''}|${data.jadwal_tanggal || ''}`;
+      existingKeys.add(key);
+    });
+
+    const batch = db.batch();
+    let createdCount = 0;
+
+    for (const anak of anakList) {
+      if (!anak.id_user || !anak.nama_anak || !anak.tanggal_lahir || anak.deleted_at) continue;
+      const tanggalLahir = parseDateField(anak.tanggal_lahir);
+      if (!tanggalLahir) continue;
+
+      for (const master of masterList) {
+        if (!master.nama_vaksin || master.usia_hari == null || master.urutan_dosis == null) continue;
+
+        let tanggalJadwal = new Date(tanggalLahir.getTime());
+        tanggalJadwal.setUTCDate(tanggalJadwal.getUTCDate() + master.usia_hari);
+
+        const cocokRealisasi = jadwalList.find((r) => {
+          const namaCocok = (r.nama_vaksin || '').toString().toLowerCase() === master.nama_vaksin.toString().toLowerCase();
+          const dosisCocok = r.urutan_dosis == null || r.urutan_dosis === master.urutan_dosis;
+          return r.id_anak === anak.id && namaCocok && dosisCocok;
+        });
+
+        if (cocokRealisasi) {
+          if (cocokRealisasi.tanggal_rencana_override) {
+            const overrideDate = parseDateField(cocokRealisasi.tanggal_rencana_override);
+            if (overrideDate) tanggalJadwal = overrideDate;
+          }
+
+          if (['sudah imunisasi', 'dilewati', 'tidak bisa dikejar'].includes((cocokRealisasi.status || '').toString().toLowerCase())) {
+            continue;
+          }
+        }
+
+        if (!sameDate(tanggalJadwal, targetDay)) continue;
+
+        const jadwalKey = `${anak.id_user}|${master.nama_vaksin.toString().toLowerCase()}|${master.urutan_dosis}|${targetDateString}`;
+        if (existingKeys.has(jadwalKey)) continue;
+
+        const pesan = `Imunisasi ${master.nama_vaksin} untuk ${anak.nama_anak} dijadwalkan tanggal ${targetDateString}. Persiapkan ya!`;
+        const notifRef = db.collection('tb_notifikasi').doc();
+        batch.set(notifRef, {
+          uid: anak.id_user,
+          judul: `Pengingat Imunisasi ${master.nama_vaksin}`,
+          pesan,
+          kategori: 'jadwal',
+          waktu: admin.firestore.Timestamp.now(),
+          jadwal_tanggal: targetDateString,
+          jadwal_nama_vaksin: master.nama_vaksin,
+          jadwal_urutan_dosis: master.urutan_dosis,
+          source: 'auto_h3',
+        });
+        existingKeys.add(jadwalKey);
+        createdCount += 1;
+      }
+    }
+
+    if (createdCount > 0) {
+      await batch.commit();
+      console.log(`Created ${createdCount} automatic H-3 jadwal notifications.`);
+    } else {
+      console.log('No H-3 jadwal notifications to create today.');
+    }
+
+    return null;
+  });
 
 exports.sendFcmOnNotificationCreate = functions.firestore
   .document('tb_notifikasi/{notifikasiId}')
