@@ -4,7 +4,11 @@ import '../profile/profile_page.dart';
 
 /// Header admin yang konsisten untuk halaman-halaman admin.
 /// Menyertakan logo, tombol notifikasi, tombol profil, dan garis pemisah.
-PreferredSizeWidget buildAdminTopBar(BuildContext context, {bool showDivider = true}) {
+PreferredSizeWidget buildAdminTopBar(
+  BuildContext context, {
+  bool showDivider = true,
+  bool hideNotification = false, // <-- Parameter ditambahkan di sini
+}) {
   const primaryTeal = Color(0xFF00A884);
   const lightTealBg = Color(0xFFE8F7F2);
 
@@ -54,55 +58,59 @@ PreferredSizeWidget buildAdminTopBar(BuildContext context, {bool showDivider = t
             ],
           ),
           actions: [
-            Center(
-              child: Container(
-                margin: const EdgeInsets.only(right: 8),
-                decoration: const BoxDecoration(
-                  color: lightTealBg,
-                  shape: BoxShape.circle,
-                ),
-                child: Stack(
-                  children: [
-                    IconButton(
-                      icon: const Icon(
-                        Icons.notifications_none_rounded,
-                        color: primaryTeal,
-                        size: 22,
+            // Hanya tampilkan tombol Notifikasi jika hideNotification == false
+            if (!hideNotification)
+              Center(
+                child: Container(
+                  margin: const EdgeInsets.only(right: 8),
+                  decoration: const BoxDecoration(
+                    color: lightTealBg,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Stack(
+                    children: [
+                      IconButton(
+                        icon: const Icon(
+                          Icons.notifications_none_rounded,
+                          color: primaryTeal,
+                          size: 22,
+                        ),
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => const NotifikasiPage(adminMode: true),
+                            ),
+                          );
+                        },
                       ),
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const NotifikasiPage(adminMode: true)),
-                        );
-                      },
-                    ),
-                    Positioned(
-                      right: 8,
-                      top: 8,
-                      child: Container(
-                        padding: const EdgeInsets.all(3),
-                        decoration: const BoxDecoration(
-                          color: Colors.red,
-                          shape: BoxShape.circle,
-                        ),
-                        constraints: const BoxConstraints(
-                          minWidth: 14,
-                          minHeight: 14,
-                        ),
-                        child: const Text(
-                          '1',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 8,
-                            fontWeight: FontWeight.bold,
+                      Positioned(
+                        right: 8,
+                        top: 8,
+                        child: Container(
+                          padding: const EdgeInsets.all(3),
+                          decoration: const BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
                           ),
-                          textAlign: TextAlign.center,
+                          constraints: const BoxConstraints(
+                            minWidth: 14,
+                            minHeight: 14,
+                          ),
+                          child: const Text(
+                            '1',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 8,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
             Center(
               child: Container(
                 margin: const EdgeInsets.only(right: 16),
