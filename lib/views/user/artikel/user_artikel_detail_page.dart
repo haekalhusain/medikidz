@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:medikidz/views/notification/notifikasi_page.dart';
-import 'package:medikidz/views/user/profile/profil_anda_page.dart';
-import '../../../controllers/notifikasi_controller.dart';
 import '../../../models/artikel_model.dart';
 import '../../../utils/date_formatter.dart';
-// Import file profil anda (sesuaikan path foldernya jika perlu)
-
+import '../widgets/user_header.dart';
 
 class UserArtikelDetailPage extends StatelessWidget {
   final Artikel artikel;
@@ -28,105 +24,11 @@ class UserArtikelDetailPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leadingWidth: 70,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 16),
-          child: Center(
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-                shape: BoxShape.circle,
-              ),
-              child: IconButton(
-                icon: const Icon(
-                  Icons.arrow_back,
-                  color: Colors.black,
-                  size: 20,
-                ),
-                onPressed: () => Get.back(),
-              ),
-            ),
-          ),
-        ),
-        actions: [
-          // Icon Notifikasi dengan Badge
-          Center(
-            child: Container(
-              margin: const EdgeInsets.only(right: 10),
-              decoration: const BoxDecoration(
-                color: lightTealBg,
-                shape: BoxShape.circle,
-              ),
-              child: Stack(
-                children: [
-                  IconButton(
-                    icon: const Icon(
-                      Icons.notifications_none_rounded,
-                      color: primaryTeal,
-                      size: 22,
-                    ),
-                    onPressed: () {
-                      Get.to(() => const NotifikasiPage());
-                    },
-                  ),
-                  Obx(() {
-                    final count = notifikasiController.unreadCount.value;
-                    if (count <= 0) return const SizedBox.shrink();
-
-                    return Positioned(
-                      right: 8,
-                      top: 8,
-                      child: Container(
-                        padding: const EdgeInsets.all(3),
-                        decoration: const BoxDecoration(
-                          color: Colors.red,
-                          shape: BoxShape.circle,
-                        ),
-                        constraints: const BoxConstraints(
-                          minWidth: 14,
-                          minHeight: 14,
-                        ),
-                        child: Text(
-                          '$count',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 8,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    );
-                  }),
-                ],
-              ),
-            ),
-          ),
-
-          // Icon Profile (Direct ke ProfilAndaPage)
-          Center(
-            child: Container(
-              margin: const EdgeInsets.only(right: 16),
-              decoration: const BoxDecoration(
-                color: lightTealBg,
-                shape: BoxShape.circle,
-              ),
-              child: IconButton(
-                icon: const Icon(
-                  Icons.person,
-                  color: primaryTeal,
-                  size: 24,
-                ),
-                onPressed: () {
-                  Get.to(() => const ProfilAndaPage());
-                },
-              ),
-            ),
-          ),
-        ],
+      appBar: buildUserTopBar(
+        context,
+        showBackButton: true,
+        hideNotification: false,
+        hideProfileIcon: true,
       ),
       body: SingleChildScrollView(
         child: Column(

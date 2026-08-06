@@ -27,16 +27,24 @@ class JadwalListPage extends StatelessWidget {
               margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               child: ListTile(
                 leading: Icon(
-                  jadwal.status == 'sudah imunisasi' ? Icons.check_circle : Icons.pending,
-                  color: jadwal.status == 'sudah imunisasi' ? Colors.green : Colors.orange,
+                  jadwal.status == 'sudah imunisasi'
+                      ? Icons.check_circle
+                      : Icons.pending,
+                  color: jadwal.status == 'sudah imunisasi'
+                      ? Colors.green
+                      : Colors.orange,
                 ),
                 title: Text(jadwal.namaVaksin ?? '-'),
-                subtitle: Text('${jadwal.namaAnak ?? '-'}  •  ${_formatDate(jadwal.tanggalImunisasi)}'),
+                subtitle: Text(
+                  '${jadwal.namaAnak ?? '-'}  •  ${_formatDate(jadwal.tanggalImunisasi)}',
+                ),
                 trailing: Text(
                   jadwal.status,
                   style: TextStyle(
                     fontSize: 11,
-                    color: jadwal.status == 'sudah imunisasi' ? Colors.green : Colors.orange,
+                    color: jadwal.status == 'sudah imunisasi'
+                        ? Colors.green
+                        : Colors.orange,
                   ),
                 ),
               ),

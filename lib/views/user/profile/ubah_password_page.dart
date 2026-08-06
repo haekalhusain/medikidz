@@ -31,8 +31,10 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
   }
 
   bool get _hasMinLength => _passwordBaruController.text.length >= 6;
-  bool get _hasNumber => RegExp(r'[0-9]').hasMatch(_passwordBaruController.text);
-  bool get _hasLetter => RegExp(r'[A-Za-z]').hasMatch(_passwordBaruController.text);
+  bool get _hasNumber =>
+      RegExp(r'[0-9]').hasMatch(_passwordBaruController.text);
+  bool get _hasLetter =>
+      RegExp(r'[A-Za-z]').hasMatch(_passwordBaruController.text);
 
   Widget _buildRule(String label, bool passed) {
     return Row(
@@ -158,25 +160,35 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
                   filled: true,
                   fillColor: const Color(0xFFFAFAFA),
                   hintText: 'Masukkan Kata Sandi Lama',
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 16,
+                  ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(28),
                     borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(28),
-                    borderSide: const BorderSide(color: Color(0xFF359D89), width: 1.5),
+                    borderSide: const BorderSide(
+                      color: Color(0xFF359D89),
+                      width: 1.5,
+                    ),
                   ),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _obscureLama ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                      _obscureLama
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
                       color: Colors.grey.shade600,
                       size: 20,
                     ),
-                    onPressed: () => setState(() => _obscureLama = !_obscureLama),
+                    onPressed: () =>
+                        setState(() => _obscureLama = !_obscureLama),
                   ),
                 ),
-                validator: (v) => (v == null || v.isEmpty) ? 'Wajib diisi' : null,
+                validator: (v) =>
+                    (v == null || v.isEmpty) ? 'Wajib diisi' : null,
               ),
 
               const SizedBox(height: 20),
@@ -198,22 +210,31 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
                   filled: true,
                   fillColor: const Color(0xFFFAFAFA),
                   hintText: 'Masukkan Password Baru',
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 16,
+                  ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(28),
                     borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(28),
-                    borderSide: const BorderSide(color: Color(0xFF359D89), width: 1.5),
+                    borderSide: const BorderSide(
+                      color: Color(0xFF359D89),
+                      width: 1.5,
+                    ),
                   ),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _obscureBaru ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                      _obscureBaru
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
                       color: Colors.grey.shade600,
                       size: 20,
                     ),
-                    onPressed: () => setState(() => _obscureBaru = !_obscureBaru),
+                    onPressed: () =>
+                        setState(() => _obscureBaru = !_obscureBaru),
                   ),
                 ),
                 onChanged: (_) => setState(() {}),
@@ -251,27 +272,38 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
                   filled: true,
                   fillColor: const Color(0xFFFAFAFA),
                   hintText: 'Konfirmasi Password Baru',
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 16,
+                  ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(28),
                     borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(28),
-                    borderSide: const BorderSide(color: Color(0xFF359D89), width: 1.5),
+                    borderSide: const BorderSide(
+                      color: Color(0xFF359D89),
+                      width: 1.5,
+                    ),
                   ),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _obscureKonfirmasi ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                      _obscureKonfirmasi
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
                       color: Colors.grey.shade600,
                       size: 20,
                     ),
-                    onPressed: () => setState(() => _obscureKonfirmasi = !_obscureKonfirmasi),
+                    onPressed: () => setState(
+                      () => _obscureKonfirmasi = !_obscureKonfirmasi,
+                    ),
                   ),
                 ),
                 validator: (v) {
                   if (v == null || v.isEmpty) return 'Wajib diisi';
-                  if (v != _passwordBaruController.text) return 'Password tidak sama';
+                  if (v != _passwordBaruController.text)
+                    return 'Password tidak sama';
                   return null;
                 },
               ),
@@ -283,7 +315,10 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
                   padding: const EdgeInsets.only(bottom: 16),
                   child: Text(
                     _errorMessage,
-                    style: const TextStyle(color: Colors.redAccent, fontSize: 13),
+                    style: const TextStyle(
+                      color: Colors.redAccent,
+                      fontSize: 13,
+                    ),
                   ),
                 ),
 

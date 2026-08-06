@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:medikidz/views/notification/notifikasi_page.dart';
-import 'package:medikidz/views/user/profile/profil_anda_page.dart';
+import '../widgets/user_header.dart';
 import '../../../controllers/vaksin_controller.dart';
 import '../../../models/vaksin_model.dart';
 
@@ -20,119 +19,7 @@ class UserVaksinListPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        automaticallyImplyLeading: false,
-        titleSpacing: 16,
-        title: const Text(
-          'Detail Vaksin',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        actions: [
-          // Icon Notifikasi Lingkaran dengan Badge Dinamis
-          Container(
-            width: 40,
-            height: 40,
-            margin: const EdgeInsets.only(right: 12),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFE6F5F2),
-                    shape: BoxShape.circle,
-                  ),
-                  child: IconButton(
-                    padding: EdgeInsets.zero,
-                    icon: const Icon(
-                      Icons.notifications_none_rounded,
-                      color: Color(0xFF50C8A8),
-                      size: 24,
-                    ),
-                    onPressed: () {
-                      Get.to(() => const NotifikasiPage());
-                    },
-                  ),
-                ),
-                // Bulatan merah dan angka hanya muncul jika ada notifikasi (> 0)
-                if (unreadNotificationCount > 0)
-                  Positioned(
-                    top: 2,
-                    right: 2,
-                    child: Container(
-                      padding: const EdgeInsets.all(2),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFE53935),
-                        shape: BoxShape.circle,
-                      ),
-                      constraints: const BoxConstraints(
-                        minWidth: 16,
-                        minHeight: 16,
-                      ),
-                      child: Center(
-                        child: Text(
-                          '$unreadNotificationCount',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-
-          // Icon Profile Lingkaran
-          Container(
-            width: 40,
-            height: 40,
-            margin: const EdgeInsets.only(right: 16),
-            decoration: const BoxDecoration(
-              color: Color(0xFFE6F5F2),
-              shape: BoxShape.circle,
-            ),
-            child: IconButton(
-              padding: EdgeInsets.zero,
-              icon: const Icon(
-                Icons.person,
-                color: Color(0xFF50C8A8),
-                size: 24,
-              ),
-              onPressed: () {
-                Get.to(() => const ProfilAndaPage());
-              },
-            ),
-          ),
-        ],
-        // Garis Pembatas Gradasi Warna di Bawah AppBar
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(3.0),
-          child: Container(
-            height: 3.0,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Color(0xFFA2E0D0),
-                  Color(0xFFC7D3B0),
-                ],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-              ),
-            ),
-          ),
-        ),
-      ),
+      appBar: buildUserTopBar(context),
       body: Column(
         children: [
           // Banner Informasi Penting
@@ -242,24 +129,23 @@ class UserVaksinListPage extends StatelessWidget {
 
     return vaksin.informasi
         .where((k) => k.subjudul.isNotEmpty || k.isi.isNotEmpty)
-        .map((k) => Padding(
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (k.subjudul.isNotEmpty)
-                    Text(
-                      k.subjudul,
-                      style: const TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                  if (k.isi.isNotEmpty)
-                    Text(
-                      k.isi,
-                      style: const TextStyle(fontSize: 13),
-                    ),
-                ],
-              ),
-            ))
+        .map(
+          (k) => Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (k.subjudul.isNotEmpty)
+                  Text(
+                    k.subjudul,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                if (k.isi.isNotEmpty)
+                  Text(k.isi, style: const TextStyle(fontSize: 13)),
+              ],
+            ),
+          ),
+        )
         .toList();
   }
 }

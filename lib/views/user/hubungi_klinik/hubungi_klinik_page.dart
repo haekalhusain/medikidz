@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/user_header.dart';
 
 class HubungiKlinikPage extends StatelessWidget {
   const HubungiKlinikPage({super.key});
@@ -7,9 +8,11 @@ class HubungiKlinikPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text('Hubungi Klinik'),
-        elevation: 0,
+      appBar: buildUserTopBar(
+        context,
+        showBackButton: true,
+        hideNotification: true,
+        hideProfileIcon: true,
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -23,12 +26,19 @@ class HubungiKlinikPage extends StatelessWidget {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.local_hospital, color: Colors.blueGrey.shade700, size: 28),
+                      Icon(
+                        Icons.local_hospital,
+                        color: Colors.blueGrey.shade700,
+                        size: 28,
+                      ),
                       const SizedBox(width: 12),
                       const Expanded(
                         child: Text(
                           'Klinik Medikidz Banjarbaru',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
                     ],
@@ -37,7 +47,11 @@ class HubungiKlinikPage extends StatelessWidget {
                   const Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.location_on, color: Colors.redAccent, size: 28),
+                      Icon(
+                        Icons.location_on,
+                        color: Colors.redAccent,
+                        size: 28,
+                      ),
                       SizedBox(width: 12),
                       Expanded(
                         child: Text(
@@ -50,7 +64,7 @@ class HubungiKlinikPage extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             Divider(color: Colors.grey.shade200, thickness: 1, height: 1),
 
             // 2. Jam Operasional
@@ -84,13 +98,15 @@ class HubungiKlinikPage extends StatelessWidget {
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Kartu WhatsApp
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF25D366), // Warna hijau khas WhatsApp
+                      color: const Color(
+                        0xFF25D366,
+                      ), // Warna hijau khas WhatsApp
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Column(
@@ -98,7 +114,11 @@ class HubungiKlinikPage extends StatelessWidget {
                         // Header WA
                         Row(
                           children: [
-                            const Icon(Icons.wechat, color: Colors.white, size: 40), // Placeholder icon WA
+                            const Icon(
+                              Icons.wechat,
+                              color: Colors.white,
+                              size: 40,
+                            ), // Placeholder icon WA
                             const SizedBox(width: 12),
                             Expanded(
                               child: Column(
@@ -127,14 +147,16 @@ class HubungiKlinikPage extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 16),
-                        
+
                         // Badge Info CS
                         Container(
                           width: double.infinity,
                           padding: const EdgeInsets.symmetric(vertical: 10),
                           decoration: BoxDecoration(
                             // ignore: deprecated_member_use
-                            color: Colors.white.withOpacity(0.2), // Transparan putih
+                            color: Colors.white.withOpacity(
+                              0.2,
+                            ), // Transparan putih
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: const Text(
@@ -148,7 +170,7 @@ class HubungiKlinikPage extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        
+
                         // Tombol Buka WhatsApp
                         SizedBox(
                           width: double.infinity,
@@ -157,14 +179,18 @@ class HubungiKlinikPage extends StatelessWidget {
                             onPressed: () {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text('tombol direct ke wa, belum bisa berfungsi untuk saat ini'),
+                                  content: Text(
+                                    'tombol direct ke wa, belum bisa berfungsi untuk saat ini',
+                                  ),
                                   duration: Duration(seconds: 2),
                                 ),
                               );
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.white,
-                              foregroundColor: const Color(0xFF25D366), // Text warna hijau
+                              foregroundColor: const Color(
+                                0xFF25D366,
+                              ), // Text warna hijau
                               elevation: 0,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(24),
@@ -173,8 +199,8 @@ class HubungiKlinikPage extends StatelessWidget {
                             child: const Text(
                               'Buka WhatsApp',
                               style: TextStyle(
-                                fontSize: 15, 
-                                fontWeight: FontWeight.bold
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
@@ -200,15 +226,9 @@ class HubungiKlinikPage extends StatelessWidget {
         const SizedBox(width: 8),
         SizedBox(
           width: 100, // Menjaga lebar text hari agar titik duanya sejajar
-          child: Text(
-            hari,
-            style: const TextStyle(fontSize: 15, height: 1.2),
-          ),
+          child: Text(hari, style: const TextStyle(fontSize: 15, height: 1.2)),
         ),
-        Text(
-          ': $jam',
-          style: const TextStyle(fontSize: 15, height: 1.2),
-        ),
+        Text(': $jam', style: const TextStyle(fontSize: 15, height: 1.2)),
       ],
     );
   }

@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import '../../notification/notifikasi_page.dart';
-import '../profile/profile_page.dart';
+import '../profile/profil_anda_page.dart';
 
-/// Header admin yang konsisten untuk halaman-halaman admin.
-/// Menyertakan logo, tombol notifikasi, tombol profil, dan garis pemisah.
-PreferredSizeWidget buildAdminTopBar(
+/// Header khusus untuk halaman-halaman Role User.
+PreferredSizeWidget buildUserTopBar(
   BuildContext context, {
   bool showDivider = true,
   bool hideNotification = false,
   bool hideProfileIcon = false,
+  bool showBackButton = false,
 }) {
   const primaryTeal = Color(0xFF00A884);
   const lightTealBg = Color(0xFFE8F7F2);
@@ -24,6 +24,12 @@ PreferredSizeWidget buildAdminTopBar(
           automaticallyImplyLeading: false,
           toolbarHeight: 67,
           titleSpacing: 16,
+          leading: showBackButton
+              ? IconButton(
+                  icon: const Icon(Icons.arrow_back, color: primaryTeal),
+                  onPressed: () => Navigator.of(context).pop(),
+                )
+              : null,
           title: Row(
             children: [
               Column(
@@ -59,7 +65,6 @@ PreferredSizeWidget buildAdminTopBar(
             ],
           ),
           actions: [
-            // Hanya tampilkan tombol Notifikasi jika hideNotification == false
             if (!hideNotification)
               Center(
                 child: Container(
@@ -79,7 +84,8 @@ PreferredSizeWidget buildAdminTopBar(
                         onPressed: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (_) => const NotifikasiPage(adminMode: true),
+                              builder: (_) =>
+                                  const NotifikasiPage(adminMode: false),
                             ),
                           );
                         },
@@ -98,7 +104,7 @@ PreferredSizeWidget buildAdminTopBar(
                             minHeight: 14,
                           ),
                           child: const Text(
-                            '1',
+                            '3',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 8,
@@ -121,14 +127,10 @@ PreferredSizeWidget buildAdminTopBar(
                     shape: BoxShape.circle,
                   ),
                   child: IconButton(
-                    icon: const Icon(
-                      Icons.person,
-                      color: primaryTeal,
-                      size: 22,
-                    ),
+                    icon: const Icon(Icons.person, color: primaryTeal, size: 22),
                     onPressed: () {
                       Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const ProfilePage()),
+                        MaterialPageRoute(builder: (_) => const ProfilAndaPage()),
                       );
                     },
                   ),
@@ -143,10 +145,7 @@ PreferredSizeWidget buildAdminTopBar(
               gradient: LinearGradient(
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
-                colors: [
-                  Color(0xFFA3D9CD),
-                  Color(0xFFC5BC9B),
-                ],
+                colors: [Color(0xFFA3D9CD), Color(0xFFC5BC9B)],
               ),
             ),
           ),

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../controllers/anak_controller.dart';
+import '../../../models/anak_model.dart';
 import '../../../services/auth_service.dart';
 import '../../../utils/date_formatter.dart';
+import '../widgets/user_header.dart';
 import 'anak_saya_jadwal_page.dart';
 import 'tambah_anak_user_page.dart';
 
@@ -18,57 +20,226 @@ class AnakSayaListPage extends StatelessWidget {
     final uid = AuthService().currentUser?.uid;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Anak Saya')),
+      appBar: buildUserTopBar(context),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const TambahAnakUserPage()),
+        onPressed: () => Navigator.of(context)
+            .push(MaterialPageRoute(builder: (_) => const TambahAnakUserPage())),
+        icon: const Icon(Icons.add, color: Colors.white),
+        label: const Text(
+          'Tambah Anak',
+          style: TextStyle(color: Colors.white),
         ),
-        icon: const Icon(Icons.add),
-        label: const Text('Tambah Anak'),
+        backgroundColor: const Color(0xFF00A884),
       ),
       body: Obx(() {
         if (controller.anakList.isEmpty && controller.isLoading.value) {
           return const Center(child: CircularProgressIndicator());
         }
 
-        final anakSaya = controller.anakList.where((a) => a.idUser == uid).toList();
+        final anakSaya = controller.anakList
+            .where((a) => a.idUser == uid)
+            .toList();
 
         if (anakSaya.isEmpty) {
-          return const Center(
-            child: Padding(
-              padding: EdgeInsets.all(24),
-              child: Text(
-                'Belum ada data anak. Tambahkan lewat tombol "Tambah Anak" di bawah.',
-                textAlign: TextAlign.center,
-              ),
+          return Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 20),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE8F7F2),
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: Column(
+                    children: const [
+                      Icon(Icons.family_restroom,
+                          size: 72, color: Color(0xFF00A884)),
+                      SizedBox(height: 18),
+                      Text(
+                        'Belum ada data anak',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF17394D),
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        'Tambahkan anak Anda untuk melihat jadwal imunisasi dan informasi kesehatan penting.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Color(0xFF4B636E),
+                          height: 1.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           );
         }
 
-        return ListView.builder(
-          padding: const EdgeInsets.all(12),
-          itemCount: anakSaya.length,
-          itemBuilder: (context, index) {
-            final anak = anakSaya[index];
-            return Card(
-              margin: const EdgeInsets.only(bottom: 8),
-              child: ListTile(
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => AnakSayaJadwalPage(anak: anak)),
-                ),
-                leading: CircleAvatar(
-                  child: Icon(anak.jenisKelamin == 'laki-laki' ? Icons.boy : Icons.girl),
-                ),
-                title: Text(anak.namaAnak),
-                subtitle: Text('Lahir: ${_formatDate(anak.tanggalLahir)}'),
-                trailing: const Icon(Icons.chevron_right),
+        return ListView(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+          children: [
+            Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: const Color(0xFFEAF7F1),
+                borderRadius: BorderRadius.circular(24),
               ),
-            );
-          },
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF00A884),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: const Icon(
+                      Icons.child_care,
+                      color: Colors.white,
+                      size: 28,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Anak Saya',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF17394D),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          '${anakSaya.length} anak terdaftar',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Color(0xFF607383),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 18),
+            ...anakSaya.map(
+              (anak) => Padding(
+                padding: const EdgeInsets.only(bottom: 14),
+                child: _AnakCard(
+                  anak: anak,
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => AnakSayaJadwalPage(anak: anak),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         );
       }),
     );
   }
 
   String _formatDate(DateTime date) => formatTanggal(date);
+}
+
+class _AnakCard extends StatelessWidget {
+  final Anak anak;
+  final VoidCallback onTap;
+
+  const _AnakCard({required this.anak, required this.onTap});
+
+  String _ageLabel(DateTime dob) {
+    final now = DateTime.now();
+    var years = now.year - dob.year;
+    var months = now.month - dob.month;
+    if (now.day < dob.day) months--;
+    if (months < 0) {
+      years--;
+      months += 12;
+    }
+    if (years > 0) {
+      return '$years tahun${months > 0 ? ' $months bln' : ''}';
+    }
+    return '$months bulan';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isBoy = anak.jenisKelamin == 'laki-laki';
+    final avatarColor = isBoy ? const Color(0xFFB5E2F5) : const Color(0xFFF6D1E9);
+    final iconColor = isBoy ? const Color(0xFF2579A9) : const Color(0xFFD13B8A);
+
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(22),
+      elevation: 1,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(22),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: const Color(0xFFE6F2EF)),
+          ),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 28,
+                backgroundColor: avatarColor,
+                child: Icon(
+                  isBoy ? Icons.boy : Icons.girl,
+                  color: iconColor,
+                  size: 28,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      anak.namaAnak,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF17394D),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Lahir: ${formatTanggal(anak.tanggalLahir)}',
+                      style: const TextStyle(color: Color(0xFF607383)),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _ageLabel(anak.tanggalLahir),
+                      style: const TextStyle(color: Color(0xFF4B636E)),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right, color: Color(0xFF607383)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }

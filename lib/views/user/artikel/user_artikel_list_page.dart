@@ -6,6 +6,7 @@ import '../../../controllers/artikel_controller.dart';
 import '../../../controllers/notifikasi_controller.dart'; // 1. Tambahkan import NotifikasiController
 import '../../../models/artikel_model.dart';
 import '../../../utils/date_formatter.dart';
+import '../widgets/user_header.dart';
 import 'user_artikel_detail_page.dart';
 
 class UserArtikelListPage extends StatefulWidget {
@@ -40,10 +41,12 @@ class _UserArtikelListPageState extends State<UserArtikelListPage> {
     return articles.where((artikel) {
       final statusTampil = artikel.status == 'dipublikasi';
 
-      final matchesKategori = _selectedKategori == 'Semua' ||
+      final matchesKategori =
+          _selectedKategori == 'Semua' ||
           artikel.kategori.toLowerCase() == _selectedKategori.toLowerCase();
 
-      final matchesQuery = _searchQuery.isEmpty ||
+      final matchesQuery =
+          _searchQuery.isEmpty ||
           artikel.judul.toLowerCase().contains(_searchQuery.toLowerCase()) ||
           artikel.ringkasan.toLowerCase().contains(_searchQuery.toLowerCase());
 
@@ -64,131 +67,23 @@ class _UserArtikelListPageState extends State<UserArtikelListPage> {
     const lightTealBg = Color(0xFFE8F7F2);
 
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        titleSpacing: 16,
-        title: const Text(
-          'Artikel',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        actions: [
-          // Icon Notifikasi Lingkaran dengan Badge Dinamis
-          Container(
-            width: 40,
-            height: 40,
-            margin: const EdgeInsets.only(right: 12),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFE6F5F2),
-                    shape: BoxShape.circle,
-                  ),
-                  child: IconButton(
-                    padding: EdgeInsets.zero,
-                    icon: const Icon(
-                      Icons.notifications_none_rounded,
-                      color: Color(0xFF50C8A8),
-                      size: 24,
-                    ),
-                    onPressed: () {
-                      Get.to(() => const NotifikasiPage());
-                    },
-                  ),
-                ),
-                // 3. Bungkus Badge dengan Obx untuk reaktivitas
-                Obx(() {
-                  final count = notifikasiController.unreadCount.value;
-
-                  // Sembunyikan bulatan merah jika tidak ada notifikasi baru
-                  if (count <= 0) return const SizedBox.shrink();
-
-                  return Positioned(
-                    top: 2,
-                    right: 2,
-                    child: Container(
-                      padding: const EdgeInsets.all(2),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFE53935),
-                        shape: BoxShape.circle,
-                      ),
-                      constraints: const BoxConstraints(
-                        minWidth: 16,
-                        minHeight: 16,
-                      ),
-                      child: Center(
-                        child: Text(
-                          '$count',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                }),
-              ],
-            ),
-          ),
-
-          // Icon Profile Lingkaran
-          Container(
-            width: 40,
-            height: 40,
-            margin: const EdgeInsets.only(right: 16),
-            decoration: const BoxDecoration(
-              color: Color(0xFFE6F5F2),
-              shape: BoxShape.circle,
-            ),
-            child: IconButton(
-              padding: EdgeInsets.zero,
-              icon: const Icon(
-                Icons.person,
-                color: Color(0xFF50C8A8),
-                size: 24,
-              ),
-              onPressed: () {
-                Get.to(() => const ProfilAndaPage());
-              },
-            ),
-          ),
-        ],
-        // Garis Pembatas Gradasi Warna di Bawah AppBar
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(3.0),
-          child: Container(
-            height: 3.0,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Color(0xFFA2E0D0),
-                  Color(0xFFC7D3B0),
-                ],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-              ),
-            ),
-          ),
-        ),
-      ),
+      appBar: buildUserTopBar(context),
       body: Column(
         children: [
           // Header Search Bar & Filter Chips
           Container(
-            color: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.03),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
             child: Column(
               children: [
                 // 1. Search Input Field
@@ -251,35 +146,15 @@ class _UserArtikelListPageState extends State<UserArtikelListPage> {
                     itemBuilder: (context, index) {
                       final kat = _kategoriList[index];
                       final isSelected = _selectedKategori == kat;
-                      return InkWell(
-                        onTap: () {
-                          setState(() => _selectedKategori = kat);
-                        },
-                        borderRadius: BorderRadius.circular(10),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: isSelected ? lightTealBg : Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: isSelected
-                                  ? primaryTeal
-                                  : Colors.grey.shade300,
-                              width: 1.2,
-                            ),
-                          ),
-                          child: Text(
-                            kat,
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: isSelected
-                                  ? FontWeight.w600
-                                  : FontWeight.normal,
-                              color: isSelected
-                                  ? primaryTeal
-                                  : Colors.grey.shade700,
-                            ),
+                      return ChoiceChip(
+                        label: Text(
+                          kat,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                            color: isSelected ? Colors.white : Colors.black87,
                           ),
                         ),
                       );
@@ -293,9 +168,9 @@ class _UserArtikelListPageState extends State<UserArtikelListPage> {
           // Detail List Artikel
           Expanded(
             child: Obx(() {
-              if (controller.isLoading.value && controller.artikelList.isEmpty) {
-                return const Center(
-                    child: CircularProgressIndicator(color: primaryTeal));
+              if (controller.isLoading.value &&
+                  controller.artikelList.isEmpty) {
+                return const Center(child: CircularProgressIndicator());
               }
 
               final filteredList = _filterArtikel(controller.artikelList);
@@ -305,15 +180,20 @@ class _UserArtikelListPageState extends State<UserArtikelListPage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.article_outlined,
-                          size: 64, color: Colors.grey.shade400),
+                      Icon(
+                        Icons.article_outlined,
+                        size: 64,
+                        color: Colors.grey.shade400,
+                      ),
                       const SizedBox(height: 12),
                       Text(
                         _searchQuery.isNotEmpty || _selectedKategori != 'Semua'
                             ? 'Artikel tidak ditemukan'
                             : 'Belum ada artikel edukasi',
                         style: const TextStyle(
-                            fontSize: 15, color: Colors.grey),
+                          fontSize: 15,
+                          color: Colors.grey,
+                        ),
                       ),
                     ],
                   ),
@@ -321,49 +201,17 @@ class _UserArtikelListPageState extends State<UserArtikelListPage> {
               }
 
               return RefreshIndicator(
-                color: primaryTeal,
                 onRefresh: () async {
+                  // Memberikan respon visual saat user melakukan tarik-untuk-refresh
                   await Future.delayed(const Duration(milliseconds: 500));
                 },
-                child: ListView(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  children: [
-                    // Section Featured Carousel
-                    if (filteredList.isNotEmpty) ...[
-                      SizedBox(
-                        height: 170,
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          itemCount: filteredList.length > 5
-                              ? 5
-                              : filteredList.length,
-                          itemBuilder: (context, index) {
-                            final item = filteredList[index];
-                            return _FeaturedArtikelCard(artikel: item);
-                          },
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                    ],
-
-                    // Section Daftar Artikel Vertikal
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: ListView.separated(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: filteredList.length,
-                        separatorBuilder: (_, __) =>
-                            const SizedBox(height: 12),
-                        itemBuilder: (context, index) {
-                          final artikel = filteredList[index];
-                          return _ArtikelUserCard(artikel: artikel);
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                  ],
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: filteredList.length,
+                  itemBuilder: (context, index) {
+                    final artikel = filteredList[index];
+                    return _ArtikelUserCard(artikel: artikel);
+                  },
                 ),
               );
             }),
@@ -495,21 +343,99 @@ class _ArtikelUserCard extends StatelessWidget {
                   width: 90,
                   height: 80,
                   color: Colors.teal.shade50,
-                  child: artikel.gambarUrl != null &&
-                          artikel.gambarUrl!.isNotEmpty
-                      ? Image.network(
-                          artikel.gambarUrl!,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => const Center(
-                            child: Icon(Icons.broken_image,
-                                color: primaryTeal, size: 28),
+                  child: const Icon(Icons.broken_image, color: Colors.teal),
+                ),
+              )
+            else
+              Container(
+                height: 120,
+                color: Colors.teal.shade50,
+                width: double.infinity,
+                child: const Icon(Icons.article, size: 48, color: Colors.teal),
+              ),
+
+            // Text Content
+            Padding(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.teal.shade50,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          artikel.kategori,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.teal,
                           ),
                         )
                       : const Center(
                           child: Icon(Icons.article,
                               size: 36, color: primaryTeal),
                         ),
-                ),
+                      ),
+                      Text(
+                        _formatTanggal(artikel.tanggalUpload),
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    artikel.judul,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      height: 1.2,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    artikel.ringkasan,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey.shade700,
+                      height: 1.3,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  const Row(
+                    children: [
+                      Text(
+                        'Baca Selengkapnya',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.teal,
+                        ),
+                      ),
+                      SizedBox(width: 4),
+                      Icon(
+                        Icons.arrow_forward_ios,
+                        size: 12,
+                        color: Colors.teal,
+                      ),
+                    ],
+                  ),
+                ],
               ),
               const SizedBox(width: 12),
 

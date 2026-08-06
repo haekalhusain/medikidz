@@ -31,7 +31,9 @@ class _AkunSayaPageState extends State<AkunSayaPage> {
             _buildPillToggle(),
             const SizedBox(height: 20),
             Expanded(
-              child: _tabIndex == 0 ? const _DataPersonalTab() : const _DataAnakTab(),
+              child: _tabIndex == 0
+                  ? const _DataPersonalTab()
+                  : const _DataAnakTab(),
             ),
           ],
         ),
@@ -134,8 +136,12 @@ class _DataPersonalTabState extends State<_DataPersonalTab> {
       nama: _namaController.text.trim(),
       noHp: _noHpController.text.trim(),
       role: 'user',
-      email: _emailController.text.trim().isEmpty ? null : _emailController.text.trim(),
-      alamat: _alamatController.text.trim().isEmpty ? null : _alamatController.text.trim(),
+      email: _emailController.text.trim().isEmpty
+          ? null
+          : _emailController.text.trim(),
+      alamat: _alamatController.text.trim().isEmpty
+          ? null
+          : _alamatController.text.trim(),
     );
 
     try {
@@ -151,11 +157,15 @@ class _DataPersonalTabState extends State<_DataPersonalTab> {
         ),
       );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Data personal disimpan.')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Data personal disimpan.')),
+        );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Gagal menyimpan: $e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Gagal menyimpan: $e')));
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -174,11 +184,20 @@ class _DataPersonalTabState extends State<_DataPersonalTab> {
         const SizedBox(height: 16),
         const Text('No.Telp', style: TextStyle(fontWeight: FontWeight.w600)),
         const SizedBox(height: 6),
-        _FieldBox(controller: _noHpController, keyboardType: TextInputType.phone),
+        _FieldBox(
+          controller: _noHpController,
+          keyboardType: TextInputType.phone,
+        ),
         const SizedBox(height: 16),
-        const Text('E-Mail (opsional)', style: TextStyle(fontWeight: FontWeight.w600)),
+        const Text(
+          'E-Mail (opsional)',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
         const SizedBox(height: 6),
-        _FieldBox(controller: _emailController, keyboardType: TextInputType.emailAddress),
+        _FieldBox(
+          controller: _emailController,
+          keyboardType: TextInputType.emailAddress,
+        ),
         const SizedBox(height: 16),
         const Text('Alamat', style: TextStyle(fontWeight: FontWeight.w600)),
         const SizedBox(height: 6),
@@ -190,13 +209,24 @@ class _DataPersonalTabState extends State<_DataPersonalTab> {
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.teal,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+              ),
             ),
             onPressed: _isSaving ? null : _submit,
             child: _isSaving
                 ? const SizedBox(
-                    height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                : const Text('Selesai', style: TextStyle(color: Colors.white, fontSize: 16)),
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Text(
+                    'Selesai',
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
           ),
         ),
       ],
@@ -256,14 +286,18 @@ class _DataAnakTabState extends State<_DataAnakTab> {
       namaAnak: _namaAnakController.text.trim(),
       tanggalLahir: _tanggalLahir ?? anak.tanggalLahir,
       jenisKelamin: _jenisKelamin,
-      nik: _nikController.text.trim().isEmpty ? null : _nikController.text.trim(),
+      nik: _nikController.text.trim().isEmpty
+          ? null
+          : _nikController.text.trim(),
     );
 
     final success = await controller.updateData(anak.id!, updated);
     if (mounted) {
       setState(() => _isSaving = false);
       if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Data anak disimpan.')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Data anak disimpan.')));
       }
     }
   }
@@ -274,7 +308,9 @@ class _DataAnakTabState extends State<_DataAnakTab> {
     final uid = AuthService().currentUser?.uid;
 
     return Obx(() {
-      final anakSaya = controller.anakList.where((a) => a.idUser == uid).toList();
+      final anakSaya = controller.anakList
+          .where((a) => a.idUser == uid)
+          .toList();
 
       if (anakSaya.isEmpty) {
         return Center(
@@ -304,10 +340,21 @@ class _DataAnakTabState extends State<_DataAnakTab> {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                decoration: BoxDecoration(color: Colors.teal, borderRadius: BorderRadius.circular(20)),
-                child: Text('Profil Anak ${_selectedIndex + 1}',
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.teal,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  'Profil Anak ${_selectedIndex + 1}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
               const Spacer(),
               Container(
@@ -320,7 +367,10 @@ class _DataAnakTabState extends State<_DataAnakTab> {
                   child: DropdownButton<int>(
                     value: _selectedIndex,
                     icon: const Icon(Icons.arrow_drop_down, color: Colors.teal),
-                    style: const TextStyle(color: Colors.teal, fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                      color: Colors.teal,
+                      fontWeight: FontWeight.w600,
+                    ),
                     items: List.generate(
                       anakSaya.length,
                       (i) => DropdownMenuItem(
@@ -332,25 +382,35 @@ class _DataAnakTabState extends State<_DataAnakTab> {
                         ),
                       ),
                     ),
-                    onChanged: (value) => setState(() => _selectedIndex = value ?? 0),
+                    onChanged: (value) =>
+                        setState(() => _selectedIndex = value ?? 0),
                   ),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 20),
-          const Text('Nama Anak', style: TextStyle(fontWeight: FontWeight.w600)),
+          const Text(
+            'Nama Anak',
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
           const SizedBox(height: 6),
           _FieldBox(controller: _namaAnakController),
           const SizedBox(height: 16),
-          const Text('Tanggal Lahir', style: TextStyle(fontWeight: FontWeight.w600)),
+          const Text(
+            'Tanggal Lahir',
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
           const SizedBox(height: 6),
           InkWell(
             onTap: _pickDate,
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-              decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(12)),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(12),
+              ),
               child: Text(
                 _tanggalLahir == null
                     ? 'Pilih tanggal'
@@ -359,11 +419,17 @@ class _DataAnakTabState extends State<_DataAnakTab> {
             ),
           ),
           const SizedBox(height: 16),
-          const Text('Jenis Kelamin', style: TextStyle(fontWeight: FontWeight.w600)),
+          const Text(
+            'Jenis Kelamin',
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
           const SizedBox(height: 6),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14),
-            decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(12)),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
                 value: _jenisKelamin,
@@ -371,29 +437,37 @@ class _DataAnakTabState extends State<_DataAnakTab> {
                 items: [
                   DropdownMenuItem(
                     value: 'laki-laki',
-                    child: Row(children: const [
-                      Icon(Icons.male, color: Colors.blue, size: 20),
-                      SizedBox(width: 8),
-                      Text('Laki-laki'),
-                    ]),
+                    child: Row(
+                      children: const [
+                        Icon(Icons.male, color: Colors.blue, size: 20),
+                        SizedBox(width: 8),
+                        Text('Laki-laki'),
+                      ],
+                    ),
                   ),
                   DropdownMenuItem(
                     value: 'perempuan',
-                    child: Row(children: const [
-                      Icon(Icons.female, color: Colors.pink, size: 20),
-                      SizedBox(width: 8),
-                      Text('Perempuan'),
-                    ]),
+                    child: Row(
+                      children: const [
+                        Icon(Icons.female, color: Colors.pink, size: 20),
+                        SizedBox(width: 8),
+                        Text('Perempuan'),
+                      ],
+                    ),
                   ),
                 ],
-                onChanged: (value) => setState(() => _jenisKelamin = value ?? 'laki-laki'),
+                onChanged: (value) =>
+                    setState(() => _jenisKelamin = value ?? 'laki-laki'),
               ),
             ),
           ),
           const SizedBox(height: 16),
           const Text('NIK', style: TextStyle(fontWeight: FontWeight.w600)),
           const SizedBox(height: 6),
-          _FieldBox(controller: _nikController, keyboardType: TextInputType.number),
+          _FieldBox(
+            controller: _nikController,
+            keyboardType: TextInputType.number,
+          ),
           const SizedBox(height: 20),
           SizedBox(
             width: double.infinity,
@@ -402,7 +476,9 @@ class _DataAnakTabState extends State<_DataAnakTab> {
               style: OutlinedButton.styleFrom(
                 foregroundColor: Colors.teal,
                 side: const BorderSide(color: Colors.teal),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
               ),
               onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const TambahAnakUserPage()),
@@ -418,13 +494,24 @@ class _DataAnakTabState extends State<_DataAnakTab> {
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.teal,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
               ),
               onPressed: _isSaving ? null : () => _submit(controller, anak),
               child: _isSaving
                   ? const SizedBox(
-                      height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                  : const Text('Selesai', style: TextStyle(color: Colors.white, fontSize: 16)),
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Text(
+                      'Selesai',
+                      style: TextStyle(color: Colors.white, fontSize: 16),
+                    ),
             ),
           ),
         ],
@@ -447,8 +534,14 @@ class _FieldBox extends StatelessWidget {
       decoration: InputDecoration(
         filled: true,
         fillColor: Colors.grey.shade100,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 14,
+        ),
       ),
     );
   }

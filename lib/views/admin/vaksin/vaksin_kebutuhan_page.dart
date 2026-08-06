@@ -5,6 +5,7 @@ import '../../../controllers/jadwal_controller.dart';
 import '../../../controllers/jadwal_master_controller.dart';
 import '../../../controllers/vaksin_controller.dart';
 import '../../../services/jadwal_schedule_service.dart';
+import '../widgets/admin_header.dart';
 
 /// Halaman "Kebutuhan Vaksin": menghitung otomatis berapa dosis tiap jenis
 /// vaksin yang dibutuhkan bulan ini (berdasarkan jadwal imunisasi seharusnya
@@ -28,7 +29,8 @@ class VaksinKebutuhanPage extends StatelessWidget {
     final namaBulan = _namaBulan(now.month);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Kebutuhan Vaksin')),
+      backgroundColor: const Color(0xFFF4F7F6),
+      appBar: buildAdminTopBar(context),
       body: Obx(() {
         if (masterController.jadwalMasterList.isEmpty) {
           return const Center(
@@ -37,6 +39,7 @@ class VaksinKebutuhanPage extends StatelessWidget {
               child: Text(
                 'Jadwal master belum diisi. Isi dulu lewat menu "Jadwal Master" di dashboard.',
                 textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.black54, fontSize: 14),
               ),
             ),
           );
@@ -51,39 +54,109 @@ class VaksinKebutuhanPage extends StatelessWidget {
         );
 
         final totalKekurangan = kebutuhan.fold<int>(0, (sum, k) => sum + k.kekurangan);
+        final totalJenis = kebutuhan.length;
+        final totalCukup = kebutuhan.where((k) => k.cukup && k.terdaftarDiStok).length;
+        final totalKurang = kebutuhan.where((k) => !k.cukup && k.terdaftarDiStok).length;
+        final totalBelumTerdaftar = kebutuhan.where((k) => !k.terdaftarDiStok).length;
 
         return ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            Text(
-              'Estimasi Kebutuhan - $namaBulan ${now.year}',
-              style: Theme.of(context).textTheme.titleMedium,
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.03),
+                    blurRadius: 18,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Estimasi Kebutuhan - $namaBulan ${now.year}',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Dihitung dari jadwal imunisasi seharusnya seluruh anak yang belum direalisasikan, dibandingkan dengan stok vaksin saat ini.',
+                    style: TextStyle(color: Colors.black54, fontSize: 13, height: 1.5),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 4),
-            const Text(
-              'Dihitung dari jadwal imunisasi seharusnya seluruh anak yang belum '
-              'direalisasikan, dibandingkan dengan stok vaksin saat ini.',
-              style: TextStyle(color: Colors.black54, fontSize: 12),
+            const SizedBox(height: 18),
+            Row(
+              children: [
+                Expanded(
+                  child: _SummaryBadge(
+                    title: 'Jenis',
+                    value: '$totalJenis',
+                    color: const Color(0xFF00A88F),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _SummaryBadge(
+                    title: 'Cukup',
+                    value: '$totalCukup',
+                    color: const Color(0xFF4CAF50),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: _SummaryBadge(
+                    title: 'Kurang',
+                    value: '$totalKurang',
+                    color: const Color(0xFFE55335),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _SummaryBadge(
+                    title: 'Belum Daftar',
+                    value: '$totalBelumTerdaftar',
+                    color: const Color(0xFF7B8FA1),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
             if (totalKekurangan > 0)
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(14),
                 margin: const EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.06),
-                  border: Border.all(color: Colors.red.withOpacity(0.4)),
-                  borderRadius: BorderRadius.circular(10),
+                  color: const Color(0xFFFFEBEB),
+                  border: Border.all(color: const Color(0xFFF4C1C0)),
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.warning_amber_rounded, color: Colors.red, size: 20),
-                    const SizedBox(width: 8),
+                    const Icon(Icons.warning_amber_rounded, color: Color(0xFFE55335), size: 20),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        'Ada $totalKekurangan dosis (gabungan semua jenis) yang stoknya belum cukup.',
-                        style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w600, fontSize: 13),
+                        'Ada $totalKekurangan dosis yang stoknya belum cukup. Segera lengkapi stok vaksin yang kurang.',
+                        style: const TextStyle(
+                          color: Color(0xFFE55335),
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
                       ),
                     ),
                   ],
@@ -93,11 +166,15 @@ class VaksinKebutuhanPage extends StatelessWidget {
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 24),
                 child: Center(
-                  child: Text('Tidak ada jadwal imunisasi yang jatuh bulan ini.'),
+                  child: Text(
+                    'Tidak ada jadwal imunisasi yang jatuh bulan ini.',
+                    style: TextStyle(color: Colors.black54, fontSize: 14),
+                  ),
                 ),
               )
             else
               ...kebutuhan.map((k) => _KebutuhanCard(kebutuhan: k)),
+            const SizedBox(height: 24),
           ],
         );
       }),
@@ -119,69 +196,102 @@ class _KebutuhanCard extends StatelessWidget {
   const _KebutuhanCard({required this.kebutuhan});
 
   Color get _accentColor {
-    if (!kebutuhan.terdaftarDiStok) return Colors.grey;
-    return kebutuhan.cukup ? Colors.teal : Colors.red;
+    if (!kebutuhan.terdaftarDiStok) return const Color(0xFF7B8FA1);
+    return kebutuhan.cukup ? const Color(0xFF00A88F) : const Color(0xFFE55335);
+  }
+
+  String get _statusLabel {
+    if (!kebutuhan.terdaftarDiStok) return 'Belum terdaftar';
+    return kebutuhan.cukup ? 'Stok Cukup' : 'Stok Kurang';
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
-        color: _accentColor.withOpacity(0.06),
-        border: Border.all(color: _accentColor.withOpacity(0.5)),
-        borderRadius: BorderRadius.circular(12),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+            decoration: BoxDecoration(
+              color: _accentColor.withOpacity(0.08),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            child: Row(
               children: [
-                Icon(Icons.vaccines, color: _accentColor, size: 20),
-                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: _accentColor.withOpacity(0.16),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.vaccines, color: _accentColor, size: 20),
+                ),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     kebutuhan.namaVaksin,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Colors.black87,
+                    ),
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: _accentColor,
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(18),
                   ),
                   child: Text(
-                    !kebutuhan.terdaftarDiStok
-                        ? 'Belum ada di stok'
-                        : (kebutuhan.cukup ? 'Stok Cukup' : 'Stok Kurang'),
-                    style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600),
+                    _statusLabel,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 10),
-            Row(
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+            child: Row(
               children: [
-                _statBlock('Dibutuhkan', '${kebutuhan.dibutuhkan}'),
-                const SizedBox(width: 20),
-                _statBlock('Stok Tersedia', '${kebutuhan.stokTersedia}'),
-                const SizedBox(width: 20),
-                _statBlock('Kekurangan', '${kebutuhan.kekurangan}'),
+                Expanded(child: _statBlock('Dibutuhkan', '${kebutuhan.dibutuhkan}')),
+                Expanded(child: _statBlock('Stok Tersedia', '${kebutuhan.stokTersedia}')),
+                Expanded(child: _statBlock('Kekurangan', '${kebutuhan.kekurangan}')),
               ],
             ),
-            if (!kebutuhan.terdaftarDiStok) ...[
-              const SizedBox(height: 8),
-              const Text(
-                'Vaksin ini belum terdaftar di menu Data Vaksin, jadi stoknya dianggap 0. '
-                'Tambahkan datanya supaya perbandingan stok akurat.',
-                style: TextStyle(fontSize: 11, color: Colors.black54, fontStyle: FontStyle.italic),
+          ),
+          if (!kebutuhan.terdaftarDiStok)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+              decoration: const BoxDecoration(
+                color: Color(0xFFF7F8FA),
+                borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
               ),
-            ],
-          ],
-        ),
+              child: const Text(
+                'Vaksin ini belum terdaftar di menu Data Vaksin, jadi stoknya dianggap 0. Tambahkan datanya supaya perbandingan stok akurat.',
+                style: TextStyle(fontSize: 12, color: Colors.black54, height: 1.4),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -190,9 +300,50 @@ class _KebutuhanCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontSize: 11, color: Colors.black54)),
-        Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        Text(label, style: const TextStyle(fontSize: 12, color: Colors.black45)),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+        ),
       ],
+    );
+  }
+}
+
+class _SummaryBadge extends StatelessWidget {
+  final String title;
+  final String value;
+  final Color color;
+
+  const _SummaryBadge({
+    required this.title,
+    required this.value,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(color: color.withOpacity(0.9), fontSize: 12, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            value,
+            style: TextStyle(color: color, fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
     );
   }
 }
