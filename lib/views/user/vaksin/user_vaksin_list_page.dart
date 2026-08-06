@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:medikidz/views/notification/notifikasi_page.dart';
 import 'package:medikidz/views/user/profile/profil_anda_page.dart';
 import '../../../controllers/vaksin_controller.dart';
 import '../../../models/vaksin_model.dart';
-// Import file profil anda (menggunakan huruf "i" pada profil)
 
-/// Info vaksin buat user -- read-only, cuma nampilin nama, kategori,
-/// stok, status, dan info edukasi (subjudul+isi). Tidak ada tombol tambah/edit/hapus,
-/// itu wewenang admin.
 class UserVaksinListPage extends StatelessWidget {
   const UserVaksinListPage({super.key});
 
@@ -15,107 +12,134 @@ class UserVaksinListPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.put(VaksinController());
 
+    // Contoh variabel jumlah notifikasi (bisa disesuaikan dari controller/state management Anda)
+    final int unreadNotificationCount = 0;
+
     // Color Palette
     const primaryTeal = Color(0xFF52C49C);
-    const lightTealBg = Color(0xFFE8F7F2);
 
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        scrolledUnderElevation: 0,
         automaticallyImplyLeading: false,
+        titleSpacing: 16,
         title: const Text(
           'Detail Vaksin',
           style: TextStyle(
             color: Colors.black,
-            fontSize: 18,
+            fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
         ),
         actions: [
-          // Icon Notifikasi
-          Center(
-            child: Container(
-              margin: const EdgeInsets.only(right: 10),
-              decoration: const BoxDecoration(
-                color: lightTealBg,
-                shape: BoxShape.circle,
-              ),
-              child: Stack(
-                children: [
-                  IconButton(
+          // Icon Notifikasi Lingkaran dengan Badge Dinamis
+          Container(
+            width: 40,
+            height: 40,
+            margin: const EdgeInsets.only(right: 12),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFE6F5F2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: IconButton(
+                    padding: EdgeInsets.zero,
                     icon: const Icon(
                       Icons.notifications_none_rounded,
-                      color: primaryTeal,
-                      size: 22,
+                      color: Color(0xFF50C8A8),
+                      size: 24,
                     ),
-                    onPressed: () {},
+                    onPressed: () {
+                      Get.to(() => const NotifikasiPage());
+                    },
                   ),
+                ),
+                // Bulatan merah dan angka hanya muncul jika ada notifikasi (> 0)
+                if (unreadNotificationCount > 0)
                   Positioned(
-                    right: 8,
-                    top: 8,
+                    top: 2,
+                    right: 2,
                     child: Container(
-                      padding: const EdgeInsets.all(3),
+                      padding: const EdgeInsets.all(2),
                       decoration: const BoxDecoration(
-                        color: Colors.red,
+                        color: Color(0xFFE53935),
                         shape: BoxShape.circle,
                       ),
                       constraints: const BoxConstraints(
-                        minWidth: 14,
-                        minHeight: 14,
+                        minWidth: 16,
+                        minHeight: 16,
                       ),
-                      child: const Text(
-                        '3',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 8,
-                          fontWeight: FontWeight.bold,
+                      child: Center(
+                        child: Text(
+                          '$unreadNotificationCount',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                        textAlign: TextAlign.center,
                       ),
                     ),
                   ),
-                ],
-              ),
+              ],
             ),
           ),
 
-          // Icon Profile (Mengarahkan ke ProfilAndaPage)
-          Center(
-            child: Container(
-              margin: const EdgeInsets.only(right: 16),
-              decoration: const BoxDecoration(
-                color: lightTealBg,
-                shape: BoxShape.circle,
+          // Icon Profile Lingkaran
+          Container(
+            width: 40,
+            height: 40,
+            margin: const EdgeInsets.only(right: 16),
+            decoration: const BoxDecoration(
+              color: Color(0xFFE6F5F2),
+              shape: BoxShape.circle,
+            ),
+            child: IconButton(
+              padding: EdgeInsets.zero,
+              icon: const Icon(
+                Icons.person,
+                color: Color(0xFF50C8A8),
+                size: 24,
               ),
-              child: IconButton(
-                icon: const Icon(
-                  Icons.person,
-                  color: primaryTeal,
-                  size: 24,
-                ),
-                onPressed: () {
-                  Get.to(() => const ProfilAndaPage());
-                },
-              ),
+              onPressed: () {
+                Get.to(() => const ProfilAndaPage());
+              },
             ),
           ),
         ],
+        // Garis Pembatas Gradasi Warna di Bawah AppBar
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(3.0),
+          child: Container(
+            height: 3.0,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFFA2E0D0),
+                  Color(0xFFC7D3B0),
+                ],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+              ),
+            ),
+          ),
+        ),
       ),
       body: Column(
         children: [
-          // Banner Informasi Penting (Garis Atas & Bawah Abu-abu)
+          // Banner Informasi Penting
           Container(
             width: double.infinity,
-            decoration: BoxDecoration(
-              color: const Color(0xFFF9F9F9),
-              border: Border(
-                top: BorderSide(color: Colors.grey.shade300, width: 1),
-                bottom: BorderSide(color: Colors.grey.shade300, width: 1),
-              ),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            color: const Color(0xFFFAFAFA),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
             child: const Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -123,40 +147,50 @@ class UserVaksinListPage extends StatelessWidget {
                   'Informasi Penting',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 14,
+                    fontSize: 15,
                     color: Colors.black,
                   ),
                 ),
-                SizedBox(height: 4),
+                SizedBox(height: 8),
                 Text(
                   'Silakan cek ketersediaan stok vaksin sebelum datang ke klinik.\nStatus stok diperbarui otomatis oleh sistem apotek klinik.',
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 13,
                     color: Colors.black87,
-                    height: 1.3,
+                    height: 1.35,
                   ),
                 ),
               ],
             ),
           ),
 
-          const SizedBox(height: 8),
-
-          // Header Banner Toska
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            color: primaryTeal,
-            child: const Center(
-              child: Text(
-                'Daftar Stok Vaksinasi',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
+          // Header Banner "Daftar Stok Vaksinasi"
+          Column(
+            children: [
+              // Stripe Mint Muda tanpa border
+              Container(
+                width: double.infinity,
+                height: 12,
+                color: const Color(0xFFC2E9DC),
+              ),
+              // Body Banner Teal Solid
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                color: primaryTeal,
+                child: const Center(
+                  child: Text(
+                    'Daftar Stok Vaksinasi',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
                 ),
               ),
-            ),
+            ],
           ),
 
           // Content / Listing Kartu Vaksin
@@ -230,7 +264,7 @@ class UserVaksinListPage extends StatelessWidget {
   }
 }
 
-/// Custom Card Widget Presisi
+/// Custom Card Widget
 class _UserVaksinCard extends StatefulWidget {
   final Vaksin vaksin;
   final List<Widget> informasiChildren;
@@ -294,7 +328,6 @@ class _UserVaksinCardState extends State<_UserVaksinCard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 1. Header Kartu (Nama Vaksin & Tombol Lihat Detail)
               Padding(
                 padding: const EdgeInsets.fromLTRB(14, 12, 14, 10),
                 child: Row(
@@ -316,11 +349,11 @@ class _UserVaksinCardState extends State<_UserVaksinCard> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: _accentColor.withOpacity(0.5),
+                        color: _accentColor.withValues(alpha: 0.5),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: const Row(
-                        mainAxisSize: MainAxisSize.min,
+                        mainAxisSize: MainAxisSize.min, // Perbaikan typo: MinAxisSize -> MainAxisSize
                         children: [
                           Text(
                             'Lihat Detail',
@@ -342,15 +375,11 @@ class _UserVaksinCardState extends State<_UserVaksinCard> {
                   ],
                 ),
               ),
-
-              // 2. Garis Pemisah (Divider)
               Divider(
                 height: 1,
                 thickness: 1,
-                color: Colors.black.withOpacity(0.15),
+                color: Colors.black.withValues(alpha: 0.15),
               ),
-
-              // 3. Konten Utama Card
               Padding(
                 padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
                 child: Column(
@@ -397,13 +426,11 @@ class _UserVaksinCardState extends State<_UserVaksinCard> {
                   ],
                 ),
               ),
-
-              // 4. Detail tambahan saat kartu diklik
               if (_isExpanded) ...[
                 Divider(
                   height: 1,
                   thickness: 1,
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                 ),
                 const SizedBox(height: 8),
                 ...widget.informasiChildren,

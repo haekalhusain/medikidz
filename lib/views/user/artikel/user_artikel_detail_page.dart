@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:medikidz/views/notification/notifikasi_page.dart';
 import 'package:medikidz/views/user/profile/profil_anda_page.dart';
+import '../../../controllers/notifikasi_controller.dart';
 import '../../../models/artikel_model.dart';
 import '../../../utils/date_formatter.dart';
 // Import file profil anda (sesuaikan path foldernya jika perlu)
@@ -17,6 +19,10 @@ class UserArtikelDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final notifikasiController = Get.isRegistered<NotifikasiController>()
+        ? Get.find<NotifikasiController>()
+        : Get.put(NotifikasiController());
+
     const primaryTeal = Color(0xFF52C49C);
     const lightTealBg = Color(0xFFE8F7F2);
 
@@ -62,32 +68,39 @@ class UserArtikelDetailPage extends StatelessWidget {
                       color: primaryTeal,
                       size: 22,
                     ),
-                    onPressed: () {},
+                    onPressed: () {
+                      Get.to(() => const NotifikasiPage());
+                    },
                   ),
-                  Positioned(
-                    right: 8,
-                    top: 8,
-                    child: Container(
-                      padding: const EdgeInsets.all(3),
-                      decoration: const BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
-                      ),
-                      constraints: const BoxConstraints(
-                        minWidth: 14,
-                        minHeight: 14,
-                      ),
-                      child: const Text(
-                        '3',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 8,
-                          fontWeight: FontWeight.bold,
+                  Obx(() {
+                    final count = notifikasiController.unreadCount.value;
+                    if (count <= 0) return const SizedBox.shrink();
+
+                    return Positioned(
+                      right: 8,
+                      top: 8,
+                      child: Container(
+                        padding: const EdgeInsets.all(3),
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
                         ),
-                        textAlign: TextAlign.center,
+                        constraints: const BoxConstraints(
+                          minWidth: 14,
+                          minHeight: 14,
+                        ),
+                        child: Text(
+                          '$count',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 8,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
-                    ),
-                  ),
+                    );
+                  }),
                 ],
               ),
             ),
@@ -119,24 +132,27 @@ class UserArtikelDetailPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. Gambar Banner Artikel
-            Container(
-              width: double.infinity,
-              height: 220,
-              color: lightTealBg,
-              child: artikel.gambarUrl != null && artikel.gambarUrl!.isNotEmpty
-                  ? Image.network(
-                      artikel.gambarUrl!,
-                      width: double.infinity,
-                      height: 220,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => const Center(
-                        child: Icon(Icons.broken_image, size: 50, color: primaryTeal),
+            // 1. Gambar Banner Artikel (Diberi padding atas saja, tanpa rounded)
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: Container(
+                width: double.infinity,
+                height: 220,
+                color: lightTealBg,
+                child: artikel.gambarUrl != null && artikel.gambarUrl!.isNotEmpty
+                    ? Image.network(
+                        artikel.gambarUrl!,
+                        width: double.infinity,
+                        height: 220,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => const Center(
+                          child: Icon(Icons.broken_image, size: 50, color: primaryTeal),
+                        ),
+                      )
+                    : const Center(
+                        child: Icon(Icons.article, size: 60, color: primaryTeal),
                       ),
-                    )
-                  : const Center(
-                      child: Icon(Icons.article, size: 60, color: primaryTeal),
-                    ),
+              ),
             ),
 
             // 2. Header Artikel (Badge Kategori, Judul, Tanggal)

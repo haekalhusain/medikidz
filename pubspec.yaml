@@ -4,12 +4,15 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 environment:
   sdk: ^3.10.7
+
 dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
   # State management (dipakai di semua Controller)
   get: ^4.6.6
+  # Storage lokal untuk simpan data bookmark/pilihan user
+  get_storage: ^2.1.1
   # Firebase
   firebase_core: ^4.13.0
   firebase_auth: ^6.5.7
