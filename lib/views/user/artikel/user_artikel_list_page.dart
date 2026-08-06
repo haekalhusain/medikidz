@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:medikidz/views/notification/notifikasi_page.dart';
-import 'package:medikidz/views/user/profile/profil_anda_page.dart';
 import '../../../controllers/artikel_controller.dart';
-import '../../../controllers/notifikasi_controller.dart'; // 1. Tambahkan import NotifikasiController
 import '../../../models/artikel_model.dart';
 import '../../../utils/date_formatter.dart';
 import '../widgets/user_header.dart';
@@ -23,8 +20,6 @@ class _UserArtikelListPageState extends State<UserArtikelListPage> {
 
   final List<String> _kategoriList = [
     'Semua',
-    'Tips & Tricks',
-    'Panduan',
     'Info Vaksin',
     'Tips Kesehatan',
     'Nutrisi Anak',
@@ -58,19 +53,11 @@ class _UserArtikelListPageState extends State<UserArtikelListPage> {
   Widget build(BuildContext context) {
     final controller = Get.put(ArtikelController());
 
-    // 2. Inisialisasi NotifikasiController
-    final notifikasiController = Get.isRegistered<NotifikasiController>()
-        ? Get.find<NotifikasiController>()
-        : Get.put(NotifikasiController());
-
-    const primaryTeal = Color(0xFF52C49C);
-    const lightTealBg = Color(0xFFE8F7F2);
-
     return Scaffold(
       appBar: buildUserTopBar(context),
       body: Column(
         children: [
-          // Header Search Bar & Filter Chips
+          // Search & Filter Header Section
           Container(
             decoration: BoxDecoration(
               color: Colors.white,
@@ -86,61 +73,38 @@ class _UserArtikelListPageState extends State<UserArtikelListPage> {
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
             child: Column(
               children: [
-                // 1. Search Input Field
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Container(
-                    height: 46,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(color: Colors.grey.shade400),
-                    ),
-                    child: TextField(
-                      controller: _searchController,
-                      onChanged: (val) => setState(() => _searchQuery = val),
-                      style: const TextStyle(fontSize: 14),
-                      decoration: InputDecoration(
-                        hintText: 'Cari Artikel...',
-                        hintStyle: TextStyle(
-                            color: Colors.grey.shade500, fontSize: 14),
-                        prefixIcon: const Icon(Icons.search,
-                            color: Colors.grey, size: 20),
-                        suffixIcon: _searchQuery.isNotEmpty
-                            ? IconButton(
-                                icon: const Icon(Icons.clear,
-                                    color: Colors.grey, size: 18),
-                                onPressed: () {
-                                  _searchController.clear();
-                                  setState(() => _searchQuery = '');
-                                },
-                              )
-                            : null,
-                        border: InputBorder.none,
-                        contentPadding:
-                            const EdgeInsets.symmetric(vertical: 10),
-                      ),
+                // Search Bar
+                TextField(
+                  controller: _searchController,
+                  onChanged: (val) => setState(() => _searchQuery = val),
+                  decoration: InputDecoration(
+                    hintText: 'Cari artikel kesehatan...',
+                    prefixIcon: const Icon(Icons.search, color: Colors.teal),
+                    suffixIcon: _searchQuery.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear, color: Colors.grey),
+                            onPressed: () {
+                              _searchController.clear();
+                              setState(() => _searchQuery = '');
+                            },
+                          )
+                        : null,
+                    filled: true,
+                    fillColor: Colors.white,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 12),
 
-                // 2. Garis Pembatas FULL KIRI-KANAN
-                Divider(
-                  height: 1,
-                  thickness: 1,
-                  color: Colors.grey.shade300,
-                ),
-
-                const SizedBox(height: 12),
-
-                // 3. Horizontal Category Chips
+                // Category Chips Filter
                 SizedBox(
-                  height: 34,
+                  height: 36,
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     itemCount: _kategoriList.length,
                     separatorBuilder: (_, __) => const SizedBox(width: 8),
                     itemBuilder: (context, index) {
@@ -157,6 +121,14 @@ class _UserArtikelListPageState extends State<UserArtikelListPage> {
                             color: isSelected ? Colors.white : Colors.black87,
                           ),
                         ),
+                        selected: isSelected,
+                        selectedColor: Colors.teal,
+                        backgroundColor: Colors.white,
+                        onSelected: (bool selected) {
+                          if (selected) {
+                            setState(() => _selectedKategori = kat);
+                          }
+                        },
                       );
                     },
                   ),
@@ -165,7 +137,7 @@ class _UserArtikelListPageState extends State<UserArtikelListPage> {
             ),
           ),
 
-          // Detail List Artikel
+          // Article List View
           Expanded(
             child: Obx(() {
               if (controller.isLoading.value &&
@@ -222,91 +194,6 @@ class _UserArtikelListPageState extends State<UserArtikelListPage> {
   }
 }
 
-// Widget Tampilan Artikel Utama / Featured (Kartu Besar Horizontal)
-class _FeaturedArtikelCard extends StatelessWidget {
-  final Artikel artikel;
-
-  const _FeaturedArtikelCard({required this.artikel});
-
-  @override
-  Widget build(BuildContext context) {
-    const primaryTeal = Color(0xFF52C49C);
-
-    return Container(
-      width: 240,
-      margin: const EdgeInsets.only(right: 12),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        color: Colors.grey.shade200,
-      ),
-      child: InkWell(
-        onTap: () {
-          Get.to(() => UserArtikelDetailPage(artikel: artikel));
-        },
-        borderRadius: BorderRadius.circular(16),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
-          child: Stack(
-            children: [
-              // Gambar Artikel
-              Positioned.fill(
-                child: artikel.gambarUrl != null &&
-                        artikel.gambarUrl!.isNotEmpty
-                    ? Image.network(
-                        artikel.gambarUrl!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) =>
-                            Container(color: Colors.teal.shade100),
-                      )
-                    : Container(
-                        color: Colors.teal.shade100,
-                        child: const Icon(Icons.article,
-                            size: 48, color: primaryTeal),
-                      ),
-              ),
-
-              // Overlay Gradient Hitam di Atas Gambar
-              Positioned.fill(
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.black.withOpacity(0.0),
-                        Colors.black.withOpacity(0.75),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-
-              // Judul Artikel di Bawah Card
-              Positioned(
-                left: 12,
-                right: 12,
-                bottom: 12,
-                child: Text(
-                  artikel.judul,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    height: 1.2,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// Widget Tampilan Kartu Artikel Vertikal
 class _ArtikelUserCard extends StatelessWidget {
   final Artikel artikel;
 
@@ -318,30 +205,28 @@ class _ArtikelUserCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const primaryTeal = Color(0xFF52C49C);
-
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade300, width: 1),
-      ),
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
         onTap: () {
           Get.to(() => UserArtikelDetailPage(artikel: artikel));
         },
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Image Thumbnail di Kiri
-              ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Container(
-                  width: 90,
-                  height: 80,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Image Cover
+            if (artikel.gambarUrl != null && artikel.gambarUrl!.isNotEmpty)
+              Image.network(
+                artikel.gambarUrl!,
+                height: 160,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                // ignore: unnecessary_underscores
+                errorBuilder: (_, __, ___) => Container(
+                  height: 160,
                   color: Colors.teal.shade50,
                   child: const Icon(Icons.broken_image, color: Colors.teal),
                 ),
@@ -379,10 +264,6 @@ class _ArtikelUserCard extends StatelessWidget {
                             fontWeight: FontWeight.bold,
                             color: Colors.teal,
                           ),
-                        )
-                      : const Center(
-                          child: Icon(Icons.article,
-                              size: 36, color: primaryTeal),
                         ),
                       ),
                       Text(
@@ -437,50 +318,8 @@ class _ArtikelUserCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(width: 12),
-
-              // Detail Teks Artikel di Kanan
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      artikel.kategori,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade500,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-
-                    // Judul Artikel
-                    Text(
-                      artikel.judul,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                        height: 1.2,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-
-                    // Tanggal Upload
-                    Text(
-                      _formatTanggal(artikel.tanggalUpload),
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: Colors.grey.shade500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

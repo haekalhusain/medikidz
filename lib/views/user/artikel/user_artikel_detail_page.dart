@@ -15,10 +15,6 @@ class UserArtikelDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final notifikasiController = Get.isRegistered<NotifikasiController>()
-        ? Get.find<NotifikasiController>()
-        : Get.put(NotifikasiController());
-
     const primaryTeal = Color(0xFF52C49C);
     const lightTealBg = Color(0xFFE8F7F2);
 
@@ -34,27 +30,24 @@ class UserArtikelDetailPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. Gambar Banner Artikel (Diberi padding atas saja, tanpa rounded)
-            Padding(
-              padding: const EdgeInsets.only(top: 12),
-              child: Container(
-                width: double.infinity,
-                height: 220,
-                color: lightTealBg,
-                child: artikel.gambarUrl != null && artikel.gambarUrl!.isNotEmpty
-                    ? Image.network(
-                        artikel.gambarUrl!,
-                        width: double.infinity,
-                        height: 220,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => const Center(
-                          child: Icon(Icons.broken_image, size: 50, color: primaryTeal),
-                        ),
-                      )
-                    : const Center(
-                        child: Icon(Icons.article, size: 60, color: primaryTeal),
+            // 1. Gambar Banner Artikel
+            Container(
+              width: double.infinity,
+              height: 220,
+              color: lightTealBg,
+              child: artikel.gambarUrl != null && artikel.gambarUrl!.isNotEmpty
+                  ? Image.network(
+                      artikel.gambarUrl!,
+                      width: double.infinity,
+                      height: 220,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => const Center(
+                        child: Icon(Icons.broken_image, size: 50, color: primaryTeal),
                       ),
-              ),
+                    )
+                  : const Center(
+                      child: Icon(Icons.article, size: 60, color: primaryTeal),
+                    ),
             ),
 
             // 2. Header Artikel (Badge Kategori, Judul, Tanggal)
