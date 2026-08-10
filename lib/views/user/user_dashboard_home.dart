@@ -413,7 +413,7 @@ class _UserDashboardHomeState extends State<UserDashboardHome> {
           children: [
             buildMenuItem(
               Icons.medical_services_outlined,
-              'Tips\nMedis',
+              'Artikel',
               () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const UserArtikelListPage()),
               ),
