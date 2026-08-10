@@ -15,7 +15,7 @@ class JadwalTerjadwal {
 
   bool get sudah => realisasi != null && realisasi!.status == 'sudah imunisasi';
   bool get dilewati => realisasi != null && realisasi!.status == 'dilewati';
-  bool get tidakBisaDikejar => realisasi != null && realisasi!.status == 'tidak bisa dikejar';
+  bool get bisaDikejar => realisasi != null && realisasi!.status == 'bisa dikejar';
 
   /// True kalau jadwalnya dipindah manual sama dokter (kasus pengejaran),
   /// bukan hasil hitungan usia otomatis.
@@ -24,7 +24,7 @@ class JadwalTerjadwal {
   String get statusLabel {
     if (sudah) return 'Sudah';
     if (dilewati) return 'Dilewati';
-    if (tidakBisaDikejar) return 'Tidak Bisa Dikejar';
+    if (bisaDikejar) return 'Bisa Dikejar';
     if (tanggalJadwal.isBefore(DateTime.now())) return 'Terlambat';
     return 'Akan Datang';
   }
