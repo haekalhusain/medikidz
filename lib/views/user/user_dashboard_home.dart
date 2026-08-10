@@ -27,7 +27,9 @@ import 'artikel/user_artikel_detail_page.dart';
 import 'hubungi_klinik/hubungi_klinik_page.dart';
 
 class UserDashboardHome extends StatefulWidget {
-  const UserDashboardHome({super.key});
+  final ValueChanged<int>? onNavigateToTab;
+
+  const UserDashboardHome({super.key, this.onNavigateToTab});
 
   @override
   State<UserDashboardHome> createState() => _UserDashboardHomeState();
@@ -413,10 +415,16 @@ class _UserDashboardHomeState extends State<UserDashboardHome> {
           children: [
             buildMenuItem(
               Icons.medical_services_outlined,
-              'Tips\nMedis',
-              () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const UserArtikelListPage()),
-              ),
+              'Artikel',
+              () {
+                if (widget.onNavigateToTab != null) {
+                  widget.onNavigateToTab!(2);
+                  return;
+                }
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const UserArtikelListPage()),
+                );
+              },
             ),
             buildMenuItem(
               Icons.support_agent_rounded,
@@ -456,11 +464,17 @@ class _UserDashboardHomeState extends State<UserDashboardHome> {
                 ),
               ),
               TextButton(
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const UserArtikelListPage(),
-                  ),
-                ),
+                onPressed: () {
+                  if (widget.onNavigateToTab != null) {
+                    widget.onNavigateToTab!(2);
+                    return;
+                  }
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const UserArtikelListPage(),
+                    ),
+                  );
+                },
                 child: const Text(
                   'Lihat Semua',
                   style: TextStyle(

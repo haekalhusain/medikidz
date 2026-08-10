@@ -20,7 +20,11 @@ class AnakSayaListPage extends StatelessWidget {
     final uid = AuthService().currentUser?.uid;
 
     return Scaffold(
-      appBar: buildUserTopBar(context),
+      appBar: buildUserTopBar(
+        context,
+        hideNotification: true,
+        hideProfileIcon: true,
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => Navigator.of(context)
             .push(MaterialPageRoute(builder: (_) => const TambahAnakUserPage())),
@@ -32,126 +36,177 @@ class AnakSayaListPage extends StatelessWidget {
         backgroundColor: const Color(0xFF00A884),
       ),
       body: Obx(() {
-        if (controller.anakList.isEmpty && controller.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
         final anakSaya = controller.anakList
             .where((a) => a.idUser == uid)
             .toList();
 
-        if (anakSaya.isEmpty) {
-          return Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 20),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE8F7F2),
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: Column(
-                    children: const [
-                      Icon(Icons.family_restroom,
-                          size: 72, color: Color(0xFF00A884)),
-                      SizedBox(height: 18),
-                      Text(
-                        'Belum ada data anak',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF17394D),
-                        ),
-                      ),
-                      SizedBox(height: 10),
-                      Text(
-                        'Tambahkan anak Anda untuk melihat jadwal imunisasi dan informasi kesehatan penting.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Color(0xFF4B636E),
-                          height: 1.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          );
-        }
-
-        return ListView(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+        return Column(
           children: [
-            Container(
-              padding: const EdgeInsets.all(18),
-              decoration: BoxDecoration(
-                color: const Color(0xFFEAF7F1),
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF00A884),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: const Icon(
-                      Icons.child_care,
-                      color: Colors.white,
-                      size: 28,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Anak Saya',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFF17394D),
+            _buildPageHeader(context),
+            Expanded(
+              child: controller.anakList.isEmpty && controller.isLoading.value
+                  ? const Center(child: CircularProgressIndicator())
+                  : anakSaya.isEmpty
+                      ? Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 28, horizontal: 20),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFE8F7F2),
+                                  borderRadius: BorderRadius.circular(24),
+                                ),
+                                child: Column(
+                                  children: const [
+                                    Icon(Icons.family_restroom,
+                                        size: 72, color: Color(0xFF00A884)),
+                                    SizedBox(height: 18),
+                                    Text(
+                                      'Belum ada data anak',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w700,
+                                        color: Color(0xFF17394D),
+                                      ),
+                                    ),
+                                    SizedBox(height: 10),
+                                    Text(
+                                      'Tambahkan anak Anda untuk melihat jadwal imunisasi dan informasi kesehatan penting.',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Color(0xFF4B636E),
+                                        height: 1.5,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
+                        )
+                      : ListView(
+                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(18),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFEAF7F1),
+                                borderRadius: BorderRadius.circular(24),
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(14),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF00A884),
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: const Icon(
+                                      Icons.child_care,
+                                      color: Colors.white,
+                                      size: 28,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const Text(
+                                          'Anak Saya',
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w700,
+                                            color: Color(0xFF17394D),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 6),
+                                        Text(
+                                          '${anakSaya.length} anak terdaftar',
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            color: Color(0xFF607383),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 18),
+                            ...anakSaya.map(
+                              (anak) => Padding(
+                                padding: const EdgeInsets.only(bottom: 14),
+                                child: _AnakCard(
+                                  anak: anak,
+                                  onTap: () => Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (_) => AnakSayaJadwalPage(anak: anak),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 6),
-                        Text(
-                          '${anakSaya.length} anak terdaftar',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: Color(0xFF607383),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 18),
-            ...anakSaya.map(
-              (anak) => Padding(
-                padding: const EdgeInsets.only(bottom: 14),
-                child: _AnakCard(
-                  anak: anak,
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => AnakSayaJadwalPage(anak: anak),
-                    ),
-                  ),
-                ),
-              ),
             ),
           ],
         );
       }),
+    );
+  }
+
+  Widget _buildPageHeader(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+      child: Row(
+        children: [
+          InkWell(
+            borderRadius: BorderRadius.circular(10),
+            onTap: () => Navigator.of(context).maybePop(),
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF2F4F7),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(
+                Icons.arrow_back,
+                color: Colors.black87,
+                size: 20,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const [
+                Text(
+                  'Riwayat Imunisasi',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                SizedBox(height: 2),
+                Text(
+                  'Lihat daftar anak dan riwayat imunisasi.',
+                  style: TextStyle(fontSize: 11, color: Colors.grey),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 

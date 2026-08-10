@@ -5,6 +5,7 @@ import '../../controllers/notifikasi_controller.dart';
 import '../../models/anak_model.dart';
 import '../../models/notifikasi_model.dart';
 import 'package:medikidz/views/admin/widgets/admin_header.dart';
+import '../user/widgets/user_header.dart';
 
 class NotifikasiPage extends StatefulWidget {
   final bool adminMode;
@@ -95,34 +96,56 @@ class _NotifikasiPageState extends State<NotifikasiPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: bgLight,
-      // Menyembunyikan tombol notifikasi di AppBar khusus untuk halaman ini
-      appBar: buildAdminTopBar(context, hideNotification: true),
+      appBar: widget.adminMode
+          ? buildAdminTopBar(context, hideNotification: true)
+          : buildUserTopBar(
+              context,
+              hideNotification: true,
+              hideProfileIcon: true,
+            ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(8, 12, 16, 8),
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
             child: Row(
               children: [
-                // Tombol Kembali ke Dashboard
-                IconButton(
-                  onPressed: () => Get.back(),
-                  icon: const Icon(
-                    Icons.arrow_back_rounded,
-                    color: Color(0xFF1E293B),
-                    size: 24,
+                InkWell(
+                  borderRadius: BorderRadius.circular(10),
+                  onTap: () => Navigator.of(context).maybePop(),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF2F4F7),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.arrow_back,
+                      color: Colors.black87,
+                      size: 20,
+                    ),
                   ),
-                  tooltip: 'Kembali ke Dashboard',
                 ),
-                const SizedBox(width: 4),
-                // Judul Halaman
-                Text(
-                  widget.adminMode ? 'Notifikasi Admin' : 'Notifikasi',
-                  style: const TextStyle(
-                    color: Color(0xFF1E293B),
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: -0.5,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.adminMode ? 'Notifikasi Admin' : 'Notifikasi',
+                        style: const TextStyle(
+                          color: Color(0xFF1E293B),
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      const Text(
+                        'Daftar notifikasi dan pembaruan terbaru.',
+                        style: TextStyle(fontSize: 11, color: Colors.grey),
+                      ),
+                    ],
                   ),
                 ),
               ],

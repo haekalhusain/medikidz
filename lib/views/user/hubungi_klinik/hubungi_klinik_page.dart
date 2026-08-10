@@ -10,7 +10,6 @@ class HubungiKlinikPage extends StatelessWidget {
       backgroundColor: Colors.white,
       appBar: buildUserTopBar(
         context,
-        showBackButton: true,
         hideNotification: true,
         hideProfileIcon: true,
       ),
@@ -18,6 +17,7 @@ class HubungiKlinikPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            _buildPageHeader(context),
             // 1. Informasi Klinik & Lokasi
             Padding(
               padding: const EdgeInsets.all(20.0),
@@ -213,6 +213,53 @@ class HubungiKlinikPage extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildPageHeader(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+      child: Row(
+        children: [
+          InkWell(
+            borderRadius: BorderRadius.circular(10),
+            onTap: () => Navigator.of(context).maybePop(),
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF2F4F7),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(
+                Icons.arrow_back,
+                color: Colors.black87,
+                size: 20,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const [
+                Text(
+                  'Hubungi Klinik',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                SizedBox(height: 2),
+                Text(
+                  'Informasi kontak dan jadwal klinik Medikidz.',
+                  style: TextStyle(fontSize: 11, color: Colors.grey),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

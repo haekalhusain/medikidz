@@ -13,13 +13,22 @@ class UserShellPage extends StatefulWidget {
 
 class _UserShellPageState extends State<UserShellPage> {
   int _currentIndex = 0;
+  late final List<Widget> _pages;
 
-  final List<Widget> _pages = const [
-    UserDashboardHome(),
-    UserVaksinListPage(),
-    UserArtikelListPage(),
-    ProfilAndaPage(),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _pages = [
+      UserDashboardHome(onNavigateToTab: _navigateToTab),
+      const UserVaksinListPage(),
+      const UserArtikelListPage(),
+      const ProfilAndaPage(),
+    ];
+  }
+
+  void _navigateToTab(int index) {
+    setState(() => _currentIndex = index);
+  }
 
   // Data Item Navbar
   final List<_NavItemData> _navItems = const [

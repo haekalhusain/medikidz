@@ -25,7 +25,6 @@ class AnakSayaJadwalPage extends StatelessWidget {
     return Scaffold(
       appBar: buildUserTopBar(
         context,
-        showBackButton: true,
         hideNotification: true,
         hideProfileIcon: true,
       ),
@@ -63,6 +62,8 @@ class AnakSayaJadwalPage extends StatelessWidget {
         return ListView(
           padding: const EdgeInsets.fromLTRB(16, 18, 16, 24),
           children: [
+            _buildPageHeader(context),
+            const SizedBox(height: 18),
             _buildHeader(context),
             const SizedBox(height: 18),
             _buildSummaryCards(selesaiCount, menungguCount, terlambatCount),
@@ -102,6 +103,53 @@ class AnakSayaJadwalPage extends StatelessWidget {
           ],
         );
       }),
+    );
+  }
+
+  Widget _buildPageHeader(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+      child: Row(
+        children: [
+          InkWell(
+            borderRadius: BorderRadius.circular(10),
+            onTap: () => Navigator.of(context).maybePop(),
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF2F4F7),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(
+                Icons.arrow_back,
+                color: Colors.black87,
+                size: 20,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const [
+                Text(
+                  'Riwayat Imunisasi',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                SizedBox(height: 2),
+                Text(
+                  'Detail jadwal imunisasi dan riwayat anak Anda.',
+                  style: TextStyle(fontSize: 11, color: Colors.grey),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
