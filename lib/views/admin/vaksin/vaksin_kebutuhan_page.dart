@@ -56,8 +56,7 @@ class VaksinKebutuhanPage extends StatelessWidget {
         final totalKekurangan = kebutuhan.fold<int>(0, (sum, k) => sum + k.kekurangan);
         final totalJenis = kebutuhan.length;
         final totalCukup = kebutuhan.where((k) => k.cukup && k.terdaftarDiStok).length;
-        final totalKurang = kebutuhan.where((k) => !k.cukup && k.terdaftarDiStok).length;
-        final totalBelumTerdaftar = kebutuhan.where((k) => !k.terdaftarDiStok).length;
+
 
         return ListView(
           padding: const EdgeInsets.all(16),
@@ -99,7 +98,7 @@ class VaksinKebutuhanPage extends StatelessWidget {
               children: [
                 Expanded(
                   child: _SummaryBadge(
-                    title: 'Jenis',
+                    title: 'Jenis Vaksin',
                     value: '$totalJenis',
                     color: const Color(0xFF00A88F),
                   ),
@@ -107,33 +106,16 @@ class VaksinKebutuhanPage extends StatelessWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: _SummaryBadge(
-                    title: 'Cukup',
+                    title: 'Stok Vaksin Mencukupi',
                     value: '$totalCukup',
                     color: const Color(0xFF4CAF50),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: _SummaryBadge(
-                    title: 'Kurang',
-                    value: '$totalKurang',
-                    color: const Color(0xFFE55335),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _SummaryBadge(
-                    title: 'Belum Daftar',
-                    value: '$totalBelumTerdaftar',
-                    color: const Color(0xFF7B8FA1),
-                  ),
-                ),
-              ],
-            ),
+            
+            // Row untuk "Kurang" dan "Belum Daftar" beserta SizedBox-nya sudah DIHAPUS di sini
+            
             const SizedBox(height: 20),
             if (totalKekurangan > 0)
               Container(
