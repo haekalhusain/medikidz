@@ -146,7 +146,7 @@ class AnakJadwalPage extends StatelessWidget {
           ? Colors.green
           : j.dilewati
               ? Colors.blueGrey
-              : j.tidakBisaDikejar
+              : j.bisaDikejar
                   ? Colors.grey
                   : (j.statusLabel == 'Terlambat' ? Colors.red : Colors.orange);
       final statusValue = _currentStatusValue(j);
@@ -192,7 +192,7 @@ class AnakJadwalPage extends StatelessWidget {
                             DropdownMenuItem(value: 'belum imunisasi', child: Text('Belum Imunisasi')),
                             DropdownMenuItem(value: 'sudah imunisasi', child: Text('Sudah Imunisasi')),
                             DropdownMenuItem(value: 'dilewati', child: Text('Tidak Perlu Dikejar')),
-                            DropdownMenuItem(value: 'tidak bisa dikejar', child: Text('Tidak Bisa Dikejar')),
+                            DropdownMenuItem(value: 'bisa dikejar', child: Text('Bisa Dikejar')),
                           ],
                           onChanged: (value) {
                             if (value == null || value == statusValue) return;
@@ -220,7 +220,7 @@ class AnakJadwalPage extends StatelessWidget {
   String _currentStatusValue(JadwalTerjadwal j) {
     if (j.sudah) return 'sudah imunisasi';
     if (j.dilewati) return 'dilewati';
-    if (j.tidakBisaDikejar) return 'tidak bisa dikejar';
+    if (j.bisaDikejar) return 'bisa dikejar';
     return 'belum imunisasi';
   }
 
