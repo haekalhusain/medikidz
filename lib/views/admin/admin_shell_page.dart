@@ -3,6 +3,7 @@ import 'admin_dashboard_page.dart';
 import 'vaksin/vaksin_list_page.dart';
 import 'artikel/artikel_list_page.dart';
 import 'profile/profile_page.dart';
+import '../../services/navigation_service.dart';
 
 class AdminShellPage extends StatefulWidget {
   const AdminShellPage({super.key});
@@ -24,6 +25,16 @@ class _AdminShellPageState extends State<AdminShellPage> {
       ArtikelListPage(onNavigateToTab: _navigateToTab),
       const ProfilePage(),
     ];
+    // Announce presence of admin shell and listen to tab changes
+    NavigationService.instance.setHasAdminShell(true);
+    NavigationService.instance.adminTabNotifier.addListener(_onAdminTabChanged);
+  }
+
+  void _onAdminTabChanged() {
+    final idx = NavigationService.instance.adminTabNotifier.value;
+    // ignore: avoid_print
+    print('AdminShellPage: _onAdminTabChanged -> $idx');
+    if (mounted) setState(() => _currentIndex = idx);
   }
 
   void _navigateToTab(int index) {
@@ -129,6 +140,13 @@ class _AdminShellPageState extends State<AdminShellPage> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    NavigationService.instance.adminTabNotifier.removeListener(_onAdminTabChanged);
+    NavigationService.instance.setHasAdminShell(false);
+    super.dispose();
   }
 }
 

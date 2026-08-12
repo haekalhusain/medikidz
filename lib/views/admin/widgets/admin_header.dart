@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../notification/notifikasi_page.dart';
 import '../profile/profile_page.dart';
+import 'package:medikidz/services/navigation_service.dart';
 
 /// Header admin yang konsisten untuk halaman-halaman admin.
 /// Menyertakan logo, tombol notifikasi, tombol profil, dan garis pemisah.
@@ -127,6 +128,18 @@ PreferredSizeWidget buildAdminTopBar(
                       size: 22,
                     ),
                     onPressed: () {
+                      // Debug log to verify tap handling and shell presence.
+                      if (!Navigator.of(context).mounted) return;
+                      // ignore: avoid_print
+                      print('AdminHeader: profile pressed, hasAdminShell=${NavigationService.instance.hasAdminShell}');
+
+                      if (NavigationService.instance.hasAdminShell) {
+                        NavigationService.instance.setAdminTab(3);
+                        // ignore: avoid_print
+                        print('AdminHeader: switched admin shell to profile tab (3)');
+                        return;
+                      }
+
                       Navigator.of(context).push(
                         MaterialPageRoute(builder: (_) => const ProfilePage()),
                       );
