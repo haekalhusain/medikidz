@@ -230,11 +230,12 @@ class _NotifikasiPageState extends State<NotifikasiPage> {
 
   Widget _buildCard(BuildContext context, Notifikasi notifikasi) {
     final catColor = _colorForKategori(notifikasi.kategori);
+    final isUnread = !notifikasi.terbaca && !widget.adminMode;
 
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         onTap: widget.adminMode
             ? null
             : () {
@@ -243,146 +244,103 @@ class _NotifikasiPageState extends State<NotifikasiPage> {
                 }
               },
         child: Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
+            color: isUnread ? Colors.white : const Color(0xFFF8FAFC),
+            borderRadius: BorderRadius.circular(18),
             border: Border.all(
-              color: !notifikasi.terbaca && !widget.adminMode
-                  ? primaryTeal.withAlpha(60)
-                  : Colors.grey.shade200,
+              color: isUnread ? catColor.withOpacity(0.2) : const Color(0xFFE2E8F0),
               width: 1,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withAlpha(6),
+                color: Colors.black.withOpacity(0.04),
                 blurRadius: 10,
                 offset: const Offset(0, 3),
               ),
             ],
           ),
-          child: Column(
+          child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 42,
-                    height: 42,
-                    decoration: BoxDecoration(
-                      color: catColor.withAlpha(20),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(_iconForKategori(notifikasi.kategori), color: catColor, size: 22),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: catColor.withAlpha(20),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Text(
-                                notifikasi.kategori.toUpperCase(),
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                  color: catColor,
-                                ),
-                              ),
-                            ),
-                            const Spacer(),
-                            Text(
-                              _formatWaktu(notifikasi.waktu),
-                              style: TextStyle(color: Colors.grey.shade500, fontSize: 11),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          notifikasi.judul,
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: notifikasi.terbaca ? FontWeight.w600 : FontWeight.bold,
-                            color: const Color(0xFF0F172A),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (!notifikasi.terbaca && !widget.adminMode) ...[
-                    const SizedBox(width: 8),
-                    Container(
-                      width: 8,
-                      height: 8,
-                      margin: const EdgeInsets.only(top: 18),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFEF4444),
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-              const SizedBox(height: 10),
-              Text(
-                notifikasi.pesan,
-                style: const TextStyle(
-                  fontSize: 13.5,
-                  color: Color(0xFF475569),
-                  height: 1.45,
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: catColor.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(12),
                 ),
+                child: Icon(_iconForKategori(notifikasi.kategori), color: catColor, size: 20),
               ),
-              if (widget.adminMode) ...[
-                const SizedBox(height: 12),
-                const Divider(height: 1, thickness: 0.8),
-                const SizedBox(height: 8),
-                Row(
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'UID: ${notifikasi.uid}',
-                            style: TextStyle(fontSize: 11, color: Colors.grey.shade600, fontFamily: 'monospace'),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            notifikasi.terbaca ? 'Status: Dibaca' : 'Status: Belum dibaca',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w500,
-                              color: notifikasi.terbaca ? primaryTeal : const Color(0xFFF59E0B),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
                     Row(
                       children: [
-                        IconButton(
-                          visualDensity: VisualDensity.compact,
-                          icon: Icon(Icons.edit_outlined, color: Colors.blue.shade600, size: 18),
-                          onPressed: () => _showEditDialog(notifikasi),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: catColor.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            notifikasi.kategori.toUpperCase(),
+                            style: TextStyle(
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w700,
+                              color: catColor,
+                              letterSpacing: 0.3,
+                            ),
+                          ),
                         ),
-                        IconButton(
-                          visualDensity: VisualDensity.compact,
-                          icon: Icon(Icons.delete_outline_rounded, color: Colors.red.shade600, size: 18),
-                          onPressed: () => _confirmDelete(context, notifikasi),
+                        const Spacer(),
+                        Text(
+                          _formatWaktu(notifikasi.waktu),
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Color(0xFF64748B),
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ],
                     ),
+                    const SizedBox(height: 8),
+                    Text(
+                      notifikasi.judul,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: isUnread ? FontWeight.w800 : FontWeight.w700,
+                        color: const Color(0xFF0F172A),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      notifikasi.pesan,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: Color(0xFF475569),
+                        height: 1.45,
+                      ),
+                    ),
                   ],
+                ),
+              ),
+              if (isUnread) ...[
+                const SizedBox(width: 10),
+                Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: Container(
+                    width: 8,
+                    height: 8,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFEF4444),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
                 ),
               ],
             ],

@@ -3,8 +3,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
+import 'dart:math';
 import '../firebase_options.dart';
 import '../views/user/anak/anak_saya_list_page.dart';
 
@@ -50,6 +52,9 @@ class FcmService {
 
   Future<void> requestPermissionIfNeeded() async {
     await _requestPermission();
+    if (FirebaseAuth.instance.currentUser != null) {
+      await saveTokenForCurrentUser();
+    }
   }
 
   Future<void> _handleInitialMessage() async {
@@ -72,10 +77,15 @@ class FcmService {
 
     if (settings.authorizationStatus == AuthorizationStatus.denied) {
       debugPrint('FCM permission denied');
+      return;
     }
 
-    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+    if (settings.authorizationStatus == AuthorizationStatus.authorized ||
+        settings.authorizationStatus == AuthorizationStatus.provisional) {
       debugPrint('FCM permission authorized');
+      if (FirebaseAuth.instance.currentUser != null) {
+        await saveTokenForCurrentUser();
+      }
     }
   }
 
@@ -106,9 +116,10 @@ class FcmService {
     if (user == null) return;
 
     final fcmToken = token ?? await _messaging.getToken();
-    if (fcmToken == null) return;
+    if (fcmToken == null || fcmToken.isEmpty) return;
 
-    await FirebaseFirestore.instance.collection('tb_pengguna').doc(user.uid).update({'fcm_token': fcmToken});
+    final docRef = FirebaseFirestore.instance.collection('tb_pengguna').doc(user.uid);
+    await docRef.set({'fcm_token': fcmToken}, SetOptions(merge: true));
   }
 
   Future<void> saveTokenForCurrentUser() async {
@@ -138,14 +149,29 @@ class FcmService {
         channelDescription: _channel.description,
         importance: Importance.high,
         priority: Priority.high,
+        playSound: true,
+        enableVibration: true,
+        vibrationPattern: Int64List.fromList([0, 250, 250, 250]),
+        enableLights: true,
+        color: const Color.fromARGB(255, 0, 112, 192),
+        ledColor: const Color.fromARGB(255, 0, 112, 192),
+        ledOnMs: 1000,
+        ledOffMs: 3000,
         icon: '@mipmap/ic_launcher',
+        fullScreenIntent: true,
       ),
-      iOS: const DarwinNotificationDetails(),
+      iOS: const DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      ),
     );
 
     final payload = data['kategori'] == 'jadwal' ? 'jadwal' : data['notifikasiId']?.toString();
+    // Generate unique ID to prevent notification collision
+    final uniqueId = Random().nextInt(2147483647);
     await _localNotifications.show(
-      id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+      id: uniqueId,
       title: title,
       body: body,
       notificationDetails: notificationDetails,
