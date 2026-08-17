@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:medikidz/views/notification/notifikasi_page.dart';
-import 'package:medikidz/views/user/profile/profil_anda_page.dart';
-import '../../../controllers/notifikasi_controller.dart';
+import '../widgets/user_header.dart'; // File header reusable Anda
 import '../../../models/artikel_model.dart';
 import '../../../utils/date_formatter.dart';
-// Import file profil anda (sesuaikan path foldernya jika perlu)
-
 
 class UserArtikelDetailPage extends StatelessWidget {
   final Artikel artikel;
@@ -19,154 +15,93 @@ class UserArtikelDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final notifikasiController = Get.isRegistered<NotifikasiController>()
-        ? Get.find<NotifikasiController>()
-        : Get.put(NotifikasiController());
-
     const primaryTeal = Color(0xFF52C49C);
     const lightTealBg = Color(0xFFE8F7F2);
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leadingWidth: 70,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 16),
-          child: Center(
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-                shape: BoxShape.circle,
-              ),
-              child: IconButton(
-                icon: const Icon(
-                  Icons.arrow_back,
-                  color: Colors.black,
-                  size: 20,
-                ),
-                onPressed: () => Get.back(),
-              ),
-            ),
-          ),
-        ),
-        actions: [
-          // Icon Notifikasi dengan Badge
-          Center(
-            child: Container(
-              margin: const EdgeInsets.only(right: 10),
-              decoration: const BoxDecoration(
-                color: lightTealBg,
-                shape: BoxShape.circle,
-              ),
-              child: Stack(
-                children: [
-                  IconButton(
-                    icon: const Icon(
-                      Icons.notifications_none_rounded,
-                      color: primaryTeal,
-                      size: 22,
-                    ),
-                    onPressed: () {
-                      Get.to(() => const NotifikasiPage());
-                    },
-                  ),
-                  Obx(() {
-                    final count = notifikasiController.unreadCount.value;
-                    if (count <= 0) return const SizedBox.shrink();
-
-                    return Positioned(
-                      right: 8,
-                      top: 8,
-                      child: Container(
-                        padding: const EdgeInsets.all(3),
-                        decoration: const BoxDecoration(
-                          color: Colors.red,
-                          shape: BoxShape.circle,
-                        ),
-                        constraints: const BoxConstraints(
-                          minWidth: 14,
-                          minHeight: 14,
-                        ),
-                        child: Text(
-                          '$count',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 8,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    );
-                  }),
-                ],
-              ),
-            ),
-          ),
-
-          // Icon Profile (Direct ke ProfilAndaPage)
-          Center(
-            child: Container(
-              margin: const EdgeInsets.only(right: 16),
-              decoration: const BoxDecoration(
-                color: lightTealBg,
-                shape: BoxShape.circle,
-              ),
-              child: IconButton(
-                icon: const Icon(
-                  Icons.person,
-                  color: primaryTeal,
-                  size: 24,
-                ),
-                onPressed: () {
-                  Get.to(() => const ProfilAndaPage());
-                },
-              ),
-            ),
-          ),
-        ],
-      ),
+      appBar: buildUserTopBar(context), // Menggunakan header dari user_header.dart
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. Gambar Banner Artikel (Diberi padding atas saja, tanpa rounded)
-            Padding(
-              padding: const EdgeInsets.only(top: 12),
-              child: Container(
-                width: double.infinity,
-                height: 220,
-                color: lightTealBg,
-                child: artikel.gambarUrl != null && artikel.gambarUrl!.isNotEmpty
-                    ? Image.network(
-                        artikel.gambarUrl!,
-                        width: double.infinity,
-                        height: 220,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => const Center(
-                          child: Icon(Icons.broken_image, size: 50, color: primaryTeal),
+            // 1. Gambar Banner Artikel dengan Tombol Back Transparan & Rounded Box
+            Stack(
+              children: [
+                Container(
+                  width: double.infinity,
+                  height: 220,
+                  color: lightTealBg,
+                  child: artikel.gambarUrl != null && artikel.gambarUrl!.isNotEmpty
+                      ? Image.network(
+                          artikel.gambarUrl!,
+                          width: double.infinity,
+                          height: 220,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => const Center(
+                            child: Icon(Icons.broken_image, size: 50, color: primaryTeal),
+                          ),
+                        )
+                      : const Center(
+                          child: Icon(Icons.article, size: 60, color: primaryTeal),
                         ),
-                      )
-                    : const Center(
-                        child: Icon(Icons.article, size: 60, color: primaryTeal),
+                ),
+
+                // Tombol Back Agak Transparan, Agak Kotak Rounded (Mencegah BottomNavBar Hilang)
+                Positioned(
+                  top: 16,
+                  left: 16,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.85), // Agak transparan
+                      borderRadius: BorderRadius.circular(12), // Kotak dengan sudut rounded
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: () {
+                          // Menggunakan Get.back() agar stack BottomNavigationBar tidak hancur/hilang
+                          if (Navigator.canPop(context)) {
+                            Get.back();
+                          } else {
+                            Get.back();
+                          }
+                        },
+                        child: const Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Icon(
+                            Icons.arrow_back,
+                            color: Colors.black87,
+                            size: 22,
+                          ),
+                        ),
                       ),
-              ),
+                    ),
+                  ),
+                ),
+              ],
             ),
 
             // 2. Header Artikel (Badge Kategori, Judul, Tanggal)
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Badge Kategori (Chip Style)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                     decoration: BoxDecoration(
                       color: lightTealBg,
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(20),
                       border: Border.all(color: primaryTeal.withOpacity(0.5)),
                     ),
                     child: Text(
@@ -187,10 +122,10 @@ class UserArtikelDetailPage extends StatelessWidget {
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                       color: Colors.black,
-                      height: 1.2,
+                      height: 1.25,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 10),
 
                   // Tanggal Upload
                   Text(
@@ -204,37 +139,76 @@ class UserArtikelDetailPage extends StatelessWidget {
               ),
             ),
 
-            // Garis Divider Pemisah
-            Divider(height: 1, thickness: 1, color: Colors.grey.shade300),
-
-            // 3. Ringkasan (KOTAK/SUMMARY BOX SEPERTI SEMULA) & Detail Konten
+            // 3. Section Author / Penulis Artikel
+            Divider(height: 1, thickness: 1, color: Colors.grey.shade200),
             Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
                 children: [
-                  // Kotak Ringkasan (Style Awal)
-                  if (artikel.ringkasan.isNotEmpty) ...[
-                    Container(
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: lightTealBg,
-                        borderRadius: BorderRadius.circular(10),
-                        border: const Border(
-                          left: BorderSide(color: primaryTeal, width: 4),
-                        ),
-                      ),
-                      child: Text(
-                        artikel.ringkasan,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontStyle: FontStyle.italic,
-                          color: Colors.black87,
-                          height: 1.4,
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade200,
+                      shape: BoxShape.circle,
+                    ),
+                    child: ClipOval(
+                      child: Image.asset(
+                        'assets/images/logo_medikidz.png',
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => const Icon(
+                          Icons.person,
+                          color: primaryTeal,
+                          size: 24,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 24),
+                  ),
+                  const SizedBox(width: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      Text(
+                        'Author',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      SizedBox(height: 2),
+                      Text(
+                        'Tim Medis Klinik Medikidz',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: primaryTeal,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Divider(height: 1, thickness: 1, color: Colors.grey.shade200),
+
+            // 4. Detail Konten Artikel
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Ringkasan Sebagai Paragraf Pembuka
+                  if (artikel.ringkasan.isNotEmpty) ...[
+                    Text(
+                      artikel.ringkasan,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.black87,
+                        height: 1.6,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
                   ],
 
                   // Konten Dinamis (Subjudul & Isi)
@@ -255,12 +229,12 @@ class UserArtikelDetailPage extends StatelessWidget {
                               Text(
                                 section.subjudul,
                                 style: const TextStyle(
-                                  fontSize: 16,
+                                  fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.black,
                                 ),
                               ),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: 10),
                             ],
                             Text(
                               section.isi,
