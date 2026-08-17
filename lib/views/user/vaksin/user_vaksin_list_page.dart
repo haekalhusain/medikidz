@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../widgets/user_header.dart';
 import '../../../controllers/vaksin_controller.dart';
 import '../../../models/vaksin_model.dart';
+import 'user_vaksin_detail_page.dart'; // Import halaman detail baru
 
 class UserVaksinListPage extends StatelessWidget {
   const UserVaksinListPage({super.key});
@@ -24,7 +25,7 @@ class UserVaksinListPage extends StatelessWidget {
 
         return CustomScrollView(
           slivers: [
-            // 1. Banner "Informasi Penting" -> Ikut ter-scroll & menghilang ke atas
+            // 1. Banner "Informasi Penting"
             SliverToBoxAdapter(
               child: Container(
                 width: double.infinity,
@@ -55,9 +56,9 @@ class UserVaksinListPage extends StatelessWidget {
               ),
             ),
 
-            // 2. Banner Header "Daftar Stok Vaksinasi" -> STICKY / MENEMPEL di atas saat discroll
+            // 2. Banner Header "Daftar Stok Vaksinasi" (Sticky)
             SliverPersistentHeader(
-              pinned: true, // Menjaga header agar tidak hilang/ter-scroll keluar layar
+              pinned: true,
               delegate: _StickyHeaderDelegate(
                 primaryTeal: primaryTeal,
               ),
@@ -82,7 +83,6 @@ class UserVaksinListPage extends StatelessWidget {
                       final vaksin = controller.vaksinList[index];
                       return _UserVaksinCard(
                         vaksin: vaksin,
-                        informasiChildren: _buildInformasi(vaksin),
                       );
                     },
                     childCount: controller.vaksinList.length,
@@ -93,41 +93,6 @@ class UserVaksinListPage extends StatelessWidget {
         );
       }),
     );
-  }
-
-  List<Widget> _buildInformasi(Vaksin vaksin) {
-    if (vaksin.informasi.isEmpty) {
-      return [
-        const Padding(
-          padding: EdgeInsets.fromLTRB(16, 8, 16, 16),
-          child: Text(
-            'Belum ada informasi tambahan untuk vaksin ini.',
-            style: TextStyle(color: Colors.black54, fontSize: 13),
-          ),
-        ),
-      ];
-    }
-
-    return vaksin.informasi
-        .where((k) => k.subjudul.isNotEmpty || k.isi.isNotEmpty)
-        .map(
-          (k) => Padding(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (k.subjudul.isNotEmpty)
-                  Text(
-                    k.subjudul,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                if (k.isi.isNotEmpty)
-                  Text(k.isi, style: const TextStyle(fontSize: 13)),
-              ],
-            ),
-          ),
-        )
-        .toList();
   }
 }
 
@@ -171,7 +136,6 @@ class _StickyHeaderDelegate extends SliverPersistentHeaderDelegate {
     );
   }
 
-  // Mengubah dari 60.0 ke 66.0 agar pas dengan konten dan tidak overflow
   @override
   double get maxExtent => 66.0;
 
@@ -184,25 +148,16 @@ class _StickyHeaderDelegate extends SliverPersistentHeaderDelegate {
   }
 }
 
-/// Custom Card Widget
-class _UserVaksinCard extends StatefulWidget {
+/// Custom Card Widget yang berpindah halaman saat diklik
+class _UserVaksinCard extends StatelessWidget {
   final Vaksin vaksin;
-  final List<Widget> informasiChildren;
 
   const _UserVaksinCard({
     required this.vaksin,
-    required this.informasiChildren,
   });
 
-  @override
-  State<_UserVaksinCard> createState() => _UserVaksinCardState();
-}
-
-class _UserVaksinCardState extends State<_UserVaksinCard> {
-  bool _isExpanded = false;
-
   Color get _accentColor {
-    switch (widget.vaksin.statusStok) {
+    switch (vaksin.statusStok) {
       case 'tersedia':
         return const Color(0xFF52C49C);
       case 'menipis':
@@ -213,7 +168,7 @@ class _UserVaksinCardState extends State<_UserVaksinCard> {
   }
 
   Color get _bgColor {
-    switch (widget.vaksin.statusStok) {
+    switch (vaksin.statusStok) {
       case 'tersedia':
         return const Color(0xFFE8F7F2);
       case 'menipis':
@@ -225,12 +180,16 @@ class _UserVaksinCardState extends State<_UserVaksinCard> {
 
   @override
   Widget build(BuildContext context) {
-    final ringkasan = widget.vaksin.informasi.isNotEmpty
-        ? widget.vaksin.informasi.first.subjudul
+    final ringkasan = vaksin.informasi.isNotEmpty
+        ? vaksin.informasi.first.subjudul
         : '';
 
-    // Warna hijau tetap untuk tombol "Lihat Detail"
     const fixedGreen = Color(0xFF52C49C);
+
+    // Fungsi untuk berpindah ke Halaman Detail
+    void goToDetailPage() {
+      Get.to(() => UserVaksinDetailPage(vaksin: vaksin));
+    }
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -243,11 +202,7 @@ class _UserVaksinCardState extends State<_UserVaksinCard> {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(14),
-          onTap: () {
-            setState(() {
-              _isExpanded = !_isExpanded;
-            });
-          },
+          onTap: goToDetailPage, // Mengetuk seluruh kartu akan membuka detail
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -258,7 +213,7 @@ class _UserVaksinCardState extends State<_UserVaksinCard> {
                   children: [
                     Expanded(
                       child: Text(
-                        widget.vaksin.namaVaksin,
+                        vaksin.namaVaksin,
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -266,34 +221,37 @@ class _UserVaksinCardState extends State<_UserVaksinCard> {
                         ),
                       ),
                     ),
-                    // Tombol Lihat Detail dengan warna hijau tetap
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: fixedGreen.withValues(alpha: 0.5),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'Lihat Detail',
-                            style: TextStyle(
-                              color: Colors.black87,
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
+                    // Tombol Lihat Detail
+                    GestureDetector(
+                      onTap: goToDetailPage, // Mengarahkan ke halaman detail
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: fixedGreen.withValues(alpha: 0.5),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Lihat Detail',
+                              style: TextStyle(
+                                color: Colors.black87,
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
-                          SizedBox(width: 2),
-                          Icon(
-                            Icons.chevron_right,
-                            size: 14,
-                            color: Colors.black87,
-                          ),
-                        ],
+                            SizedBox(width: 2),
+                            Icon(
+                              Icons.chevron_right,
+                              size: 14,
+                              color: Colors.black87,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],
@@ -319,9 +277,9 @@ class _UserVaksinCardState extends State<_UserVaksinCard> {
                         ),
                       ),
                       const SizedBox(height: 2),
-                    ] else if (widget.vaksin.kategoriVaksin.isNotEmpty) ...[
+                    ] else if (vaksin.kategoriVaksin.isNotEmpty) ...[
                       Text(
-                        widget.vaksin.kategoriVaksin,
+                        vaksin.kategoriVaksin,
                         style: const TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
@@ -331,7 +289,7 @@ class _UserVaksinCardState extends State<_UserVaksinCard> {
                       const SizedBox(height: 2),
                     ],
                     Text(
-                      'Stok : ${widget.vaksin.jumlahStok}',
+                      'Stok : ${vaksin.jumlahStok}',
                       style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
@@ -340,7 +298,7 @@ class _UserVaksinCardState extends State<_UserVaksinCard> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Status : ${widget.vaksin.statusLabel}',
+                      'Status : ${vaksin.statusLabel}',
                       style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
@@ -350,16 +308,6 @@ class _UserVaksinCardState extends State<_UserVaksinCard> {
                   ],
                 ),
               ),
-              if (_isExpanded) ...[
-                Divider(
-                  height: 1,
-                  thickness: 1,
-                  color: Colors.black.withValues(alpha: 0.1),
-                ),
-                const SizedBox(height: 8),
-                ...widget.informasiChildren,
-                const SizedBox(height: 8),
-              ],
             ],
           ),
         ),
