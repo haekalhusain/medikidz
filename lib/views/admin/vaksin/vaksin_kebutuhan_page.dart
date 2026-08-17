@@ -31,135 +31,176 @@ class VaksinKebutuhanPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F7F6),
       appBar: buildAdminTopBar(context),
-      body: Obx(() {
-        if (masterController.jadwalMasterList.isEmpty) {
-          return const Center(
-            child: Padding(
-              padding: EdgeInsets.all(24),
-              child: Text(
-                'Jadwal master belum diisi. Isi dulu lewat menu "Jadwal Master" di dashboard.',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.black54, fontSize: 14),
+      body: SafeArea(
+        child: Obx(() {
+          if (masterController.jadwalMasterList.isEmpty) {
+            return const Center(
+              child: Padding(
+                padding: EdgeInsets.all(24),
+                child: Text(
+                  'Jadwal master belum diisi. Isi dulu lewat menu "Jadwal Master" di dashboard.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.black54, fontSize: 14),
+                ),
               ),
-            ),
+            );
+          }
+
+          final kebutuhan = scheduleService.hitungKebutuhanVaksin(
+            anakList: anakController.anakList,
+            masterList: masterController.jadwalMasterList,
+            semuaJadwalImunisasi: jadwalController.jadwalList,
+            vaksinList: vaksinController.vaksinList,
+            bulan: now,
           );
-        }
 
-        final kebutuhan = scheduleService.hitungKebutuhanVaksin(
-          anakList: anakController.anakList,
-          masterList: masterController.jadwalMasterList,
-          semuaJadwalImunisasi: jadwalController.jadwalList,
-          vaksinList: vaksinController.vaksinList,
-          bulan: now,
-        );
+          final totalKekurangan = kebutuhan.fold<int>(0, (sum, k) => sum + k.kekurangan);
+          final totalJenis = kebutuhan.length;
+          final totalCukup = kebutuhan.where((k) => k.cukup && k.terdaftarDiStok).length;
 
-        final totalKekurangan = kebutuhan.fold<int>(0, (sum, k) => sum + k.kekurangan);
-        final totalJenis = kebutuhan.length;
-        final totalCukup = kebutuhan.where((k) => k.cukup && k.terdaftarDiStok).length;
-
-
-        return ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(18),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
-                    blurRadius: 18,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+          return ListView(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+            children: [
+              Row(
                 children: [
-                  Text(
-                    'Estimasi Kebutuhan - $namaBulan ${now.year}',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () => Navigator.of(context).maybePop(),
+                    child: Container(
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF1F5F9),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(
+                        Icons.arrow_back_rounded,
+                        color: Colors.black87,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Kebutuhan Vaksin',
+                        style: TextStyle(
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.black87,
                         ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Dihitung dari jadwal imunisasi seharusnya seluruh anak yang belum direalisasikan, dibandingkan dengan stok vaksin saat ini.',
-                    style: TextStyle(color: Colors.black54, fontSize: 13, height: 1.5),
+                      ),
+                      Text(
+                        'Estimasi kebutuhan bulan ini',
+                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ),
-            const SizedBox(height: 18),
-            Row(
-              children: [
-                Expanded(
-                  child: _SummaryBadge(
-                    title: 'Jenis Vaksin',
-                    value: '$totalJenis',
-                    color: const Color(0xFF00A88F),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _SummaryBadge(
-                    title: 'Stok Vaksin Mencukupi',
-                    value: '$totalCukup',
-                    color: const Color(0xFF4CAF50),
-                  ),
-                ),
-              ],
-            ),
-            
-            // Row untuk "Kurang" dan "Belum Daftar" beserta SizedBox-nya sudah DIHAPUS di sini
-            
-            const SizedBox(height: 20),
-            if (totalKekurangan > 0)
+              const SizedBox(height: 16),
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(14),
-                margin: const EdgeInsets.only(bottom: 16),
+                padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFEBEB),
-                  border: Border.all(color: const Color(0xFFF4C1C0)),
-                  borderRadius: BorderRadius.circular(16),
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.03),
+                      blurRadius: 18,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
                 ),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.warning_amber_rounded, color: Color(0xFFE55335), size: 20),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        'Ada $totalKekurangan dosis yang stoknya belum cukup. Segera lengkapi stok vaksin yang kurang.',
-                        style: const TextStyle(
-                          color: Color(0xFFE55335),
-                          fontWeight: FontWeight.w600,
-                          fontSize: 13,
-                        ),
-                      ),
+                    Text(
+                      'Estimasi Kebutuhan - $namaBulan ${now.year}',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Dihitung dari jadwal imunisasi seharusnya seluruh anak yang belum direalisasikan, dibandingkan dengan stok vaksin saat ini.',
+                      style: TextStyle(color: Colors.black54, fontSize: 13, height: 1.5),
                     ),
                   ],
                 ),
               ),
-            if (kebutuhan.isEmpty)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 24),
-                child: Center(
-                  child: Text(
-                    'Tidak ada jadwal imunisasi yang jatuh bulan ini.',
-                    style: TextStyle(color: Colors.black54, fontSize: 14),
+              const SizedBox(height: 18),
+              Row(
+                children: [
+                  Expanded(
+                    child: _SummaryBadge(
+                      title: 'Jenis Vaksin',
+                      value: '$totalJenis',
+                      color: const Color(0xFF00A88F),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _SummaryBadge(
+                      title: 'Stok Vaksin Mencukupi',
+                      value: '$totalCukup',
+                      color: const Color(0xFF4CAF50),
+                    ),
+                  ),
+                ],
+              ),
+
+              // Row untuk "Kurang" dan "Belum Daftar" beserta SizedBox-nya sudah DIHAPUS di sini
+
+              const SizedBox(height: 20),
+              if (totalKekurangan > 0)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(14),
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFEBEB),
+                    border: Border.all(color: const Color(0xFFF4C1C0)),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.warning_amber_rounded, color: Color(0xFFE55335), size: 20),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'Ada $totalKekurangan dosis yang stoknya belum cukup. Segera lengkapi stok vaksin yang kurang.',
+                          style: const TextStyle(
+                            color: Color(0xFFE55335),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              )
-            else
-              ...kebutuhan.map((k) => _KebutuhanCard(kebutuhan: k)),
-            const SizedBox(height: 24),
-          ],
-        );
-      }),
+              if (kebutuhan.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 24),
+                  child: Center(
+                    child: Text(
+                      'Tidak ada jadwal imunisasi yang jatuh bulan ini.',
+                      style: TextStyle(color: Colors.black54, fontSize: 14),
+                    ),
+                  ),
+                )
+              else
+                ...kebutuhan.map((k) => _KebutuhanCard(kebutuhan: k)),
+              const SizedBox(height: 24),
+            ],
+          );
+        }),
+      ),
     );
   }
 

@@ -21,7 +21,6 @@ class _ArtikelListPageState extends State<ArtikelListPage> {
 
   // Palette warna sesuai desain
   static const primaryTeal = Color(0xFF00A884);
-  static const lightTealBg = Color(0xFFE8F7F2);
   static const filterBg = Color(0xFFE6F7F5);
 
   @override
@@ -37,6 +36,17 @@ class _ArtikelListPageState extends State<ArtikelListPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: buildAdminTopBar(context),
+      // Floating Action Button di pojok kanan bawah sesuai gambar
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: primaryTeal,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        onPressed: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const ArtikelFormPage()),
+        ),
+        child: const Icon(Icons.add, color: Colors.white, size: 28),
+      ),
       body: Obx(() {
         final semuaArtikel = controller.artikelList;
 
@@ -54,7 +64,7 @@ class _ArtikelListPageState extends State<ArtikelListPage> {
         return ListView(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
           children: [
-            _buildPageHeader(context),
+            _buildPageHeader(),
             const SizedBox(height: 16),
             _buildSearchAndFilter(context),
             const SizedBox(height: 16),
@@ -94,73 +104,23 @@ class _ArtikelListPageState extends State<ArtikelListPage> {
     );
   }
 
-  Widget _buildPageHeader(BuildContext context) {
-    return Row(
-      children: [
-        InkWell(
-          onTap: () {
-            if (widget.onNavigateToTab != null) {
-              widget.onNavigateToTab!(0);
-            } else {
-              Navigator.maybePop(context);
-            }
-          },
-          borderRadius: BorderRadius.circular(10),
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF2F4F7),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Icon(
-              Icons.arrow_back,
-              color: Colors.black87,
-              size: 20,
-            ),
+  // Header yang disesuaikan (tanpa tombol back dan tombol tambah)
+  Widget _buildPageHeader() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: const [
+        Text(
+          'Artikel',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
           ),
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
-              Text(
-                'Artikel',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-              SizedBox(height: 2),
-              Text(
-                'Kelola semua Artikel pada aplikasi',
-                style: TextStyle(fontSize: 11, color: Colors.grey),
-              ),
-            ],
-          ),
-        ),
-        ElevatedButton.icon(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: primaryTeal,
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          ),
-          onPressed: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const ArtikelFormPage()),
-          ),
-          icon: const Icon(Icons.add, size: 16, color: Colors.white),
-          label: const Text(
-            'Tambah Artikel',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+        SizedBox(height: 2),
+        Text(
+          'Kelola semua Artikel pada aplikasi',
+          style: TextStyle(fontSize: 11, color: Colors.grey),
         ),
       ],
     );
@@ -269,6 +229,7 @@ class _ArtikelListPageState extends State<ArtikelListPage> {
         return StatefulBuilder(
           builder: (context, setModalState) => Padding(
             padding: const EdgeInsets.all(20),
+        
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -386,7 +347,6 @@ class _StatChip extends StatelessWidget {
               child: Icon(icon, size: 16, color: iconColor),
             ),
             const SizedBox(height: 6),
-            // Angka Statistik Lebih Besar & Tebal
             Text(
               '$value',
               style: const TextStyle(
@@ -396,7 +356,6 @@ class _StatChip extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 4),
-            // Teks Label Dibesarkan & Ditebalkan
             Text(
               label,
               style: const TextStyle(
@@ -461,7 +420,6 @@ class _ArtikelCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Gambar Artikel (105x100 dengan corner radius 12)
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: artikel.gambarUrl != null && artikel.gambarUrl!.isNotEmpty
@@ -475,16 +433,13 @@ class _ArtikelCard extends StatelessWidget {
                 : _buildImagePlaceholder(),
           ),
           const SizedBox(width: 14),
-          // Bagian Konten
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Header Dalam Kartu (Kategori, Status Badge, Edit, Delete)
                 Row(
                   children: [
-                    // Kategori Artikel Dibesarkan Tulisannya
                     Expanded(
                       child: Text(
                         artikel.kategori,
@@ -498,7 +453,6 @@ class _ArtikelCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 6),
-                    // Badge Status
                     Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 4),
@@ -516,7 +470,6 @@ class _ArtikelCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 10),
-                    // Tombol Edit Berjarak
                     InkWell(
                       onTap: onEdit,
                       borderRadius: BorderRadius.circular(8),
@@ -535,7 +488,6 @@ class _ArtikelCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    // Tombol Sampah/Hapus Berjarak
                     InkWell(
                       onTap: onDelete,
                       borderRadius: BorderRadius.circular(8),
@@ -556,7 +508,6 @@ class _ArtikelCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 6),
-                // Judul Artikel Tebal & Jelas
                 Text(
                   artikel.judul,
                   style: const TextStyle(
@@ -569,7 +520,6 @@ class _ArtikelCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 14),
-                // Tanggal & Penulis Diturunkan Lebih Kebawah
                 Text(
                   '${_formatTanggal(artikel.tanggalUpload)}  •  Penulis: ${artikel.penulis}',
                   style: const TextStyle(
