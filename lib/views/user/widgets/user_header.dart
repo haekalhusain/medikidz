@@ -73,48 +73,20 @@ PreferredSizeWidget buildUserTopBar(
                     color: lightTealBg,
                     shape: BoxShape.circle,
                   ),
-                  child: Stack(
-                    children: [
-                      IconButton(
-                        icon: const Icon(
-                          Icons.notifications_none_rounded,
-                          color: primaryTeal,
-                          size: 22,
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.notifications_none_rounded,
+                      color: primaryTeal,
+                      size: 22,
+                    ),
+                    onPressed: () {
+                      // Navigasi murni ke NotifikasiPage
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const NotifikasiPage(adminMode: false),
                         ),
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  const NotifikasiPage(adminMode: false),
-                            ),
-                          );
-                        },
-                      ),
-                      Positioned(
-                        right: 8,
-                        top: 8,
-                        child: Container(
-                          padding: const EdgeInsets.all(3),
-                          decoration: const BoxDecoration(
-                            color: Colors.red,
-                            shape: BoxShape.circle,
-                          ),
-                          constraints: const BoxConstraints(
-                            minWidth: 14,
-                            minHeight: 14,
-                          ),
-                          child: const Text(
-                            '3',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 8,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
-                    ],
+                      );
+                    },
                   ),
                 ),
               ),
