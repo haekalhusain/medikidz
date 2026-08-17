@@ -9,6 +9,7 @@ import '../../../services/firestore_service.dart';
 import '../../../services/notifikasi_service.dart';
 import '../../../utils/date_formatter.dart';
 import '../anak/tambah_anak_user_page.dart';
+import '../widgets/user_header.dart';
 
 class AkunSayaPage extends StatefulWidget {
   const AkunSayaPage({super.key});
@@ -20,20 +21,66 @@ class AkunSayaPage extends StatefulWidget {
 class _AkunSayaPageState extends State<AkunSayaPage> {
   int _tabIndex = 0; // 0 = Data Personal, 1 = Data Anak
 
+  static const Color primaryTeal = Color(0xFF2FA28D);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Akun Saya')),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
+      backgroundColor: Colors.white,
+      appBar: buildUserTopBar(context), // Menggunakan AppBar/Header dari user_header.dart
+      body: SafeArea(
         child: Column(
           children: [
-            _buildPillToggle(),
-            const SizedBox(height: 20),
+            // Custom Back Button & Judul Halaman
+            Padding(
+              padding: const EdgeInsets.only(left: 16, right: 16, top: 12, bottom: 12),
+              child: Row(
+                children: [
+                  InkWell(
+                    onTap: () => Navigator.of(context).pop(),
+                    borderRadius: BorderRadius.circular(20),
+                    child: Container(
+                      width: 36,
+                      height: 36,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFF2F2F2),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.arrow_back,
+                        color: Colors.black,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  const Text(
+                    'Akun Saya',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
             Expanded(
-              child: _tabIndex == 0
-                  ? const _DataPersonalTab()
-                  : const _DataAnakTab(),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  children: [
+                    _buildPillToggle(),
+                    const SizedBox(height: 20),
+                    Expanded(
+                      child: _tabIndex == 0
+                          ? const _DataPersonalTab()
+                          : const _DataAnakTab(),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
@@ -42,33 +89,37 @@ class _AkunSayaPageState extends State<AkunSayaPage> {
   }
 
   Widget _buildPillToggle() {
-    return Row(
-      children: [
-        Expanded(child: _pillButton('Data personal', 0)),
-        const SizedBox(width: 10),
-        Expanded(child: _pillButton('Data Anak', 1)),
-      ],
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(color: primaryTeal, width: 1.2),
+      ),
+      child: Row(
+        children: [
+          Expanded(child: _pillButton('Data personal', 0)),
+          Expanded(child: _pillButton('Data Anak', 1)),
+        ],
+      ),
     );
   }
 
   Widget _pillButton(String label, int index) {
     final selected = _tabIndex == index;
-    return InkWell(
+    return GestureDetector(
       onTap: () => setState(() => _tabIndex = index),
-      borderRadius: BorderRadius.circular(24),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
+        padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
-          color: selected ? Colors.teal : Colors.white,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.teal),
+          color: selected ? primaryTeal : Colors.transparent,
+          borderRadius: BorderRadius.circular(30),
         ),
         child: Text(
           label,
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: selected ? Colors.white : Colors.teal,
+            color: selected ? Colors.white : primaryTeal,
             fontWeight: FontWeight.w600,
+            fontSize: 14,
           ),
         ),
       ),
@@ -88,6 +139,8 @@ class _DataPersonalTabState extends State<_DataPersonalTab> {
   final _noHpController = TextEditingController();
   final _emailController = TextEditingController();
   final _alamatController = TextEditingController();
+
+  static const Color primaryTeal = Color(0xFF2FA28D);
 
   final _penggunaService = FirestoreService<Pengguna>(
     collectionPath: 'tb_pengguna',
@@ -174,41 +227,56 @@ class _DataPersonalTabState extends State<_DataPersonalTab> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) return const Center(child: CircularProgressIndicator());
+    if (_isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(color: primaryTeal),
+      );
+    }
 
     return ListView(
+      physics: const BouncingScrollPhysics(),
       children: [
-        const Text('Nama', style: TextStyle(fontWeight: FontWeight.w600)),
-        const SizedBox(height: 6),
+        const Text(
+          'Nama',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+        ),
+        const SizedBox(height: 8),
         _FieldBox(controller: _namaController),
-        const SizedBox(height: 16),
-        const Text('No.Telp', style: TextStyle(fontWeight: FontWeight.w600)),
-        const SizedBox(height: 6),
+        const SizedBox(height: 18),
+        const Text(
+          'No.Telp',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+        ),
+        const SizedBox(height: 8),
         _FieldBox(
           controller: _noHpController,
           keyboardType: TextInputType.phone,
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 18),
         const Text(
-          'E-Mail (opsional)',
-          style: TextStyle(fontWeight: FontWeight.w600),
+          'E-Mail',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 8),
         _FieldBox(
           controller: _emailController,
           keyboardType: TextInputType.emailAddress,
         ),
-        const SizedBox(height: 16),
-        const Text('Alamat', style: TextStyle(fontWeight: FontWeight.w600)),
-        const SizedBox(height: 6),
+        const SizedBox(height: 18),
+        const Text(
+          'Alamat',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+        ),
+        const SizedBox(height: 8),
         _FieldBox(controller: _alamatController),
         const SizedBox(height: 28),
         SizedBox(
           width: double.infinity,
-          height: 50,
+          height: 48,
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.teal,
+              backgroundColor: primaryTeal,
+              elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(24),
               ),
@@ -225,10 +293,15 @@ class _DataPersonalTabState extends State<_DataPersonalTab> {
                   )
                 : const Text(
                     'Selesai',
-                    style: TextStyle(color: Colors.white, fontSize: 16),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
           ),
         ),
+        const SizedBox(height: 20),
       ],
     );
   }
@@ -250,6 +323,8 @@ class _DataAnakTabState extends State<_DataAnakTab> {
   int _selectedIndex = 0;
   String? _loadedForAnakId;
   bool _isSaving = false;
+
+  static const Color primaryTeal = Color(0xFF2FA28D);
 
   @override
   void dispose() {
@@ -320,6 +395,13 @@ class _DataAnakTabState extends State<_DataAnakTab> {
               const Text('Belum ada data anak.', textAlign: TextAlign.center),
               const SizedBox(height: 16),
               OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: primaryTeal,
+                  side: const BorderSide(color: primaryTeal),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                ),
                 onPressed: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const TambahAnakUserPage()),
                 ),
@@ -336,16 +418,17 @@ class _DataAnakTabState extends State<_DataAnakTab> {
       _populateFrom(anak);
 
       return ListView(
+        physics: const BouncingScrollPhysics(),
         children: [
           Row(
             children: [
               Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
+                  horizontal: 16,
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.teal,
+                  color: primaryTeal,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -353,32 +436,57 @@ class _DataAnakTabState extends State<_DataAnakTab> {
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
+                    fontSize: 13,
                   ),
                 ),
               ),
               const Spacer(),
+              
+              // Dropdown disesuaikan dengan Gambar 2
               Container(
+                height: 36,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.teal),
-                  borderRadius: BorderRadius.circular(20),
+                  color: primaryTeal,
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<int>(
                     value: _selectedIndex,
-                    icon: const Icon(Icons.arrow_drop_down, color: Colors.teal),
-                    style: const TextStyle(
-                      color: Colors.teal,
-                      fontWeight: FontWeight.w600,
+                    icon: const Icon(
+                      Icons.keyboard_arrow_down,
+                      color: Colors.white,
                     ),
+                    dropdownColor: Colors.white,
+                    selectedItemBuilder: (BuildContext context) {
+                      return anakSaya.map<Widget>((Anak item) {
+                        final nama = item.namaAnak.split(' ').first;
+                        return Container(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            nama,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                            ),
+                          ),
+                        );
+                      }).toList();
+                    },
                     items: List.generate(
                       anakSaya.length,
                       (i) => DropdownMenuItem(
                         value: i,
                         child: Text(
-                          anakSaya[i].namaAnak.length > 14
-                              ? '${anakSaya[i].namaAnak.substring(0, 14)}...'
+                          anakSaya[i].namaAnak.length > 15
+                              ? '${anakSaya[i].namaAnak.substring(0, 15)}...'
                               : anakSaya[i].namaAnak,
+                          style: const TextStyle(
+                            color: primaryTeal,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 13,
+                          ),
                         ),
                       ),
                     ),
@@ -392,66 +500,74 @@ class _DataAnakTabState extends State<_DataAnakTab> {
           const SizedBox(height: 20),
           const Text(
             'Nama Anak',
-            style: TextStyle(fontWeight: FontWeight.w600),
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           _FieldBox(controller: _namaAnakController),
-          const SizedBox(height: 16),
+          const SizedBox(height: 18),
           const Text(
             'Tanggal Lahir',
-            style: TextStyle(fontWeight: FontWeight.w600),
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           InkWell(
             onTap: _pickDate,
+            borderRadius: BorderRadius.circular(24),
             child: Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(12),
+                color: const Color(0xFFF9F9F9),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: const Color(0xFFE5E5E5)),
               ),
               child: Text(
                 _tanggalLahir == null
                     ? 'Pilih tanggal'
                     : formatTanggal(_tanggalLahir!),
+                style: const TextStyle(fontSize: 14, color: Colors.black87),
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 18),
           const Text(
             'Jenis Kelamin',
-            style: TextStyle(fontWeight: FontWeight.w600),
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
-              color: Colors.grey.shade100,
-              borderRadius: BorderRadius.circular(12),
+              color: const Color(0xFFF9F9F9),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: const Color(0xFFE5E5E5)),
             ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
                 value: _jenisKelamin,
                 isExpanded: true,
-                items: [
+                icon: const Icon(
+                  Icons.keyboard_arrow_down,
+                  color: Colors.black,
+                ),
+                items: const [
                   DropdownMenuItem(
                     value: 'laki-laki',
                     child: Row(
-                      children: const [
-                        Icon(Icons.male, color: Colors.blue, size: 20),
+                      children: [
+                        Icon(Icons.male, color: Colors.lightBlue, size: 20),
                         SizedBox(width: 8),
-                        Text('Laki-laki'),
+                        Text('Laki-laki', style: TextStyle(fontSize: 14)),
                       ],
                     ),
                   ),
                   DropdownMenuItem(
                     value: 'perempuan',
                     child: Row(
-                      children: const [
-                        Icon(Icons.female, color: Colors.pink, size: 20),
+                      children: [
+                        Icon(Icons.female, color: Colors.pinkAccent, size: 20),
                         SizedBox(width: 8),
-                        Text('Perempuan'),
+                        Text('Perempuan', style: TextStyle(fontSize: 14)),
                       ],
                     ),
                   ),
@@ -461,21 +577,24 @@ class _DataAnakTabState extends State<_DataAnakTab> {
               ),
             ),
           ),
-          const SizedBox(height: 16),
-          const Text('NIK', style: TextStyle(fontWeight: FontWeight.w600)),
-          const SizedBox(height: 6),
+          const SizedBox(height: 18),
+          const Text(
+            'NIK',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+          ),
+          const SizedBox(height: 8),
           _FieldBox(
             controller: _nikController,
             keyboardType: TextInputType.number,
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
           SizedBox(
             width: double.infinity,
             height: 48,
-            child: OutlinedButton.icon(
+            child: OutlinedButton(
               style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.teal,
-                side: const BorderSide(color: Colors.teal),
+                foregroundColor: primaryTeal,
+                side: const BorderSide(color: primaryTeal, width: 1.2),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(24),
                 ),
@@ -483,17 +602,24 @@ class _DataAnakTabState extends State<_DataAnakTab> {
               onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const TambahAnakUserPage()),
               ),
-              icon: const Icon(Icons.add),
-              label: const Text('Tambah Data Anak'),
+              child: const Text(
+                '+Tambah Data Anak',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: primaryTeal,
+                ),
+              ),
             ),
           ),
           const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
-            height: 50,
+            height: 48,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.teal,
+                backgroundColor: primaryTeal,
+                elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(24),
                 ),
@@ -510,10 +636,15 @@ class _DataAnakTabState extends State<_DataAnakTab> {
                     )
                   : const Text(
                       'Selesai',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
             ),
           ),
+          const SizedBox(height: 20),
         ],
       );
     });
@@ -531,16 +662,21 @@ class _FieldBox extends StatelessWidget {
     return TextField(
       controller: controller,
       keyboardType: keyboardType,
+      style: const TextStyle(fontSize: 14, color: Colors.black87),
       decoration: InputDecoration(
         filled: true,
-        fillColor: Colors.grey.shade100,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
+        fillColor: const Color(0xFFF9F9F9),
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 14,
+          horizontal: 18,
           vertical: 14,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(24),
+          borderSide: const BorderSide(color: Color(0xFFE5E5E5)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(24),
+          borderSide: const BorderSide(color: Color(0xFF2FA28D)),
         ),
       ),
     );
