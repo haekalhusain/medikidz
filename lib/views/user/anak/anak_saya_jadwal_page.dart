@@ -57,7 +57,7 @@ class AnakSayaJadwalPage extends StatelessWidget {
 
         final selesaiCount = jadwal.where((j) => j.sudah).length;
         final terlambatCount = jadwal.where((j) => !j.sudah && j.statusLabel == 'Terlambat').length;
-        final menungguCount = jadwal.where((j) => !j.sudah && j.statusLabel != 'Terlambat').length;
+        final sedangDiprosesCount = jadwal.where((j) => !j.sudah && j.statusLabel != 'Terlambat').length;
 
         return ListView(
           padding: const EdgeInsets.fromLTRB(16, 18, 16, 24),
@@ -66,7 +66,7 @@ class AnakSayaJadwalPage extends StatelessWidget {
             const SizedBox(height: 18),
             _buildHeader(context),
             const SizedBox(height: 18),
-            _buildSummaryCards(selesaiCount, menungguCount, terlambatCount),
+            _buildSummaryCards(selesaiCount, sedangDiprosesCount, terlambatCount),
             const SizedBox(height: 20),
             _buildSectionTitle('Rencana Imunisasi 2 Tahun ke Depan'),
             const SizedBox(height: 10),
@@ -204,12 +204,12 @@ class AnakSayaJadwalPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSummaryCards(int selesai, int menunggu, int terlambat) {
+  Widget _buildSummaryCards(int selesai, int sedangDiproses, int terlambat) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         _buildSummaryCard('Selesai', selesai, const Color(0xFF00A884)),
-        _buildSummaryCard('Menunggu', menunggu, const Color(0xFF56C3A2)),
+        _buildSummaryCard('Sedang Diproses', sedangDiproses, const Color(0xFF56C3A2)),
         _buildSummaryCard('Terlambat', terlambat, const Color(0xFFE5593D)),
       ],
     );
