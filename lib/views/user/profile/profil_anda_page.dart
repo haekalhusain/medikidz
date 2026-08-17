@@ -42,21 +42,7 @@ class ProfilAndaPage extends StatelessWidget {
                 child: Column(
                   children: [
                     const SizedBox(height: 20),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Row(
-                        children: const [
-                          Text(
-                            'Profil',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    
                     const SizedBox(height: 18),
                     Container(
                       width: 118,
