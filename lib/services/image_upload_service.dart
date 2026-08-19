@@ -5,7 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:imgbb/imgbb.dart';
 
 class ImageUploadService {
-  static const String _apiKey = '0d9ce7f81c1fa57cd2850485c63df52d';
+  static const String _apiKey = '299293e0cda82f3a48f03c876c201f9f';
 
   static Future<XFile?> pickImage() async {
     final ImagePicker picker = ImagePicker();
@@ -15,16 +15,18 @@ class ImageUploadService {
 
   static Future<String?> uploadImageToImgBB(XFile imageFile) async {
     try {
-      final compressedBytes = await FlutterImageCompress.compressWithFile(
-        imageFile.path,
+      final compressedBytes = await FlutterImageCompress.compressWithList(
+        await imageFile.readAsBytes(),
         quality: 70,
       );
 
-      if (compressedBytes == null) {
+      if (compressedBytes.isEmpty) {
         return null;
       }
 
-      final tempFile = await File('${Directory.systemTemp.path}/imgbb_${DateTime.now().millisecondsSinceEpoch}.jpg').create();
+      final tempFile = await File(
+        '${Directory.systemTemp.path}/imgbb_${DateTime.now().millisecondsSinceEpoch}.jpg',
+      ).create();
       await tempFile.writeAsBytes(compressedBytes);
 
       final imgbb = Imgbb(_apiKey);
@@ -35,17 +37,17 @@ class ImageUploadService {
 
       await tempFile.delete();
 
-      if (response != null && response.url != null) {
-        return response.url.replaceAll('.co/', '.co.com/');
-      } else {
-        if (kDebugMode) {
-          print('Upload gagal: response null');
-        }
-        return null;
+      if (response != null) {
+        return response.url;
       }
+
+      if (kDebugMode) {
+        print('Upload gagal: response null');
+      }
+      return null;
     } catch (e, stack) {
       if (kDebugMode) {
-        print('eror upload ke imageBB: $e');
+        print('error upload ke imageBB: $e');
         print(stack.toString());
       }
       return null;

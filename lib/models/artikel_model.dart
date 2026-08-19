@@ -34,13 +34,21 @@ class Artikel {
     }
   }
 
+  static String? _normalizeGambarUrl(dynamic value) {
+    if (value is! String || value.isEmpty) return null;
+    // i.ibb.co punya masalah SSL cert (NET::ERR_CERT_COMMON_NAME_INVALID)
+    // di beberapa device/jaringan. i.ibb.co.com aman dan sudah terbukti
+    // jalan normal di Dapoer Rasa.
+    return value.replaceFirst('i.ibb.co/', 'i.ibb.co.com/');
+  }
+
   factory Artikel.fromJson(Map<String, dynamic> json, String id) {
     return Artikel(
       id: id,
       judul: json['judul'] ?? '',
       kategori: json['kategori'] ?? '',
       ringkasan: json['ringkasan'] ?? '',
-      gambarUrl: json['gambar_url'],
+      gambarUrl: _normalizeGambarUrl(json['gambar_url']),
       konten: (json['konten'] as List<dynamic>? ?? [])
           .map((e) => KontenSection.fromJson(e as Map<String, dynamic>))
           .toList(),

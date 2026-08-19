@@ -98,6 +98,13 @@ class _ArtikelFormPageState extends State<ArtikelFormPage> {
     setState(() => _isUploadingGambar = true);
     try {
       final url = await ImageUploadService.uploadImageToImgBB(_gambarBaru!);
+      if (url == null && mounted) {
+        Get.snackbar(
+          'Upload gambar gagal',
+          'Gambar belum masuk ImgBB. Periksa koneksi lalu coba lagi.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
       return url ?? _gambarUrlLama;
     } finally {
       if (mounted) setState(() => _isUploadingGambar = false);
@@ -429,7 +436,14 @@ class _ArtikelFormPageState extends State<ArtikelFormPage> {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            Image.network(_gambarUrlLama!, fit: BoxFit.cover, width: double.infinity),
+            Image.network(
+              _gambarUrlLama!,
+              fit: BoxFit.cover,
+              width: double.infinity,
+              errorBuilder: (_, __, ___) => const Center(
+                child: Icon(Icons.broken_image, color: primaryTeal, size: 36),
+              ),
+            ),
             Positioned(
               bottom: 10,
               right: 10,
@@ -489,6 +503,7 @@ class _ArtikelFormPageState extends State<ArtikelFormPage> {
 
     final controller = Get.find<ArtikelController>();
     final gambarUrl = await _uploadGambarJikaAda();
+    if (_gambarBaru != null && gambarUrl == _gambarUrlLama) return;
 
     String penulis = _isEdit ? widget.artikel!.penulis : '-';
     if (!_isEdit) {

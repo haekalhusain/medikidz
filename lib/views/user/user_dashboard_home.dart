@@ -537,6 +537,16 @@ class _ArtikelCard extends StatelessWidget {
                       height: 100,
                       width: 170,
                       fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(
+                        height: 100,
+                        width: 170,
+                        color: const Color(0xFFE0F7FA),
+                        child: const Icon(
+                          Icons.broken_image,
+                          color: Color(0xFF00796B),
+                          size: 32,
+                        ),
+                      ),
                     )
                   : Container(
                       height: 100,
