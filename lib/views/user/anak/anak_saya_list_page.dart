@@ -20,6 +20,7 @@ class AnakSayaListPage extends StatelessWidget {
     final uid = AuthService().currentUser?.uid;
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: buildUserTopBar(
         context,
         hideNotification: true,
@@ -30,7 +31,7 @@ class AnakSayaListPage extends StatelessWidget {
             .push(MaterialPageRoute(builder: (_) => const TambahAnakUserPage())),
         icon: const Icon(Icons.add, color: Colors.white),
         label: const Text(
-          'Tambah Anak',
+          'Tambah profil anak',
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: const Color(0xFF00A884),
@@ -76,7 +77,7 @@ class AnakSayaListPage extends StatelessWidget {
                                     ),
                                     SizedBox(height: 10),
                                     Text(
-                                      'Tambahkan anak Anda untuk melihat jadwal imunisasi dan informasi kesehatan penting.',
+                                      'Tambahkan profil anak Anda untuk melihat jadwal imunisasi dan informasi kesehatan penting.',
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
                                         fontSize: 14,

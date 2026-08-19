@@ -23,6 +23,7 @@ class AnakSayaJadwalPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: buildUserTopBar(
         context,
         hideNotification: true,

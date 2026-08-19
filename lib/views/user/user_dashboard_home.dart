@@ -121,10 +121,11 @@ class _UserDashboardHomeState extends State<UserDashboardHome> {
                 SizedBox(
                   width: double.infinity,
                   height: 46,
-                  child: OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFF26A69A),
-                      side: const BorderSide(color: Color(0xFF26A69A)),
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF26A69A),
+                      foregroundColor: Colors.white,
+                      elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(24),
                       ),
@@ -134,7 +135,7 @@ class _UserDashboardHomeState extends State<UserDashboardHome> {
                         builder: (_) => const TambahAnakUserPage(),
                       ),
                     ),
-                    icon: const Icon(Icons.add_circle_outline),
+                    icon: const Icon(Icons.add_circle_outline, color: Colors.white),
                     label: const Text('Tambah Profil Anak'),
                   ),
                 ),
@@ -220,10 +221,14 @@ class _UserDashboardHomeState extends State<UserDashboardHome> {
               color: Color(0xFFB2DFDB),
               shape: BoxShape.circle,
             ),
-            child: const Icon(
-              Icons.child_care,
-              size: 42,
-              color: Color(0xFF00796B),
+            child: ClipOval(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Image.asset(
+                  'assets/logobayi.png',
+                  fit: BoxFit.contain,
+                ),
+              ),
             ),
           ),
           const SizedBox(width: 14),
@@ -290,40 +295,44 @@ class _UserDashboardHomeState extends State<UserDashboardHome> {
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: Container(
-            height: 46,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: const Color(0xFF26A69A)),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<int>(
-                value: _selectedAnakIndex.clamp(0, anakSaya.length - 1),
-                items: anakSaya.asMap().entries.map((entry) {
-                  return DropdownMenuItem<int>(
-                    value: entry.key,
-                    child: Text(entry.value.namaAnak),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() {
-                      _selectedAnakIndex = value;
-                    });
-                  }
-                },
-                icon: const Icon(
-                  Icons.keyboard_arrow_down,
-                  color: Color(0xFF26A69A),
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: Container(
+              width: 200,
+              height: 46,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: const Color(0xFF26A69A)),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<int>(
+                  value: _selectedAnakIndex.clamp(0, anakSaya.length - 1),
+                  items: anakSaya.asMap().entries.map((entry) {
+                    return DropdownMenuItem<int>(
+                      value: entry.key,
+                      child: Text(entry.value.namaAnak),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() {
+                        _selectedAnakIndex = value;
+                      });
+                    }
+                  },
+                  icon: const Icon(
+                    Icons.keyboard_arrow_down,
+                    color: Color(0xFF26A69A),
+                  ),
+                  style: const TextStyle(
+                    color: Color(0xFF0F172A),
+                    fontWeight: FontWeight.w600,
+                  ),
+                  dropdownColor: Colors.white,
+                  isExpanded: true,
                 ),
-                style: const TextStyle(
-                  color: Color(0xFF0F172A),
-                  fontWeight: FontWeight.w600,
-                ),
-                dropdownColor: Colors.white,
-                isExpanded: true,
               ),
             ),
           ),
@@ -333,42 +342,54 @@ class _UserDashboardHomeState extends State<UserDashboardHome> {
   }
 
   Widget _buildMenuGrid(BuildContext context, List<Anak> anakSaya) {
-    Widget buildMenuItem(IconData icon, String label, VoidCallback onTap) {
+    Widget buildMenuItem(dynamic icon, String label, VoidCallback onTap) {
       return Expanded(
         child: Container(
-          height: 110,
+          height: 76,
           margin: const EdgeInsets.all(4),
           child: OutlinedButton(
             style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               side: const BorderSide(color: Color(0xFF26A69A), width: 1.5),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(14),
               ),
               backgroundColor: Colors.white,
             ),
             onPressed: onTap,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
-                  width: 44,
-                  height: 44,
+                  width: 48,
+                  height: 48,
                   decoration: const BoxDecoration(
                     color: Color(0xFFE0F7FA),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(icon, color: const Color(0xFF00796B), size: 24),
+                  child: Center(
+                    child: icon is String
+                        ? Image.asset(
+                            icon,
+                            width: 28,
+                            height: 28,
+                            fit: BoxFit.contain,
+                          )
+                        : Icon(icon, color: const Color(0xFF00796B), size: 28),
+                  ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  label,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Color(0xFF00796B),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
-                    height: 1.2,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    label,
+                    maxLines: 2,
+                    softWrap: true,
+                    style: const TextStyle(
+                      color: Color(0xFF00796B),
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                      height: 1.1,
+                    ),
                   ),
                 ),
               ],
@@ -398,13 +419,13 @@ class _UserDashboardHomeState extends State<UserDashboardHome> {
       children: [
         Row(
           children: [
+                buildMenuItem(
+                  'assets/logojadwalimunisasi.png',
+                  'Jadwal\nImunisasi',
+                  bukaJadwalAtauRiwayat,
+                ),
             buildMenuItem(
-              Icons.edit_calendar_rounded,
-              'Jadwal\nImunisasi',
-              bukaJadwalAtauRiwayat,
-            ),
-            buildMenuItem(
-              Icons.assignment_outlined,
+              'assets/logoriwayatimunisasi.png',
               'Riwayat\nImunisasi',
               bukaJadwalAtauRiwayat,
             ),
@@ -414,7 +435,7 @@ class _UserDashboardHomeState extends State<UserDashboardHome> {
         Row(
           children: [
             buildMenuItem(
-              Icons.medical_services_outlined,
+              'assets/logoartikel.png',
               'Artikel',
               () {
                 if (widget.onNavigateToTab != null) {
@@ -427,7 +448,7 @@ class _UserDashboardHomeState extends State<UserDashboardHome> {
               },
             ),
             buildMenuItem(
-              Icons.support_agent_rounded,
+              'assets/logohubungiklinik.png',
               'Hubungi\nKlinik',
               () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const HubungiKlinikPage()),
@@ -495,9 +516,9 @@ class _UserDashboardHomeState extends State<UserDashboardHome> {
                 style: TextStyle(color: Colors.black54),
               ),
             )
-          else
+            else
             SizedBox(
-              height: 200,
+              height: 260,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemCount: artikelList.length,
@@ -525,7 +546,7 @@ class _ArtikelCard extends StatelessWidget {
         ),
       ),
       child: SizedBox(
-        width: 170,
+        width: 240,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -534,28 +555,28 @@ class _ArtikelCard extends StatelessWidget {
               child: artikel.gambarUrl != null && artikel.gambarUrl!.isNotEmpty
                   ? Image.network(
                       artikel.gambarUrl!,
-                      height: 100,
-                      width: 170,
+                      height: 140,
+                      width: 240,
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => Container(
-                        height: 100,
-                        width: 170,
+                        height: 140,
+                        width: 240,
                         color: const Color(0xFFE0F7FA),
                         child: const Icon(
                           Icons.broken_image,
                           color: Color(0xFF00796B),
-                          size: 32,
+                          size: 40,
                         ),
                       ),
                     )
                   : Container(
-                      height: 100,
-                      width: 170,
+                      height: 140,
+                      width: 240,
                       color: const Color(0xFFE0F7FA),
                       child: const Icon(
                         Icons.description_outlined,
                         color: Color(0xFF00796B),
-                        size: 32,
+                        size: 40,
                       ),
                     ),
             ),
@@ -660,12 +681,12 @@ class _AnakBlockState extends State<_AnakBlock> {
               width: double.infinity,
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: const Color(0xFFE8F6EF), // hijau muda untuk kartu profil anak
                 borderRadius: BorderRadius.circular(22),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 14,
+                    color: Colors.black.withOpacity(0.04),
+                    blurRadius: 10,
                     offset: const Offset(0, 6),
                   ),
                 ],
@@ -675,13 +696,7 @@ class _AnakBlockState extends State<_AnakBlock> {
                   CircleAvatar(
                     radius: 28,
                     backgroundColor: const Color(0xFF26A69A).withOpacity(0.12),
-                    child: Icon(
-                      widget.anak.jenisKelamin == 'laki-laki'
-                          ? Icons.boy
-                          : Icons.girl,
-                      color: const Color(0xFF26A69A),
-                      size: 28,
-                    ),
+                    backgroundImage: const AssetImage('assets/logobayi.png'),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -744,15 +759,11 @@ class _AnakBlockState extends State<_AnakBlock> {
               width: double.infinity,
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Color(0xFF26A69A), Color(0xFF1B8B75)],
-                ),
+                color: const Color(0xFF59BBA5), // hijau muda permintaan
                 borderRadius: BorderRadius.circular(22),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF26A69A).withOpacity(0.18),
+                    color: const Color(0xFF59BBA5).withOpacity(0.18),
                     blurRadius: 18,
                     offset: const Offset(0, 8),
                   ),
@@ -856,114 +867,7 @@ class _AnakBlockState extends State<_AnakBlock> {
             ],
           ],
 
-          if (sisanya.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            InkWell(
-              onTap: () => setState(() => _expanded = !_expanded),
-              borderRadius: BorderRadius.circular(24),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(color: const Color(0xFF26A69A)),
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      _expanded ? Icons.expand_less : Icons.expand_more,
-                      color: const Color(0xFF26A69A),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Lihat Selengkapnya',
-                      style: const TextStyle(
-                        color: Color(0xFF26A69A),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            if (_expanded)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Column(
-                  children: sisanya.map((j) {
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 10),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF7FAFB),
-                        borderRadius: BorderRadius.circular(18),
-                        border: Border.all(color: const Color(0xFFE6F2EF)),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.04),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 42,
-                            height: 42,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFBCE8E0),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.schedule,
-                              color: Color(0xFF16806A),
-                              size: 20,
-                            ),
-                          ),
-                          const SizedBox(width: 14),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '${j.master.namaVaksin} - Dosis ${j.master.urutanDosis}',
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: Color(0xFF17394D),
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  _formatDate(j.tanggalJadwal),
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                    color: Color(0xFF64748B),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-          ],
+          // Removed "Lihat Selengkapnya" button and extra immunization list per request
         ],
       );
     });

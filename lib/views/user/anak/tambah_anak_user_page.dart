@@ -33,6 +33,7 @@ class _TambahAnakUserPageState extends State<TambahAnakUserPage> {
     final anakController = Get.put(AnakController());
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: buildUserTopBar(
         context,
         showBackButton: true,
@@ -45,82 +46,127 @@ class _TambahAnakUserPageState extends State<TambahAnakUserPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
                 color: const Color(0xFFE8F7F2),
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.04),
+                    blurRadius: 10,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Text(
-                    'Tambah Anak Baru',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF17394D),
+              child: Row(
+                children: [
+                  Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF00A884),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.family_restroom,
+                      color: Colors.white,
+                      size: 32,
                     ),
                   ),
-                  SizedBox(height: 10),
-                  Text(
-                    'Isi data anak agar informasi kesehatan dan jadwal imunisasi bisa tercatat rapih.',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Color(0xFF4B636E),
-                      height: 1.5,
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        Text(
+                          'Tambah Profil Anak Baru',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF17394D),
+                          ),
+                        ),
+                        SizedBox(height: 6),
+                        Text(
+                          'Isi data anak agar informasi kesehatan dan jadwal imunisasi tercatat rapi.',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Color(0xFF4B636E),
+                            height: 1.4,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 24),
-            Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  _buildInputField(
-                    controller: _namaAnakController,
-                    label: 'Nama Anak',
-                  ),
-                  const SizedBox(height: 16),
-                  _buildDatePicker(context),
-                  const SizedBox(height: 16),
-                  _buildGenderDropdown(),
-                  const SizedBox(height: 26),
-                  Obx(
-                    () => SizedBox(
-                      width: double.infinity,
-                      height: 52,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF00A884),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                        onPressed: anakController.isLoading.value
-                            ? null
-                            : () => _submit(anakController),
-                        child: anakController.isLoading.value
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : const Text(
-                                'Simpan Anak',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                ),
-                              ),
-                      ),
-                    ),
+            // Card wrapper for form
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.only(bottom: 24),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.04),
+                    blurRadius: 12,
+                    offset: const Offset(0, 6),
                   ),
                 ],
+              ),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    _buildInputField(
+                      controller: _namaAnakController,
+                      label: 'Nama Anak',
+                    ),
+                    const SizedBox(height: 14),
+                    _buildDatePicker(context),
+                    const SizedBox(height: 14),
+                    _buildGenderDropdown(),
+                    const SizedBox(height: 20),
+                    Obx(
+                      () => SizedBox(
+                        width: double.infinity,
+                        height: 52,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF00A884),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          onPressed: anakController.isLoading.value
+                              ? null
+                              : () => _submit(anakController),
+                          child: anakController.isLoading.value
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Text(
+                                  'Simpan Profil Anak',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -232,7 +278,7 @@ class _TambahAnakUserPageState extends State<TambahAnakUserPage> {
     final success = await anakController.create(anak);
     if (success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Anak berhasil ditambahkan.')),
+        const SnackBar(content: Text('Profil anak berhasil ditambahkan.')),
       );
       Navigator.pop(context);
     }

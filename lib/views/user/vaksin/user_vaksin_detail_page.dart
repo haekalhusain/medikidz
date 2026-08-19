@@ -70,43 +70,58 @@ class UserVaksinDetailPage extends StatelessWidget {
               ),
             ),
 
-            // Section 1: Nama & Deskripsi Vaksin
+            // Section 1: Nama & Deskripsi Vaksin (styled)
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
-              child: Column(
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Icon(
-                        Icons.vaccines,
-                        size: 24,
-                        color: Colors.black,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFC2E9DC),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.04),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.vaccines,
+                      size: 24,
+                      color: Color(0xFF0F6F5A),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
                           widgetNamaVaksin(vaksin.namaVaksin),
                           style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF0F172A),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  if (vaksin.informasi.isNotEmpty &&
-                      vaksin.informasi.first.subjudul.isNotEmpty)
-                    Text(
-                      vaksin.informasi.first.subjudul,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.black87,
-                      ),
+                        const SizedBox(height: 6),
+                        if (vaksin.informasi.isNotEmpty &&
+                            vaksin.informasi.first.subjudul.isNotEmpty)
+                          Text(
+                            vaksin.informasi.first.subjudul,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.black87,
+                            ),
+                          ),
+                      ],
                     ),
+                  ),
                 ],
               ),
             ),
@@ -163,62 +178,87 @@ class UserVaksinDetailPage extends StatelessWidget {
 
             const Divider(height: 1, thickness: 1, color: Color(0xFFEEEEEE)),
 
-            // Section 3: Detail Stok Klinik
+            // Section 3: Detail Stok Klinik (card)
             Padding(
               padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Detail Stok Klinik',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 12,
+                      offset: const Offset(0, 6),
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      const Text(
-                        '•  Sisa Stok fisik  : ',
-                        style: TextStyle(fontSize: 14, color: Colors.black87),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Sisa Stok Fisik',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.black54,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            '${vaksin.jumlahStok} Vial',
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF0F172A),
+                            ),
+                          ),
+                        ],
                       ),
-                      Text(
-                        '${vaksin.jumlahStok} Vial',
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.black87,
-                        ),
+                    ),
+                    Container(width: 1, height: 48, color: const Color(0xFFF1F1F1)),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Status Stok',
+                            style: TextStyle(fontSize: 13, color: Colors.black54),
+                          ),
+                          const SizedBox(height: 6),
+                          Row(
+                            children: [
+                              Container(
+                                width: 10,
+                                height: 10,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: _getStatusDotColor(vaksin.statusStok),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  vaksin.statusLabel,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFF0F172A),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      const Text(
-                        '•  Status              : ',
-                        style: TextStyle(fontSize: 14, color: Colors.black87),
-                      ),
-                      Text(
-                        vaksin.statusLabel,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Container(
-                        width: 10,
-                        height: 10,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: _getStatusDotColor(vaksin.statusStok),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
             ),
 
@@ -226,7 +266,7 @@ class UserVaksinDetailPage extends StatelessWidget {
 
             // Section 4: Informasi Medis (Berdasarkan IDAI)
             Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -238,7 +278,7 @@ class UserVaksinDetailPage extends StatelessWidget {
                       color: Colors.black,
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   if (vaksin.informasi.isEmpty)
                     const Text(
                       'Belum ada informasi medis tambahan.',
@@ -246,22 +286,28 @@ class UserVaksinDetailPage extends StatelessWidget {
                     )
                   else
                     ...vaksin.informasi.map(
-                      (info) => Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
+                      (info) => Container(
+                        width: double.infinity,
+                        margin: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF9FFF9),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: const Color(0xFFE8F6EF)),
+                        ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            if (info.subjudul.isNotEmpty) ...[
+                            if (info.subjudul.isNotEmpty)
                               Text(
-                                '${info.subjudul} :',
+                                info.subjudul,
                                 style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.w700,
                                   fontSize: 14,
-                                  color: Colors.black,
+                                  color: Color(0xFF0F172A),
                                 ),
                               ),
-                              const SizedBox(height: 4),
-                            ],
+                            if (info.subjudul.isNotEmpty) const SizedBox(height: 6),
                             if (info.isi.isNotEmpty)
                               Text(
                                 info.isi,
