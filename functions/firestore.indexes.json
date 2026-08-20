@@ -1,0 +1,13 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "tb_notifikasi",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "kategori", "order": "ASCENDING" },
+        { "fieldPath": "jadwal_tanggal", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

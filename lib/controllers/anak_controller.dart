@@ -36,7 +36,19 @@ class AnakController extends GetxController {
   Future<bool> updateData(String id, Anak anak) async {
     try {
       isLoading.value = true;
-      await _service.update(id, anak);
+      // PENTING: pakai updateFields() dengan field spesifik, BUKAN
+      // _service.update(id, anak) yang mengirim toJson() penuh (termasuk
+      // 'deleted_at': null). Kalau pakai update() biasa, tiap kali anak
+      // yang sudah di-soft-delete diedit, deleted_at ke-reset jadi null
+      // (anak "hidup" lagi tanpa sengaja). softDelete()/restore() tetap
+      // satu-satunya jalur yang boleh mengubah 'deleted_at'.
+      await _service.updateFields(id, {
+        'id_user': anak.idUser,
+        'nama_anak': anak.namaAnak,
+        'tanggal_lahir': anak.tanggalLahir.toIso8601String(),
+        'jenis_kelamin': anak.jenisKelamin,
+        'nik': anak.nik,
+      });
       return true;
     } catch (e) {
       Get.snackbar('Gagal', e.toString());

@@ -31,6 +31,16 @@ class Anak {
     );
   }
 
+  /// Catatan: 'deleted_at' TETAP di-set null di sini karena dipakai saat
+  /// CREATE (FirestoreService.create() -> _collection.add(toJson(item))).
+  /// Firestore where('deleted_at','==',null) HANYA match dokumen yang field-nya
+  /// eksplisit null -- dokumen yang field-nya tidak ada sama sekali TIDAK match.
+  /// Makanya field ini wajib ada sejak dokumen dibuat.
+  ///
+  /// PENTING: toJson() ini TIDAK BOLEH dipakai lagi untuk UPDATE data anak yang
+  /// sudah ada (lihat AnakController.updateData -- sudah diganti pakai
+  /// updateFields() dengan field spesifik, supaya 'deleted_at' tidak pernah
+  /// ke-reset ke null tiap kali anak diedit).
   Map<String, dynamic> toJson() => {
         'id_user': idUser,
         'nama_anak': namaAnak,

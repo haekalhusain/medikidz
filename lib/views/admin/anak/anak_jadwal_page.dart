@@ -224,7 +224,7 @@ class AnakJadwalPage extends StatelessWidget {
     return 'belum imunisasi';
   }
 
-  Future<void> _editJadwalManual(BuildContext context, JadwalTerjadwal item, List<JadwalMaster> masterList) async {
+  Future<bool> _editJadwalManual(BuildContext context, JadwalTerjadwal item, List<JadwalMaster> masterList) async {
     final acuanSebelumnya = _scheduleService.tanggalAcuanDosisSebelumnya(
       anak: anak,
       masterList: masterList,
@@ -248,7 +248,7 @@ class AnakJadwalPage extends StatelessWidget {
       firstDate: DateTime(2015),
       lastDate: DateTime.now().add(const Duration(days: 365 * 3)),
     );
-    if (tanggalTerpilih == null || !context.mounted) return;
+    if (tanggalTerpilih == null || !context.mounted) return false;
 
     final peringatan = <String>[];
     if (batasMinimum != null && tanggalTerpilih.isBefore(batasMinimum)) {
@@ -275,10 +275,10 @@ class AnakJadwalPage extends StatelessWidget {
           ],
         ),
       );
-      if (lanjut != true) return;
+      if (lanjut != true) return false;
     }
 
-    if (!context.mounted) return;
+    if (!context.mounted) return false;
     final success = await JadwalStatusUpdater.jadwalUlangManual(
       jadwalController: _jadwalController,
       anak: anak,
@@ -291,15 +291,23 @@ class AnakJadwalPage extends StatelessWidget {
         SnackBar(content: Text('Jadwal ${item.master.namaVaksin} diubah ke ${_formatDate(tanggalTerpilih)}.')),
       );
     }
+    return success;
   }
 
   Future<void> _handlePilihStatus(BuildContext context, JadwalTerjadwal item, String status) async {
+    if (status == 'bisa dikejar') {
+      final jadwalBerhasilDiubah = await _editJadwalManual(context, item, _masterController.jadwalMasterList);
+      if (!jadwalBerhasilDiubah) return;
+      if (!context.mounted) return;
+    }
+
     if (status != 'sudah imunisasi') {
       await _ubahStatus(context, item, status, vaksinDariKlinik: false);
       return;
     }
 
     final vaksinDariKlinik = await _tanyaVaksinKlinik(context);
+    if (!context.mounted) return;
     if (vaksinDariKlinik == null) return; // dibatalkan
     await _ubahStatus(context, item, status, vaksinDariKlinik: vaksinDariKlinik);
   }
