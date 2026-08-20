@@ -210,7 +210,7 @@ class AnakSayaJadwalPage extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         _buildSummaryCard('Selesai', selesai, const Color(0xFF00A884)),
-        _buildSummaryCard('Sedang Diproses', sedangDiproses, const Color(0xFF56C3A2)),
+        _buildSummaryCard('Akan datang', sedangDiproses, const Color(0xFF56C3A2)),
         _buildSummaryCard('Terlambat', terlambat, const Color(0xFFE5593D)),
       ],
     );
